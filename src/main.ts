@@ -1,8 +1,9 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import type { Request, Response, NextFunction } from 'express';
 import { AppModule } from './app.module.js';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
@@ -18,6 +19,7 @@ async function bootstrap(): Promise<void> {
   const logger = app.get(AppLoggerService);
   app.useLogger(logger);
 
+  const reflector = app.get(Reflector);
   const configService = app.get(ConfigService);
   const appCfg = configService.get<AppConfig>('app');
   const securityCfg = configService.get<SecurityConfig>('security');
@@ -25,6 +27,15 @@ async function bootstrap(): Promise<void> {
 
   // Security Headers
   app.use(helmet());
+
+  // Redirect common documentation aliases (/docs, /swagger) to /api/docs
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const cleanPath = req.path.replace(/\/+$/, '');
+    if (cleanPath === '/docs' || cleanPath === '/swagger') {
+      return res.redirect('/api/docs');
+    }
+    next();
+  });
 
   // CORS configuration
   const allowedOrigin = securityCfg?.corsOrigin ?? '*';
@@ -49,7 +60,7 @@ async function bootstrap(): Promise<void> {
   );
 
   // Global Interceptors: Request Tracing & Structured Logging, Standard Response Envelope
-  app.useGlobalInterceptors(new LoggingInterceptor(logger), new TransformInterceptor());
+  app.useGlobalInterceptors(new LoggingInterceptor(logger), new TransformInterceptor(reflector));
 
   // Centralized Global Exception Filter
   app.useGlobalFilters(new GlobalExceptionFilter(logger));
@@ -66,6 +77,7 @@ async function bootstrap(): Promise<void> {
           'Production-ready NestJS API with Mongoose DAL, strict TypeScript, structured logging, and OpenAPI documentation.',
       )
       .setVersion(swaggerCfg?.version ?? '1.0.0')
+      .addTag('Clients', 'Zoho CRM Leads & Contacts migration operations')
       .addTag('Health', 'Operational health, telemetry, and database connectivity')
       .addBearerAuth(
         {
@@ -87,6 +99,7 @@ async function bootstrap(): Promise<void> {
         persistAuthorization: true,
         tagsSorter: 'alpha',
         operationsSorter: 'alpha',
+        docExpansion: 'list',
       },
     });
   }
@@ -96,7 +109,7 @@ async function bootstrap(): Promise<void> {
 
   logger.log(`Application started and listening on http://localhost:${port}/api/v1`, 'Bootstrap');
   logger.log(
-    `Swagger documentation available at http://localhost:${port}/${swaggerCfg?.path ?? 'api/docs'}`,
+    `Swagger documentation available at http://localhost:${port}/${swaggerCfg?.path ?? 'api/docs'} (also accessible via /docs)`,
     'Bootstrap',
   );
 }

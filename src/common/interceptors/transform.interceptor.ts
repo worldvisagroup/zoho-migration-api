@@ -1,8 +1,10 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { REQUEST_ID_HEADER } from '../constants/index.js';
+import { BYPASS_TRANSFORM_KEY } from '../decorators/bypass-transform.decorator.js';
 import type { PaginatedResult, PaginationMeta, StandardApiResponse } from '../types/index.js';
 
 function isPaginatedResult<T>(value: unknown): value is PaginatedResult<T> {
@@ -18,14 +20,25 @@ function isPaginatedResult<T>(value: unknown): value is PaginatedResult<T> {
 @Injectable()
 export class TransformInterceptor<T> implements NestInterceptor<
   T,
-  StandardApiResponse<T> | StandardApiResponse<T[]>
+  StandardApiResponse<T> | StandardApiResponse<T[]> | T
 > {
+  constructor(private readonly reflector?: Reflector) {}
+
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,
-  ): Observable<StandardApiResponse<T> | StandardApiResponse<T[]>> {
+  ): Observable<StandardApiResponse<T> | StandardApiResponse<T[]> | T> {
     if (context.getType() !== 'http') {
-      return next.handle() as Observable<StandardApiResponse<T>>;
+      return next.handle();
+    }
+
+    const isBypassed = this.reflector?.getAllAndOverride<boolean>(BYPASS_TRANSFORM_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isBypassed) {
+      return next.handle();
     }
 
     const httpContext = context.switchToHttp();

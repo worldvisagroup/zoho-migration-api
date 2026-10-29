@@ -1,4 +1,3 @@
-export * from './crm-migration.repository.js';
 export * from './migrated-attachment.schema.js';
 export * from './migrated-call.schema.js';
 export * from './migrated-contact-status-history.schema.js';

@@ -86,6 +86,40 @@ describe('ClientsController (e2e)', () => {
     }),
   };
 
+  const mockUserModel = {
+    find: vi.fn().mockReturnValue({
+      sort: vi.fn().mockReturnValue({
+        skip: vi.fn().mockReturnValue({
+          limit: vi.fn().mockReturnValue({
+            lean: vi.fn().mockReturnValue({
+              exec: vi.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      }),
+    }),
+    countDocuments: vi.fn().mockReturnValue({
+      exec: vi.fn().mockResolvedValue(0),
+    }),
+  };
+
+  const mockNoteModel = {
+    find: vi.fn().mockReturnValue({
+      sort: vi.fn().mockReturnValue({
+        skip: vi.fn().mockReturnValue({
+          limit: vi.fn().mockReturnValue({
+            lean: vi.fn().mockReturnValue({
+              exec: vi.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      }),
+    }),
+    countDocuments: vi.fn().mockReturnValue({
+      exec: vi.fn().mockResolvedValue(0),
+    }),
+  };
+
   beforeAll(async () => {
     const mockConnection = {
       readyState: 1,
@@ -106,6 +140,10 @@ describe('ClientsController (e2e)', () => {
       .useValue(mockInvoiceModel)
       .overrideProvider(getModelToken('MigratedBooksContact'))
       .useValue(mockBooksContactModel)
+      .overrideProvider(getModelToken('MigratedUser'))
+      .useValue(mockUserModel)
+      .overrideProvider(getModelToken('MigratedNote'))
+      .useValue(mockNoteModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

@@ -78,6 +78,8 @@ async function bootstrap(): Promise<void> {
       )
       .setVersion(swaggerCfg?.version ?? '1.0.0')
       .addTag('Clients', 'Zoho CRM Leads & Contacts migration operations')
+      .addTag('Staff', 'Zoho CRM Staff (migrated_users) migration operations')
+      .addTag('Notes', 'Zoho CRM Notes (migrated_notes) migration operations')
       .addTag('Health', 'Operational health, telemetry, and database connectivity')
       .addBearerAuth(
         {

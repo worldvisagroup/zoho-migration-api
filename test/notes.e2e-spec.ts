@@ -149,6 +149,14 @@ describe('NotesController (e2e)', () => {
       .useValue(mockInvoiceModel)
       .overrideProvider(getModelToken('MigratedBooksContact'))
       .useValue(mockBooksContactModel)
+      .overrideProvider(getModelToken('MigratedCall'))
+      .useValue(mockLeadModel)
+      .overrideProvider(getModelToken('MigratedDeal'))
+      .useValue(mockLeadModel)
+      .overrideProvider(getModelToken('MigratedVisaApplication'))
+      .useValue(mockLeadModel)
+      .overrideProvider(getModelToken('MigratedSpouseSkillAssessment'))
+      .useValue(mockLeadModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

@@ -137,6 +137,14 @@ describe('StaffController (e2e)', () => {
       .useValue(mockBooksContactModel)
       .overrideProvider(getModelToken('MigratedNote'))
       .useValue(mockNoteModel)
+      .overrideProvider(getModelToken('MigratedCall'))
+      .useValue(mockNoteModel)
+      .overrideProvider(getModelToken('MigratedDeal'))
+      .useValue(mockNoteModel)
+      .overrideProvider(getModelToken('MigratedVisaApplication'))
+      .useValue(mockNoteModel)
+      .overrideProvider(getModelToken('MigratedSpouseSkillAssessment'))
+      .useValue(mockNoteModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

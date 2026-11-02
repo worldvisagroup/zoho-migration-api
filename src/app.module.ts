@@ -10,6 +10,7 @@ import { HealthModule } from './modules/health/health.module.js';
 import { ClientsModule } from './modules/clients/clients.module.js';
 import { StaffModule } from './modules/staff/staff.module.js';
 import { NotesModule } from './modules/notes/notes.module.js';
+import { CallsModule } from './modules/calls/calls.module.js';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware.js';
 
 @Module({
@@ -33,6 +34,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware.j
     ClientsModule,
     StaffModule,
     NotesModule,
+    CallsModule,
   ],
   providers: [
     {

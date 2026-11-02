@@ -80,6 +80,7 @@ async function bootstrap(): Promise<void> {
       .addTag('Clients', 'Zoho CRM Leads & Contacts migration operations')
       .addTag('Staff', 'Zoho CRM Staff (migrated_users) migration operations')
       .addTag('Notes', 'Zoho CRM Notes (migrated_notes) migration operations')
+      .addTag('Calls', 'Zoho CRM Calls (migrated_calls) migration operations')
       .addTag('Health', 'Operational health, telemetry, and database connectivity')
       .addBearerAuth(
         {

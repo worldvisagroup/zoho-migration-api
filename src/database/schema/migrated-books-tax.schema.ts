@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -84,12 +83,9 @@ export const MigratedBooksTaxSchema = new Schema<MigratedBooksTaxDocument>(
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_TAXES,
     strict: true,
-  }
+  },
 );
 
 export const MigratedBooksTaxModel =
   mongoose.models['MigratedBooksTax'] ||
-  mongoose.model<MigratedBooksTaxDocument>(
-    'MigratedBooksTax',
-    MigratedBooksTaxSchema
-  );
+  mongoose.model<MigratedBooksTaxDocument>('MigratedBooksTax', MigratedBooksTaxSchema);

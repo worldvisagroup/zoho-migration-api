@@ -5,18 +5,9 @@ import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
 
 export type MigratedUserStatus =
-  | 'active'
-  | 'deleted'
-  | 'disabled'
-  | 'inactive'
-  | 'pending'
-  | 'confirmed'
-  | string;
+  'active' | 'deleted' | 'disabled' | 'inactive' | 'pending' | 'confirmed' | string;
 
-export type MigratedUserType =
-  | 'Regular User'
-  | 'Support User'
-  | string;
+export type MigratedUserType = 'Regular User' | 'Support User' | string;
 
 export type MigratedUserRole =
   | 'CEO'
@@ -29,12 +20,7 @@ export type MigratedUserRole =
   | string;
 
 export type MigratedUserProfile =
-  | 'Administrator'
-  | 'Standard'
-  | 'New_Standard'
-  | 'Processing'
-  | 'SupportProfileInternal'
-  | string;
+  'Administrator' | 'Standard' | 'New_Standard' | 'Processing' | 'SupportProfileInternal' | string;
 
 export interface MigratedUserEntity {
   _id?: string;
@@ -88,7 +74,7 @@ const MigratedUserSchema = new Schema<MigratedUserDocument>(
     time_zone: { type: String, default: null },
     raw_data: { type: Schema.Types.Mixed, default: null },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_USERS }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_USERS },
 );
 
 export const MigratedUserModel =

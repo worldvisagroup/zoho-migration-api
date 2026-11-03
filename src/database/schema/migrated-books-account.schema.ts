@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -133,19 +132,15 @@ export const MigratedBooksAccountSchema = new Schema<MigratedBooksAccountDocumen
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_ACCOUNTS,
     strict: true,
-  }
+  },
 );
 
 export const MigratedBooksAccountModel =
   mongoose.models['MigratedBooksAccount'] ||
-  mongoose.model<MigratedBooksAccountDocument>(
-    'MigratedBooksAccount',
-    MigratedBooksAccountSchema
-  );
+  mongoose.model<MigratedBooksAccountDocument>('MigratedBooksAccount', MigratedBooksAccountSchema);
 
 // Aliases for explicit clarity matching the "chartofaccounts" folder and UI tab
 export type MigratedBooksChartOfAccountEntity = MigratedBooksAccountEntity;
 export type MigratedBooksChartOfAccountDocument = MigratedBooksAccountDocument;
 export const MigratedBooksChartOfAccountSchema = MigratedBooksAccountSchema;
 export const MigratedBooksChartOfAccountModel = MigratedBooksAccountModel;
-

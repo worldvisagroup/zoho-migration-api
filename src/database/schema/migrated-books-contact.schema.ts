@@ -50,12 +50,7 @@ export interface MigratedBooksContactEntity {
   portal_status: 'enabled' | 'disabled';
   portal_status_formatted?: string;
   gst_no: string;
-  gst_treatment:
-  | 'business_gst'
-  | 'business_none'
-  | 'consumer'
-  | 'overseas'
-  | 'sez';
+  gst_treatment: 'business_gst' | 'business_none' | 'consumer' | 'overseas' | 'sez';
   place_of_contact: string;
   place_of_contact_formatted: string;
   pan_no: string;
@@ -229,12 +224,9 @@ export const MigratedBooksContactSchema = new Schema<MigratedBooksContactDocumen
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_CONTACTS,
     strict: true,
-  }
+  },
 );
 
 export const MigratedBooksContactModel =
   mongoose.models['MigratedBooksContact'] ||
-  mongoose.model<MigratedBooksContactDocument>(
-    'MigratedBooksContact',
-    MigratedBooksContactSchema
-  );
+  mongoose.model<MigratedBooksContactDocument>('MigratedBooksContact', MigratedBooksContactSchema);

@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -38,12 +37,12 @@ export const MigratedBooksCurrencySchema = new Schema<MigratedBooksCurrencyDocum
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_CURRENCIES,
     strict: true,
-  }
+  },
 );
 
 export const MigratedBooksCurrencyModel =
   mongoose.models['MigratedBooksCurrency'] ||
   mongoose.model<MigratedBooksCurrencyDocument>(
     'MigratedBooksCurrency',
-    MigratedBooksCurrencySchema
+    MigratedBooksCurrencySchema,
   );

@@ -38,5 +38,3 @@ export * from './migrated-books-invoice.schema.js';
 export * from './migrated-books-bank-transaction.schema.js';
 export * from './migrated-books-journal.schema.js';
 export * from './migrated-books-payment-link.schema.js';
-
-

@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -41,9 +40,12 @@ const MigratedDealStageHistorySchema = new Schema<MigratedDealStageHistoryDocume
     Stage_Duration_Days: { type: Number, default: null },
     Modified_Time: { type: Date, default: null },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_DEAL_STAGE_HISTORY, strict: true }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_DEAL_STAGE_HISTORY, strict: true },
 );
 
 export const MigratedDealStageHistoryModel =
   mongoose.models['MigratedDealStageHistory'] ||
-  mongoose.model<MigratedDealStageHistoryDocument>('MigratedDealStageHistory', MigratedDealStageHistorySchema);
+  mongoose.model<MigratedDealStageHistoryDocument>(
+    'MigratedDealStageHistory',
+    MigratedDealStageHistorySchema,
+  );

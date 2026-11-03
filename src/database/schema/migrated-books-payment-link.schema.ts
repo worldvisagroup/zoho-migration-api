@@ -52,7 +52,12 @@ export type MigratedBooksPaymentLinkDocument = Document & MigratedBooksPaymentLi
 export const MigratedBooksPaymentLinkPaymentSchema = new Schema<MigratedBooksPaymentLinkPayment>(
   {
     payment_id: { type: String, default: '' },
-    _payment_id: { type: Schema.Types.ObjectId, ref: 'MigratedBooksCustomerPayment', default: null, index: true },
+    _payment_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedBooksCustomerPayment',
+      default: null,
+      index: true,
+    },
     payment_number: { type: String, default: '' },
     payment_date: { type: String, default: '' },
     amount: { type: Number, default: 0 },
@@ -66,7 +71,12 @@ export const MigratedBooksPaymentLinkSchema = new Schema<MigratedBooksPaymentLin
     payment_link_number: { type: String, default: '', index: true },
 
     customer_id: { type: String, default: '', index: true },
-    _customer_id: { type: Schema.Types.ObjectId, ref: 'MigratedBooksContact', default: null, index: true },
+    _customer_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedBooksContact',
+      default: null,
+      index: true,
+    },
     _zoho_customer_id: { type: String, default: '' },
     customer_name: { type: String, default: '' },
     customer_email: { type: String, default: '' },
@@ -96,4 +106,7 @@ export const MigratedBooksPaymentLinkSchema = new Schema<MigratedBooksPaymentLin
 
 export const MigratedBooksPaymentLinkModel =
   mongoose.models['MigratedBooksPaymentLink'] ||
-  mongoose.model<MigratedBooksPaymentLinkDocument>('MigratedBooksPaymentLink', MigratedBooksPaymentLinkSchema);
+  mongoose.model<MigratedBooksPaymentLinkDocument>(
+    'MigratedBooksPaymentLink',
+    MigratedBooksPaymentLinkSchema,
+  );

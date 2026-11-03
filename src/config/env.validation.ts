@@ -66,6 +66,31 @@ export class EnvironmentVariables {
   @IsBoolean()
   @IsOptional()
   SWAGGER_ENABLED: boolean = true;
+
+  @IsString()
+  @IsOptional()
+  R2_ACCOUNT_ID?: string;
+
+  @IsString()
+  @IsOptional()
+  R2_ACCESS_KEY_ID?: string;
+
+  @IsString()
+  @IsOptional()
+  R2_SECRET_ACCESS_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  R2_BUCKET_NAME?: string;
+
+  @IsString()
+  @IsOptional()
+  R2_PUBLIC_DOMAIN?: string;
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  R2_EXPIRES_IN?: number = 3600;
 }
 
 export function validateEnvironment(config: Record<string, unknown>): EnvironmentVariables {

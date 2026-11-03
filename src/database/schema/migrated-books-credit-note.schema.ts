@@ -173,7 +173,7 @@ export const MigratedBooksCreditNoteLineItemSchema = new Schema<MigratedBooksCre
     tax_name: { type: String, default: '' },
     tax_percentage: { type: Number, default: 0 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 export const MigratedBooksCreditNoteSchema = new Schema<MigratedBooksCreditNoteDocument>(
@@ -304,7 +304,6 @@ export const MigratedBooksCreditNoteSchema = new Schema<MigratedBooksCreditNoteD
     custom_field_hash: { type: Schema.Types.Mixed, default: {} },
     tags: { type: Array, default: [] },
 
-
     // Additional Comprehensive Detail Fields (Audited 100% Coverage)
     invoice_id: { type: String, default: '' },
     invoice_number: { type: String, default: '' },
@@ -400,12 +399,12 @@ export const MigratedBooksCreditNoteSchema = new Schema<MigratedBooksCreditNoteD
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_CREDIT_NOTES,
     strict: false,
-  }
+  },
 );
 
 export const MigratedBooksCreditNoteModel =
   mongoose.models['MigratedBooksCreditNote'] ||
   mongoose.model<MigratedBooksCreditNoteDocument>(
     'MigratedBooksCreditNote',
-    MigratedBooksCreditNoteSchema
+    MigratedBooksCreditNoteSchema,
   );

@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -56,7 +55,12 @@ export type MigratedZohoSignDocumentDocument = Document & MigratedZohoSignDocume
 const MigratedZohoSignDocumentSchema = new Schema<MigratedZohoSignDocumentDocument>(
   {
     zoho_id: { type: String, required: true, unique: true, index: true },
-    _contact_id: { type: Schema.Types.ObjectId, ref: 'MigratedContact', default: null, index: true },
+    _contact_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedContact',
+      default: null,
+      index: true,
+    },
     _zoho_contact_id: { type: String, default: null, index: true },
     _lead_id: { type: Schema.Types.ObjectId, ref: 'MigratedLead', default: null, index: true },
     _zoho_lead_id: { type: String, default: null, index: true },
@@ -97,9 +101,12 @@ const MigratedZohoSignDocumentSchema = new Schema<MigratedZohoSignDocumentDocume
     zohosign__Module_Record_ID: { type: String, default: null },
     Record_Status__s: { type: String, default: null },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_ZOHO_SIGN_DOCUMENTS, strict: true }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_ZOHO_SIGN_DOCUMENTS, strict: true },
 );
 
 export const MigratedZohoSignDocumentModel =
   mongoose.models['MigratedZohoSignDocument'] ||
-  mongoose.model<MigratedZohoSignDocumentDocument>('MigratedZohoSignDocument', MigratedZohoSignDocumentSchema);
+  mongoose.model<MigratedZohoSignDocumentDocument>(
+    'MigratedZohoSignDocument',
+    MigratedZohoSignDocumentSchema,
+  );

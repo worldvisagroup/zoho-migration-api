@@ -155,6 +155,8 @@ describe('CallsController (e2e)', () => {
       .useValue(mockUserModel)
       .overrideProvider(getModelToken('MigratedNote'))
       .useValue(mockEmptyModel)
+      .overrideProvider(getModelToken('MigratedAttachment'))
+      .useValue(mockEmptyModel)
       .overrideProvider(getModelToken('MigratedBooksInvoice'))
       .useValue(mockEmptyModel)
       .overrideProvider(getModelToken('MigratedBooksContact'))

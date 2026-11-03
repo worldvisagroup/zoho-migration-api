@@ -81,12 +81,12 @@ const MigratedMeetingRecordingSchema = new Schema<MigratedMeetingRecordingDocume
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_MEETING_RECORDINGS,
     strict: true,
-  }
+  },
 );
 
 export const MigratedMeetingRecordingModel =
   mongoose.models['MigratedMeetingRecording'] ||
   mongoose.model<MigratedMeetingRecordingDocument>(
     'MigratedMeetingRecording',
-    MigratedMeetingRecordingSchema
+    MigratedMeetingRecordingSchema,
   );

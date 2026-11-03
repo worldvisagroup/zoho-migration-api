@@ -3,8 +3,6 @@ import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
 
-
-
 export interface MigratedEventEntity {
   _id?: string;
   zoho_id: string;
@@ -18,7 +16,15 @@ export interface MigratedEventEntity {
   _zoho_visa_application_id?: string;
   _spouse_skill_assessment_id?: Schema.Types.ObjectId;
   _zoho_spouse_skill_assessment_id?: string;
-  parent_entity_type?: 'lead' | 'contact' | 'deal' | 'visa_application' | 'spouse_skill_assessment' | 'task' | 'event' | 'signed_document';
+  parent_entity_type?:
+    | 'lead'
+    | 'contact'
+    | 'deal'
+    | 'visa_application'
+    | 'spouse_skill_assessment'
+    | 'task'
+    | 'event'
+    | 'signed_document';
   _owner_id?: Schema.Types.ObjectId;
   _zoho_owner_id?: string;
   _created_by_id?: Schema.Types.ObjectId;
@@ -78,15 +84,44 @@ const MigratedEventSchema = new Schema<MigratedEventDocument>(
     zoho_id: { type: String, required: true, unique: true, index: true },
     _lead_id: { type: Schema.Types.ObjectId, ref: 'MigratedLead', default: null, index: true },
     _zoho_lead_id: { type: String, default: null, index: true },
-    _contact_id: { type: Schema.Types.ObjectId, ref: 'MigratedContact', default: null, index: true },
+    _contact_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedContact',
+      default: null,
+      index: true,
+    },
     _zoho_contact_id: { type: String, default: null, index: true },
     _deal_id: { type: Schema.Types.ObjectId, ref: 'MigratedDeal', default: null, index: true },
     _zoho_deal_id: { type: String, default: null, index: true },
-    _visa_application_id: { type: Schema.Types.ObjectId, ref: 'MigratedVisaApplication', default: null, index: true },
+    _visa_application_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedVisaApplication',
+      default: null,
+      index: true,
+    },
     _zoho_visa_application_id: { type: String, default: null, index: true },
-    _spouse_skill_assessment_id: { type: Schema.Types.ObjectId, ref: 'MigratedSpouseSkillAssessment', default: null, index: true },
+    _spouse_skill_assessment_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedSpouseSkillAssessment',
+      default: null,
+      index: true,
+    },
     _zoho_spouse_skill_assessment_id: { type: String, default: null, index: true },
-    parent_entity_type: { type: String, enum: ['lead', 'contact', 'deal', 'visa_application', 'spouse_skill_assessment', 'task', 'event', 'signed_document'], default: null, index: true },
+    parent_entity_type: {
+      type: String,
+      enum: [
+        'lead',
+        'contact',
+        'deal',
+        'visa_application',
+        'spouse_skill_assessment',
+        'task',
+        'event',
+        'signed_document',
+      ],
+      default: null,
+      index: true,
+    },
     _owner_id: { type: Schema.Types.ObjectId, ref: 'MigratedUser', default: null },
     _zoho_owner_id: { type: String, default: null },
     _created_by_id: { type: Schema.Types.ObjectId, ref: 'MigratedUser', default: null },
@@ -135,7 +170,7 @@ const MigratedEventSchema = new Schema<MigratedEventDocument>(
     Meeting_Provider__s: { type: String, default: null, index: true },
     Online_Meeting_External_UUID__s: { type: String, default: null, index: true },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_EVENTS, strict: true }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_EVENTS, strict: true },
 );
 
 export const MigratedEventModel =

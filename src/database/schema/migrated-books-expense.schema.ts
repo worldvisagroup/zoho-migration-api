@@ -4,12 +4,7 @@ import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
 
 export type BooksExpenseStatus =
-  | 'unbilled'
-  | 'invoiced'
-  | 'reimbursed'
-  | 'nonbillable'
-  | 'billable'
-  | 'billed';
+  'unbilled' | 'invoiced' | 'reimbursed' | 'nonbillable' | 'billable' | 'billed';
 
 export interface MigratedBooksExpenseEntity {
   [key: string]: any;
@@ -227,7 +222,6 @@ export const MigratedBooksExpenseSchema = new Schema<MigratedBooksExpenseDocumen
     tags: { type: Array, default: [] },
     user_name: { type: String, default: '' },
 
-
     // Additional Comprehensive Detail Fields (Audited 100% Coverage)
     account_id: { type: String, default: '' },
     paid_through_account_id: { type: String, default: '' },
@@ -297,12 +291,9 @@ export const MigratedBooksExpenseSchema = new Schema<MigratedBooksExpenseDocumen
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_EXPENSES,
     strict: false,
-  }
+  },
 );
 
 export const MigratedBooksExpenseModel =
   mongoose.models['MigratedBooksExpense'] ||
-  mongoose.model<MigratedBooksExpenseDocument>(
-    'MigratedBooksExpense',
-    MigratedBooksExpenseSchema
-  );
+  mongoose.model<MigratedBooksExpenseDocument>('MigratedBooksExpense', MigratedBooksExpenseSchema);

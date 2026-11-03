@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -20,9 +19,12 @@ const MigratedReferenceEntitySchema = new Schema<MigratedReferenceDocument>(
     name: { type: String, default: '' },
     module_api_name: { type: String, required: true, index: true },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_REFERENCE_ENTITIES }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_REFERENCE_ENTITIES },
 );
 
 export const MigratedReferenceEntityModel =
   mongoose.models['MigratedReferenceEntity'] ||
-  mongoose.model<MigratedReferenceDocument>('MigratedReferenceEntity', MigratedReferenceEntitySchema);
+  mongoose.model<MigratedReferenceDocument>(
+    'MigratedReferenceEntity',
+    MigratedReferenceEntitySchema,
+  );

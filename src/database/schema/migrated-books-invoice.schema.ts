@@ -353,7 +353,7 @@ export const MigratedBooksInvoiceLineItemSchema = new Schema<MigratedBooksInvoic
     tags: { type: Array, default: [] },
     item_custom_fields: { type: Array, default: [] },
   },
-  { _id: false }
+  { _id: false },
 );
 
 export const MigratedBooksInvoiceSchema = new Schema<MigratedBooksInvoiceDocument>(
@@ -569,7 +569,6 @@ export const MigratedBooksInvoiceSchema = new Schema<MigratedBooksInvoiceDocumen
     notes: { type: String, default: '' },
     terms: { type: String, default: '' },
 
-
     // Additional Comprehensive Detail Fields (Audited 100% Coverage)
     discount_account_id: { type: String, default: '' },
     discount_account_name: { type: String, default: '' },
@@ -715,12 +714,9 @@ export const MigratedBooksInvoiceSchema = new Schema<MigratedBooksInvoiceDocumen
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_INVOICES,
     strict: false,
-  }
+  },
 );
 
 export const MigratedBooksInvoiceModel =
   mongoose.models['MigratedBooksInvoice'] ||
-  mongoose.model<MigratedBooksInvoiceDocument>(
-    'MigratedBooksInvoice',
-    MigratedBooksInvoiceSchema
-  );
+  mongoose.model<MigratedBooksInvoiceDocument>('MigratedBooksInvoice', MigratedBooksInvoiceSchema);

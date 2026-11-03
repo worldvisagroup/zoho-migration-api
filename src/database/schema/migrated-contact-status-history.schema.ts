@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -26,7 +25,12 @@ export type MigratedContactStatusHistoryDocument = Document & MigratedContactSta
 const MigratedContactStatusHistorySchema = new Schema<MigratedContactStatusHistoryDocument>(
   {
     zoho_id: { type: String, required: true, unique: true, index: true },
-    _contact_id: { type: Schema.Types.ObjectId, ref: 'MigratedContact', required: true, index: true },
+    _contact_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedContact',
+      required: true,
+      index: true,
+    },
     _zoho_contact_id: { type: String, required: true, index: true },
     _modified_by_id: { type: Schema.Types.ObjectId, ref: 'MigratedUser', default: null },
     _zoho_modified_by_id: { type: String, default: null },
@@ -37,9 +41,12 @@ const MigratedContactStatusHistorySchema = new Schema<MigratedContactStatusHisto
     Last_Activity_Time: { type: Date, default: null },
     Duration_Days: { type: Number, default: null },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_CONTACT_STATUS_HISTORY, strict: true }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_CONTACT_STATUS_HISTORY, strict: true },
 );
 
 export const MigratedContactStatusHistoryModel =
   mongoose.models['MigratedContactStatusHistory'] ||
-  mongoose.model<MigratedContactStatusHistoryDocument>('MigratedContactStatusHistory', MigratedContactStatusHistorySchema);
+  mongoose.model<MigratedContactStatusHistoryDocument>(
+    'MigratedContactStatusHistory',
+    MigratedContactStatusHistorySchema,
+  );

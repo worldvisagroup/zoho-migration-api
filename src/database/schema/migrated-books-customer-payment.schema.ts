@@ -129,34 +129,35 @@ export interface MigratedBooksCustomerPaymentEntity {
 
 export type MigratedBooksCustomerPaymentDocument = Document & MigratedBooksCustomerPaymentEntity;
 
-export const MigratedBooksPaymentInvoiceAllocationSchema = new Schema<MigratedBooksPaymentInvoiceAllocation>(
-  {
-    invoice_id: { type: String, required: true, index: true },
-    _invoice_id: {
-      type: Schema.Types.ObjectId,
-      ref: 'MigratedBooksInvoice',
-      default: null,
-      index: true,
+export const MigratedBooksPaymentInvoiceAllocationSchema =
+  new Schema<MigratedBooksPaymentInvoiceAllocation>(
+    {
+      invoice_id: { type: String, required: true, index: true },
+      _invoice_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'MigratedBooksInvoice',
+        default: null,
+        index: true,
+      },
+      invoice_number: { type: String, default: '' },
+      invoice_payment_id: { type: String, default: '' },
+      invoice_customer_id: { type: String, default: '' },
+      invoice_customer_name: { type: String, default: '' },
+      amount_applied: { type: Number, required: true, default: 0 },
+      tax_amount_withheld: { type: Number, default: 0 },
+      total: { type: Number, default: 0 },
+      balance: { type: Number, default: 0 },
+      date: { type: String, default: '' },
+      due_date: { type: String, default: '' },
+      apply_date: { type: String, default: '' },
+      unprocessed_payment_amount: { type: Number, default: 0 },
+      price_precision: { type: Number, default: 2 },
+      allow_partial_payments: { type: Schema.Types.Mixed, default: '' },
+      invoice_installments: { type: Array, default: [] },
+      installments: { type: Array, default: [] },
     },
-    invoice_number: { type: String, default: '' },
-    invoice_payment_id: { type: String, default: '' },
-    invoice_customer_id: { type: String, default: '' },
-    invoice_customer_name: { type: String, default: '' },
-    amount_applied: { type: Number, required: true, default: 0 },
-    tax_amount_withheld: { type: Number, default: 0 },
-    total: { type: Number, default: 0 },
-    balance: { type: Number, default: 0 },
-    date: { type: String, default: '' },
-    due_date: { type: String, default: '' },
-    apply_date: { type: String, default: '' },
-    unprocessed_payment_amount: { type: Number, default: 0 },
-    price_precision: { type: Number, default: 2 },
-    allow_partial_payments: { type: Schema.Types.Mixed, default: '' },
-    invoice_installments: { type: Array, default: [] },
-    installments: { type: Array, default: [] },
-  },
-  { _id: false }
-);
+    { _id: false },
+  );
 
 export const MigratedBooksCustomerPaymentSchema = new Schema<MigratedBooksCustomerPaymentDocument>(
   {
@@ -279,7 +280,6 @@ export const MigratedBooksCustomerPaymentSchema = new Schema<MigratedBooksCustom
     custom_field_hash: { type: Schema.Types.Mixed, default: {} },
     tags: { type: Array, default: [] },
 
-
     // Additional Comprehensive Detail Fields (Audited 100% Coverage)
     price_precision: { type: Number, default: 2 },
     account_identifier: { type: String, default: '' },
@@ -335,12 +335,12 @@ export const MigratedBooksCustomerPaymentSchema = new Schema<MigratedBooksCustom
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_CUSTOMER_PAYMENTS,
     strict: false,
-  }
+  },
 );
 
 export const MigratedBooksCustomerPaymentModel =
   mongoose.models['MigratedBooksCustomerPayment'] ||
   mongoose.model<MigratedBooksCustomerPaymentDocument>(
     'MigratedBooksCustomerPayment',
-    MigratedBooksCustomerPaymentSchema
+    MigratedBooksCustomerPaymentSchema,
   );

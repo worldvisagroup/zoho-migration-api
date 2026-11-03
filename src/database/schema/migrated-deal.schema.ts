@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -22,11 +21,43 @@ export interface MigratedDealEntity {
   Amount?: number; // Amount (currency)
   Deal_Name?: string; // Deal Name (text)
   Closing_Date?: Date | string; // Closing Date (date)
-  Stage?: 'Deal' | 'Qualification' | 'Needs Analysis' | 'Value Proposition' | 'Id. Decision Makers' | 'Proposal/Price Quote' | 'Negotiation/Review' | 'Closed Won' | 'Closed Lost' | 'Closed Lost to Competition' | 'Generate Payment Link' | 'RNR' | 'Negotiation' | 'Review' | 'Deal Parked' | 'Payment Awaited' | string; // Stage (picklist)
+  Stage?:
+    | 'Deal'
+    | 'Qualification'
+    | 'Needs Analysis'
+    | 'Value Proposition'
+    | 'Id. Decision Makers'
+    | 'Proposal/Price Quote'
+    | 'Negotiation/Review'
+    | 'Closed Won'
+    | 'Closed Lost'
+    | 'Closed Lost to Competition'
+    | 'Generate Payment Link'
+    | 'RNR'
+    | 'Negotiation'
+    | 'Review'
+    | 'Deal Parked'
+    | 'Payment Awaited'
+    | string; // Stage (picklist)
   Type?: 'Existing Business' | 'New Business' | string; // Type (picklist)
   Expected_Revenue?: number; // Expected Revenue (currency)
   Next_Step?: string; // Next Step (text)
-  Lead_Source?: 'Advertisement' | 'Cold Call' | 'Employee Referral' | 'External Referral' | 'OnlineStore' | 'Partner' | 'Public Relations' | 'Sales Mail Alias' | 'Seminar Partner' | 'Seminar-Internal' | 'Trade Show' | 'Web Download' | 'Web Research' | 'Chat' | string; // Lead Source (picklist)
+  Lead_Source?:
+    | 'Advertisement'
+    | 'Cold Call'
+    | 'Employee Referral'
+    | 'External Referral'
+    | 'OnlineStore'
+    | 'Partner'
+    | 'Public Relations'
+    | 'Sales Mail Alias'
+    | 'Seminar Partner'
+    | 'Seminar-Internal'
+    | 'Trade Show'
+    | 'Web Download'
+    | 'Web Research'
+    | 'Chat'
+    | string; // Lead Source (picklist)
   Created_Time?: Date | string; // Created Time (datetime)
   Modified_Time?: Date | string; // Modified Time (datetime)
   Currency?: 'INR' | 'USD' | string; // Currency (picklist)
@@ -45,8 +76,145 @@ export interface MigratedDealEntity {
   Email_1?: string; // Email 1 (email)
   Phone?: string; // Phone (phone)
   Package_Finalize?: 'Normal' | 'Advance' | 'Premium' | string; // Package Finalize (picklist)
-  Country_Finalized?: 'Afghanistan' | 'Albania' | 'Algeria' | 'American Samoa' | 'Andorra' | 'Angola' | 'Anguilla' | 'Antigua And Barbuda' | 'Argentina' | 'Armenia' | 'Aruba' | 'Australia' | 'Austria' | 'Azerbaijan' | 'Bahamas' | 'Bahrain' | 'Bangladesh' | 'Barbados' | 'Belarus' | 'Belgium' | 'Belize' | 'Benin' | 'Bermuda' | 'Bhutan' | 'Bolivia' | 'Bosnia And Herzegovina' | 'Botswana' | 'Brazil' | 'British Virgin Islands' | 'Brunei' | 'Bulgaria' | 'Burkina Faso' | 'Burundi' | 'Cambodia' | 'Cameroon' | 'Canada' | 'Cape Verde' | 'Cayman Islands' | 'Central African Republic' | 'Chad' | 'Chile' | 'China' | 'Colombia' | 'Comoros' | 'Cook Islands' | 'Costa Rica' | 'Croatia' | 'Cuba' | 'Curacao' | 'Cyprus' | 'Czech Republic' | 'Denmark' | 'Djibouti' | 'Dominica' | 'Dominican Republic' | 'Dr Congo' | 'Ecuador' | 'Egypt' | 'El Salvador' | 'Equatorial Guinea' | 'Eritrea' | 'Estonia' | 'Eswatini' | 'Ethiopia' | 'Falkland Islands' | 'Faroe Islands' | 'Fiji' | 'Finland' | 'France' | 'French Guiana' | 'French Polynesia' | 'Gabon' | 'Gambia' | 'Georgia' | 'Germany' | 'Ghana' | 'Gibraltar' | 'Greece' | 'Greenland' | 'Grenada' | 'Guadeloupe' | 'Guam' | 'Guatemala' | 'Guernsey' | 'Guinea' | 'Guinea Bissau' | 'Guyana' | 'Haiti' | 'Honduras' | 'Hong Kong' | 'HongKong' | 'Hungary' | 'Iceland' | 'India' | 'Indonesia' | 'Iran' | 'Iraq' | 'Ireland' | 'Isle Of Man' | 'Israel' | string; // Country Finalized (picklist)
-  Service_Finalized?: 'University Admission' | 'Skill Assessment' | 'Work Permit' | 'UK Global Talent visa' | 'Investor Migration' | 'College Admission' | 'Student Visa' | 'Permanent Residency' | 'Dependent Spouse' | 'Intra Office' | 'Visit Visa' | 'Job Seeker Visa' | 'Germany Opportunity Card' | 'Parent Visa RRV' | 'Australia GTI' | 'Australia Parent Visa' | 'Australia Child Visa' | 'Australia Partner Visa' | 'Parent Visa Australia SC804' | 'Australia RRV' | 'Child Visa Agreement Australia' | 'Retainer Agreement JSV Germany' | 'Parent Visa Australia retainer agreement' | 'EOI & Visa Stage 2' | 'Australia GTI Agreement' | 'Temporary Dependent Visa' | 'Australian Student Visa' | 'Visitor Visa Rejection' | 'Australia Work in Holiday Visa' | 'Germany Family Re-Union Visa' | 'Partner of Student Work Visa' | 'Business Visitor Visa' | 'Super Visa' | 'SC 403 Visa Application' | 'National Innovation Visa (NIV)' | string; // Service Finalized (picklist)
+  Country_Finalized?:
+    | 'Afghanistan'
+    | 'Albania'
+    | 'Algeria'
+    | 'American Samoa'
+    | 'Andorra'
+    | 'Angola'
+    | 'Anguilla'
+    | 'Antigua And Barbuda'
+    | 'Argentina'
+    | 'Armenia'
+    | 'Aruba'
+    | 'Australia'
+    | 'Austria'
+    | 'Azerbaijan'
+    | 'Bahamas'
+    | 'Bahrain'
+    | 'Bangladesh'
+    | 'Barbados'
+    | 'Belarus'
+    | 'Belgium'
+    | 'Belize'
+    | 'Benin'
+    | 'Bermuda'
+    | 'Bhutan'
+    | 'Bolivia'
+    | 'Bosnia And Herzegovina'
+    | 'Botswana'
+    | 'Brazil'
+    | 'British Virgin Islands'
+    | 'Brunei'
+    | 'Bulgaria'
+    | 'Burkina Faso'
+    | 'Burundi'
+    | 'Cambodia'
+    | 'Cameroon'
+    | 'Canada'
+    | 'Cape Verde'
+    | 'Cayman Islands'
+    | 'Central African Republic'
+    | 'Chad'
+    | 'Chile'
+    | 'China'
+    | 'Colombia'
+    | 'Comoros'
+    | 'Cook Islands'
+    | 'Costa Rica'
+    | 'Croatia'
+    | 'Cuba'
+    | 'Curacao'
+    | 'Cyprus'
+    | 'Czech Republic'
+    | 'Denmark'
+    | 'Djibouti'
+    | 'Dominica'
+    | 'Dominican Republic'
+    | 'Dr Congo'
+    | 'Ecuador'
+    | 'Egypt'
+    | 'El Salvador'
+    | 'Equatorial Guinea'
+    | 'Eritrea'
+    | 'Estonia'
+    | 'Eswatini'
+    | 'Ethiopia'
+    | 'Falkland Islands'
+    | 'Faroe Islands'
+    | 'Fiji'
+    | 'Finland'
+    | 'France'
+    | 'French Guiana'
+    | 'French Polynesia'
+    | 'Gabon'
+    | 'Gambia'
+    | 'Georgia'
+    | 'Germany'
+    | 'Ghana'
+    | 'Gibraltar'
+    | 'Greece'
+    | 'Greenland'
+    | 'Grenada'
+    | 'Guadeloupe'
+    | 'Guam'
+    | 'Guatemala'
+    | 'Guernsey'
+    | 'Guinea'
+    | 'Guinea Bissau'
+    | 'Guyana'
+    | 'Haiti'
+    | 'Honduras'
+    | 'Hong Kong'
+    | 'HongKong'
+    | 'Hungary'
+    | 'Iceland'
+    | 'India'
+    | 'Indonesia'
+    | 'Iran'
+    | 'Iraq'
+    | 'Ireland'
+    | 'Isle Of Man'
+    | 'Israel'
+    | string; // Country Finalized (picklist)
+  Service_Finalized?:
+    | 'University Admission'
+    | 'Skill Assessment'
+    | 'Work Permit'
+    | 'UK Global Talent visa'
+    | 'Investor Migration'
+    | 'College Admission'
+    | 'Student Visa'
+    | 'Permanent Residency'
+    | 'Dependent Spouse'
+    | 'Intra Office'
+    | 'Visit Visa'
+    | 'Job Seeker Visa'
+    | 'Germany Opportunity Card'
+    | 'Parent Visa RRV'
+    | 'Australia GTI'
+    | 'Australia Parent Visa'
+    | 'Australia Child Visa'
+    | 'Australia Partner Visa'
+    | 'Parent Visa Australia SC804'
+    | 'Australia RRV'
+    | 'Child Visa Agreement Australia'
+    | 'Retainer Agreement JSV Germany'
+    | 'Parent Visa Australia retainer agreement'
+    | 'EOI & Visa Stage 2'
+    | 'Australia GTI Agreement'
+    | 'Temporary Dependent Visa'
+    | 'Australian Student Visa'
+    | 'Visitor Visa Rejection'
+    | 'Australia Work in Holiday Visa'
+    | 'Germany Family Re-Union Visa'
+    | 'Partner of Student Work Visa'
+    | 'Business Visitor Visa'
+    | 'Super Visa'
+    | 'SC 403 Visa Application'
+    | 'National Innovation Visa (NIV)'
+    | string; // Service Finalized (picklist)
   Worldvisa_Id?: string; // DealId (autonumber)
   GCLID?: string; // GCLID (text)
   ZCAMPAIGNID?: string; // ZCAMPAIGNID (text)
@@ -54,8 +222,27 @@ export interface MigratedDealEntity {
   ADID?: string; // ADID (text)
   KEYWORDID?: string; // KEYWORDID (text)
   Keyword?: string; // Keyword (text)
-  Click_Type?: 'Other' | 'Phone calls' | 'Headline' | 'Product plusbox offer' | 'Sitelink' | 'Product listing ad' | 'Driving direction' | 'Print offer' | 'Breadcrumbs' | 'Manually dialed phone calls' | 'Mobile phone calls' | 'Get location details' | 'unknown' | string; // Click Type (picklist)
-  Device_Type?: 'Other' | 'Computers' | 'Mobile devices with full browsers' | 'Tablets with full browsers' | string; // Device Type (picklist)
+  Click_Type?:
+    | 'Other'
+    | 'Phone calls'
+    | 'Headline'
+    | 'Product plusbox offer'
+    | 'Sitelink'
+    | 'Product listing ad'
+    | 'Driving direction'
+    | 'Print offer'
+    | 'Breadcrumbs'
+    | 'Manually dialed phone calls'
+    | 'Mobile phone calls'
+    | 'Get location details'
+    | 'unknown'
+    | string; // Click Type (picklist)
+  Device_Type?:
+    | 'Other'
+    | 'Computers'
+    | 'Mobile devices with full browsers'
+    | 'Tablets with full browsers'
+    | string; // Device Type (picklist)
   Ad_Network?: 'Search Network' | 'Display Network' | string; // Ad Network (picklist)
   Search_Partner_Network?: 'Google search' | 'Search partners' | 'Display Network' | string; // Search Partner Network (picklist)
   Ad_Campaign_Name?: string; // Ad Campaign Name (text)
@@ -67,7 +254,16 @@ export interface MigratedDealEntity {
   Cost_per_Conversion?: number; // Cost per Conversion (currency)
   Conversion_Exported_On?: Date | string; // Conversion Exported On (datetime)
   Conversion_Export_Status?: 'Success' | 'Failure' | 'NA - Invalid' | 'Not started' | string; // Conversion Export Status (picklist)
-  Reason_for_Conversion_Failure?: 'INVALID_CONVERSION_TYPE' | 'UNPARSEABLE_GCLID' | 'CONVERSION_PRECEDES_CLICK' | 'FUTURE_CONVERSION_TIME' | 'EXPIRED_CLICK' | 'UNKNOWN' | 'TOO_RECENT_CLICK' | 'CLICK_MISSING_CONVERSION_LABEL' | string; // Reason for Conversion Failure (picklist)
+  Reason_for_Conversion_Failure?:
+    | 'INVALID_CONVERSION_TYPE'
+    | 'UNPARSEABLE_GCLID'
+    | 'CONVERSION_PRECEDES_CLICK'
+    | 'FUTURE_CONVERSION_TIME'
+    | 'EXPIRED_CLICK'
+    | 'UNKNOWN'
+    | 'TOO_RECENT_CLICK'
+    | 'CLICK_MISSING_CONVERSION_LABEL'
+    | string; // Reason for Conversion Failure (picklist)
   Payment_ID?: string; // Payment ID (text)
   Payment_Bank?: string; // Payment Bank (text)
   Payment_Tax?: string; // payment order id (text)
@@ -120,7 +316,12 @@ export type MigratedDealDocument = Document & MigratedDealEntity;
 const MigratedDealSchema = new Schema<MigratedDealDocument>(
   {
     zoho_id: { type: String, required: true, unique: true, index: true },
-    _contact_id: { type: Schema.Types.ObjectId, ref: 'MigratedContact', default: null, index: true },
+    _contact_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedContact',
+      default: null,
+      index: true,
+    },
     _zoho_contact_id: { type: String, default: null, index: true },
     _lead_id: { type: Schema.Types.ObjectId, ref: 'MigratedLead', default: null, index: true },
     _zoho_lead_id: { type: String, default: null, index: true },
@@ -225,7 +426,7 @@ const MigratedDealSchema = new Schema<MigratedDealDocument>(
     ProposalLink: { type: String, default: null },
     Stage_Modified_Time: { type: Date, default: null },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_DEALS, strict: true }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_DEALS, strict: true },
 );
 
 export const MigratedDealModel =

@@ -61,19 +61,39 @@ export const MigratedBooksBankTransactionSchema = new Schema<MigratedBooksBankTr
     source: { type: String, default: '' },
 
     account_id: { type: String, default: '', index: true },
-    _bank_account_id: { type: Schema.Types.ObjectId, ref: 'MigratedBooksBankAccount', default: null, index: true },
-    _account_id: { type: Schema.Types.ObjectId, ref: 'MigratedBooksAccount', default: null, index: true },
+    _bank_account_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedBooksBankAccount',
+      default: null,
+      index: true,
+    },
+    _account_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedBooksAccount',
+      default: null,
+      index: true,
+    },
     account_name: { type: String, default: '' },
     account_type: { type: String, default: '' },
 
     customer_id: { type: String, default: '', index: true },
-    _customer_id: { type: Schema.Types.ObjectId, ref: 'MigratedBooksContact', default: null, index: true },
+    _customer_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedBooksContact',
+      default: null,
+      index: true,
+    },
     payee: { type: String, default: '' },
 
     debit_or_credit: { type: String, enum: ['debit', 'credit'], required: true, index: true },
     reference_number: { type: String, default: '', index: true },
 
-    _currency_id: { type: Schema.Types.ObjectId, ref: 'MigratedBooksCurrency', default: null, index: true },
+    _currency_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedBooksCurrency',
+      default: null,
+      index: true,
+    },
     _zoho_currency_id: { type: String, default: '' },
     currency_id: { type: String, default: '' },
     currency_code: { type: String, default: 'INR' },

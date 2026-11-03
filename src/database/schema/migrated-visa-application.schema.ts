@@ -63,7 +63,13 @@ export interface MigratedVisaApplicationEntity {
   Visa_Outcome?: '-None-' | 'Positive' | 'Negative' | '374 AUD' | '315' | '500 AUD' | string; // FEES - ITA FILED (picklist)
   Locked__s?: boolean; // Locked (boolean)
   Checklist_Document_Stage_1?: any; // Checklist Document Stage 1 (fileupload)
-  Australia_Authority?: '-None-' | 'AACA	​Architects Accreditation Council of Australia' | 'AASW	Australian Association of Social Workers Limited' | 'ACECQA	Australian Children’s Education and Care Quality' | 'Competent' | string; // Language - ITA FINAL (picklist)
+  Australia_Authority?:
+    | '-None-'
+    | 'AACA	​Architects Accreditation Council of Australia'
+    | 'AASW	Australian Association of Social Workers Limited'
+    | 'ACECQA	Australian Children’s Education and Care Quality'
+    | 'Competent'
+    | string; // Language - ITA FINAL (picklist)
   Document_Rejection_List?: string; // Document Rejection List (textarea)
   Further_Information_Required_List?: string; // Further Information Required List (textarea)
   Application_Type?: '-None-' | 'Review' | 'Appeal' | 'Fresh' | string; // Application Type (picklist)
@@ -89,7 +95,15 @@ export interface MigratedVisaApplicationEntity {
   Validity_Stage_4?: Date | string; // Last  Email Received on (date)
   Validity_Stage_3?: Date | string; // Filed Date (date)
   Outcome_Stage_5?: '-None-' | 'Positive' | 'Negative' | '500 AUD' | string; // Fees  ITA (picklist)
-  Check_List_Document_Status?: '-None-' | 'Negative' | 'Check List' | 'Check List Reviewed' | 'Documents Uploaded' | 'Positive' | 'Send For Check List Review' | string; // Check List Document Status (picklist)
+  Check_List_Document_Status?:
+    | '-None-'
+    | 'Negative'
+    | 'Check List'
+    | 'Check List Reviewed'
+    | 'Documents Uploaded'
+    | 'Positive'
+    | 'Send For Check List Review'
+    | string; // Check List Document Status (picklist)
   Outcome_Stage_3?: string; // ANZSCO -ITA 2 (picklist)
   Outcome_Stage_2?: string; // ROI 1 States Lodge (picklist)
   Comments_Stage_6?: string; // Comments Stage 6 (textarea)
@@ -106,7 +120,8 @@ export interface MigratedVisaApplicationEntity {
   Stage_4_Name?: string; // VISA GRANT - Name (text)
   Stage_3_Name?: string; // Stage 3 - Name (text)
   Stage_1_Name?: string; // SA - Name (text)
-  Application_Stage1?: '-None-' | 'Stage 1' | 'Stage 2' | 'Stage 3' | 'Stage 4' | 'Stage 5' | string; // Application Stage (picklist)
+  Application_Stage1?:
+    '-None-' | 'Stage 1' | 'Stage 2' | 'Stage 3' | 'Stage 4' | 'Stage 5' | string; // Application Stage (picklist)
   Phone?: string; // Phone (phone)
   Validity_Stage_3_Negative_Outcome?: Date | string; // Expiry Date_ ITA FILED (date)
   Validity_Stage_4_Negative_Outcome?: Date | string; // PNP Date (date)
@@ -127,11 +142,56 @@ export interface MigratedVisaApplicationEntity {
   PTE_Core?: boolean; // PTE Core (boolean)
   CAE?: boolean; // CAE (boolean)
   States_Applied_For?: string[]; // States Applied For (multiselectpicklist)
-  Points_for_Subclass_491?: '-None-' | 'N/A' | '65' | '70' | '75' | '80' | '85' | '90' | '95' | '100' | '105' | '110' | '115' | '120' | string; // Points for Subclass EOI  491 (picklist)
+  Points_for_Subclass_491?:
+    | '-None-'
+    | 'N/A'
+    | '65'
+    | '70'
+    | '75'
+    | '80'
+    | '85'
+    | '90'
+    | '95'
+    | '100'
+    | '105'
+    | '110'
+    | '115'
+    | '120'
+    | string; // Points for Subclass EOI  491 (picklist)
   Points_for_ACT_Metrix?: string; // Points for ACT Matrix (picklist)
   Language?: '-None-' | 'Expert' | 'Proficient' | 'Competent' | 'Basic' | 'Functional' | string; // Language (picklist)
-  Points_for_Subclass_189?: '-None-' | 'N/A' | '65' | '70' | '75' | '80' | '85' | '90' | '95' | '100' | '105' | '110' | '115' | '120' | string; // Points for EOI  Subclass 189 (picklist)
-  Points_for_SubClass_190?: '-None-' | 'N/A' | '65' | '70' | '75' | '80' | '85' | '90' | '95' | '100' | '105' | '110' | '115' | '120' | string; // Points for EOI  SubClass 190 (picklist)
+  Points_for_Subclass_189?:
+    | '-None-'
+    | 'N/A'
+    | '65'
+    | '70'
+    | '75'
+    | '80'
+    | '85'
+    | '90'
+    | '95'
+    | '100'
+    | '105'
+    | '110'
+    | '115'
+    | '120'
+    | string; // Points for EOI  Subclass 189 (picklist)
+  Points_for_SubClass_190?:
+    | '-None-'
+    | 'N/A'
+    | '65'
+    | '70'
+    | '75'
+    | '80'
+    | '85'
+    | '90'
+    | '95'
+    | '100'
+    | '105'
+    | '110'
+    | '115'
+    | '120'
+    | string; // Points for EOI  SubClass 190 (picklist)
   DATE?: Date | string; // ROI DATE (date)
   INVITIED_BY?: '-None-' | 'SUBCLASS 189' | 'SUBCLASS 190' | 'SUBCLASS 491' | string; // INVITIED BY ITA1 (picklist)
   HAP_Id?: string; // HAP Id (text)
@@ -157,7 +217,14 @@ export interface MigratedVisaApplicationEntity {
   FEES_ITA_3?: string; // States Invitied  ITA1 (picklist)
   Points_Invited_ITA_3?: string[]; // Points Invited -ITA FINAL (multiselectpicklist)
   Points_Invited_ITA_2?: string[]; // Points Invited (multiselectpicklist)
-  Furture_Information_Required?: '-None-' | 'Children\'s Education' | 'PHD' | 'Employment & Education' | 'Payment Evidence' | 'Others' | string; // Furture Information Required (picklist)
+  Furture_Information_Required?:
+    | '-None-'
+    | "Children's Education"
+    | 'PHD'
+    | 'Employment & Education'
+    | 'Payment Evidence'
+    | 'Others'
+    | string; // Furture Information Required (picklist)
   Reminder_subject?: string; // Reminder subject (text)
   Reminder_Subject_Lodge_application?: string; // Reminder Subject - Lodge application (text)
   Send_Check_List?: string; // Assessing Authority  Stage 1 (picklist)
@@ -166,7 +233,8 @@ export interface MigratedVisaApplicationEntity {
   POINTS_INVITED_ON_ITA_1?: string; // POINTS INVITED ON ITA 1 (picklist)
   File_No_ITA_31?: string; // File No  ITA FINAL (text)
   ANZSCO_NOC?: string[]; // SA - ANZSCO (multiselectpicklist)
-  Education_Recognized?: '-None-' | 'Bachelor Degree' | 'PHD' | 'Double Degree' | 'Diploma' | 'Masters Degree' | string; // Education Recognized (picklist)
+  Education_Recognized?:
+    '-None-' | 'Bachelor Degree' | 'PHD' | 'Double Degree' | 'Diploma' | 'Masters Degree' | string; // Education Recognized (picklist)
   Express_Entry_PNP_3?: number; // Express Entry PNP 3s (integer)
   Points_PNP?: number; // Points   PNP (integer)
   Express_Entry?: number; // Express Entry noS (integer)
@@ -259,13 +327,24 @@ export interface MigratedVisaApplicationEntity {
   Description?: string; // Description (textarea)
   Date_of_Agreement?: string; // Date of Agreement (text)
   Sl_No?: string; // status change field (text)
-  Spouse_Education?: '-None-' | 'N/A' | 'Bachelor Degree' | 'PHD' | 'Double Degree' | 'Diploma' | 'Masters Degree' | 'Option 1' | 'Option 2' | string; // Spouse Education (picklist)
+  Spouse_Education?:
+    | '-None-'
+    | 'N/A'
+    | 'Bachelor Degree'
+    | 'PHD'
+    | 'Double Degree'
+    | 'Diploma'
+    | 'Masters Degree'
+    | 'Option 1'
+    | 'Option 2'
+    | string; // Spouse Education (picklist)
   Application_State?: '-None-' | 'Active' | 'In-Active' | string; // Application State (picklist)
   Express_Entry_PNP_31?: string; // Express Entry PNP 3 (text)
   Express_Entry_no?: string; // Express Entry no (text)
   Express_Entry_number1?: string; // Express Entry  number (text)
   Email_Sentiment?: '-None-' | 'Negative' | 'Positive' | 'Neutral' | string; // Email Sentiment (picklist)
-  Experience_Consider?: '-None-' | 'Less than 3' | '1' | '2' | '3' | '4' | '3-4' | '5-7' | '7' | '8 and more' | string; // Experience Consider (picklist)
+  Experience_Consider?:
+    '-None-' | 'Less than 3' | '1' | '2' | '3' | '4' | '3-4' | '5-7' | '7' | '8 and more' | string; // Experience Consider (picklist)
   Spouse_Out_Come_Validity?: Date | string; // Spouse Out Come Validity (datetime)
   Spouse_Name?: string; // Spouse Name (text)
   Spouse_Date_of_OutCome?: Date | string; // Spouse Date of OutCome (datetime)
@@ -274,7 +353,8 @@ export interface MigratedVisaApplicationEntity {
   Writing?: number; // Writing (integer)
   Speaking?: number; // Speaking (integer)
   Listening?: number; // Listening (integer)
-  Spouse_Language_test?: '-None-' | 'IELTS' | 'PTE Core' | 'OET' | 'PTE' | 'TOEFL' | 'CELPIP' | 'CAE' | string; // Spouse Language  test (picklist)
+  Spouse_Language_test?:
+    '-None-' | 'IELTS' | 'PTE Core' | 'OET' | 'PTE' | 'TOEFL' | 'CELPIP' | 'CAE' | string; // Spouse Language  test (picklist)
   Spouse_s_Skill_Assessing_Authority?: string[]; // Spouse's Skill Assessing Authority (multiselectpicklist)
   Blueprint?: string; // Blueprint (text)
   Send_English_Prep?: '-None-' | 'Yes' | 'No' | string; // Send English Prep (picklist)
@@ -307,7 +387,17 @@ export interface MigratedVisaApplicationEntity {
   Reminder_Invitation_received?: Date | string; // Reminder Invitation received (datetime)
   Reminder_Visa_Application_Lodgement?: Date | string; // Reminder Visa Application Lodgement (datetime)
   Skill_Assesment_Next_Follow_up?: Date | string; // Skill Assesment Next Follow up (datetime)
-  Contact_in_Future?: '-None-' | '1 Months' | '2 Months' | '3 Months' | '4 Months' | '5 Months' | '6 Months' | '1 Year' | '2 year' | string; // Contact in Future (picklist)
+  Contact_in_Future?:
+    | '-None-'
+    | '1 Months'
+    | '2 Months'
+    | '3 Months'
+    | '4 Months'
+    | '5 Months'
+    | '6 Months'
+    | '1 Year'
+    | '2 year'
+    | string; // Contact in Future (picklist)
   Recurring_Emails?: string; // Recurring Emails (text)
   Google_Drive_Link?: string; // Google Drive Link (website)
   Age_of_the_Visa_Application?: any; // Age of the Visa Application (formula)
@@ -340,7 +430,12 @@ export type MigratedVisaApplicationDocument = Document & MigratedVisaApplication
 const MigratedVisaApplicationSchema = new Schema<MigratedVisaApplicationDocument>(
   {
     zoho_id: { type: String, required: true, unique: true, index: true },
-    _contact_id: { type: Schema.Types.ObjectId, ref: 'MigratedContact', default: null, index: true },
+    _contact_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedContact',
+      default: null,
+      index: true,
+    },
     _zoho_contact_id: { type: String, default: null, index: true },
     _owner_id: { type: Schema.Types.ObjectId, ref: 'MigratedUser', default: null, index: true },
     _zoho_owner_id: { type: String, default: null, index: true },
@@ -662,9 +757,12 @@ const MigratedVisaApplicationSchema = new Schema<MigratedVisaApplicationDocument
     Spouse_id: { type: String, default: null },
     Spouse_Skill_Assessment: { type: String, default: null },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_VISA_APPLICATIONS, strict: false }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_VISA_APPLICATIONS, strict: false },
 );
 
 export const MigratedVisaApplicationModel =
   mongoose.models['MigratedVisaApplication'] ||
-  mongoose.model<MigratedVisaApplicationDocument>('MigratedVisaApplication', MigratedVisaApplicationSchema);
+  mongoose.model<MigratedVisaApplicationDocument>(
+    'MigratedVisaApplication',
+    MigratedVisaApplicationSchema,
+  );

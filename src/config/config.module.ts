@@ -1,6 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
-import { appConfig, databaseConfig, securityConfig, swaggerConfig } from './app.config.js';
+import {
+  appConfig,
+  databaseConfig,
+  r2Config,
+  securityConfig,
+  swaggerConfig,
+} from './app.config.js';
 import { validateEnvironment } from './env.validation.js';
 
 @Module({
@@ -10,7 +16,7 @@ import { validateEnvironment } from './env.validation.js';
       cache: true,
       expandVariables: true,
       validate: validateEnvironment,
-      load: [appConfig, databaseConfig, securityConfig, swaggerConfig],
+      load: [appConfig, databaseConfig, securityConfig, swaggerConfig, r2Config],
     }),
   ],
 })

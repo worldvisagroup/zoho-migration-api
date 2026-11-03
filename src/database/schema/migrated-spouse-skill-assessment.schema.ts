@@ -32,9 +32,19 @@ export interface MigratedSpouseSkillAssessmentEntity {
   Spouse_Out_Come_Validity?: Date | string; // Spouse Out Come Validity (datetime)
   Spouse_ANZSCO?: string[]; // Spouse _ANZSCO (multiselectpicklist)
   Spouse_s_Skill_Assessing_Authority?: string[]; // Spouse's Skill Assessing Authority (multiselectpicklist)
-  Application_Stage?: '-None-' | 'Skill Assessment' | 'Stage 1 Documentation: Approved' | 'Stage 1 Documentation: Rejected' | 'Stage 1 Milestone Completed' | 'Stage 1 Documentation Reviewed' | 'SA Application Lodge' | string; // Spouse Skill Assessment Status (picklist)
-  Spouse_Experience_Considered?: '-None-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8 & More' | string; // Spouse Experience Considered (picklist)
-  Spouse_Education?: '-None-' | 'Bachelor Degree' | 'PHD' | 'Double Degree' | 'Diploma' | 'Masters Degree' | string; // Spouse Education (picklist)
+  Application_Stage?:
+    | '-None-'
+    | 'Skill Assessment'
+    | 'Stage 1 Documentation: Approved'
+    | 'Stage 1 Documentation: Rejected'
+    | 'Stage 1 Milestone Completed'
+    | 'Stage 1 Documentation Reviewed'
+    | 'SA Application Lodge'
+    | string; // Spouse Skill Assessment Status (picklist)
+  Spouse_Experience_Considered?:
+    '-None-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8 & More' | string; // Spouse Experience Considered (picklist)
+  Spouse_Education?:
+    '-None-' | 'Bachelor Degree' | 'PHD' | 'Double Degree' | 'Diploma' | 'Masters Degree' | string; // Spouse Education (picklist)
   Spouse_Language_Ability?: '-None-' | 'Expert' | 'Proficient' | 'Basic' | 'Competent' | string; // Spouse Language Ability (picklist)
   Qualified_Country?: string; // Qualified Country (picklist)
   Application_Handled_By?: string; // Application Handled By (picklist)
@@ -70,7 +80,12 @@ export type MigratedSpouseSkillAssessmentDocument = Document & MigratedSpouseSki
 const MigratedSpouseSkillAssessmentSchema = new Schema<MigratedSpouseSkillAssessmentDocument>(
   {
     zoho_id: { type: String, required: true, unique: true, index: true },
-    _visa_application_id: { type: Schema.Types.ObjectId, ref: 'MigratedVisaApplication', default: null, index: true },
+    _visa_application_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedVisaApplication',
+      default: null,
+      index: true,
+    },
     _zoho_visa_application_id: { type: String, default: null, index: true },
     _owner_id: { type: Schema.Types.ObjectId, ref: 'MigratedUser', default: null, index: true },
     _zoho_owner_id: { type: String, default: null, index: true },
@@ -122,12 +137,12 @@ const MigratedSpouseSkillAssessmentSchema = new Schema<MigratedSpouseSkillAssess
     DMS_Portal_Result: { type: String, default: null },
     Main_Applicant: { type: String, default: null },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_SPOUSE_SKILL_ASSESSMENTS, strict: false }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_SPOUSE_SKILL_ASSESSMENTS, strict: false },
 );
 
 export const MigratedSpouseSkillAssessmentModel =
   mongoose.models['MigratedSpouseSkillAssessment'] ||
   mongoose.model<MigratedSpouseSkillAssessmentDocument>(
     'MigratedSpouseSkillAssessment',
-    MigratedSpouseSkillAssessmentSchema
+    MigratedSpouseSkillAssessmentSchema,
   );

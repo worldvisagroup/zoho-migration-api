@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -36,14 +35,25 @@ export interface MigratedVisaApplicationProgressEntity {
   updatedAt?: Date;
 }
 
-export type MigratedVisaApplicationProgressDocument = Document & MigratedVisaApplicationProgressEntity;
+export type MigratedVisaApplicationProgressDocument = Document &
+  MigratedVisaApplicationProgressEntity;
 
 const MigratedVisaApplicationProgressSchema = new Schema<MigratedVisaApplicationProgressDocument>(
   {
-    _visa_application_id: { type: Schema.Types.ObjectId, ref: 'MigratedVisaApplication', default: null, index: true },
+    _visa_application_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'MigratedVisaApplication',
+      default: null,
+      index: true,
+    },
     zoho_visa_application_id: { type: String, default: null, index: true },
     visa_applicant_name: { type: String, required: true },
-    status: { type: String, required: true, enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED'], index: true },
+    status: {
+      type: String,
+      required: true,
+      enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED'],
+      index: true,
+    },
     error_message: { type: String, default: null },
     normalized_users_count: { type: Number, default: 0 },
     reference_entities_count: { type: Number, default: 0 },
@@ -55,7 +65,11 @@ const MigratedVisaApplicationProgressSchema = new Schema<MigratedVisaApplication
     status_history_count: { type: Number, default: 0 },
     spouse_skill_assessment: {
       type: {
-        _spouse_skill_assessment_id: { type: Schema.Types.ObjectId, ref: 'MigratedSpouseSkillAssessment', default: null },
+        _spouse_skill_assessment_id: {
+          type: Schema.Types.ObjectId,
+          ref: 'MigratedSpouseSkillAssessment',
+          default: null,
+        },
         zoho_spouse_skill_assessment_id: { type: String, default: null },
         spouse_name: { type: String, default: null },
         notes_count: { type: Number, default: 0 },
@@ -69,12 +83,12 @@ const MigratedVisaApplicationProgressSchema = new Schema<MigratedVisaApplication
     zoho_api_requests_count: { type: Number, default: 0 },
     extracted_at: { type: Date, required: true, index: true },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_VISA_APPLICATION_PROGRESS, strict: true }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_VISA_APPLICATION_PROGRESS, strict: true },
 );
 
 export const MigratedVisaApplicationProgressModel =
   mongoose.models['MigratedVisaApplicationProgress'] ||
   mongoose.model<MigratedVisaApplicationProgressDocument>(
     'MigratedVisaApplicationProgress',
-    MigratedVisaApplicationProgressSchema
+    MigratedVisaApplicationProgressSchema,
   );

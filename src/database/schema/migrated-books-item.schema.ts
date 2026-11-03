@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -147,12 +146,9 @@ export const MigratedBooksItemSchema = new Schema<MigratedBooksItemDocument>(
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_ITEMS,
     strict: true,
-  }
+  },
 );
 
 export const MigratedBooksItemModel =
   mongoose.models['MigratedBooksItem'] ||
-  mongoose.model<MigratedBooksItemDocument>(
-    'MigratedBooksItem',
-    MigratedBooksItemSchema
-  );
+  mongoose.model<MigratedBooksItemDocument>('MigratedBooksItem', MigratedBooksItemSchema);

@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
@@ -88,12 +87,12 @@ export const MigratedBooksBankAccountSchema = new Schema<MigratedBooksBankAccoun
     timestamps: true,
     collection: DB_COLLECTIONS.MIGRATED_BOOKS_BANK_ACCOUNTS,
     strict: true,
-  }
+  },
 );
 
 export const MigratedBooksBankAccountModel =
   mongoose.models['MigratedBooksBankAccount'] ||
   mongoose.model<MigratedBooksBankAccountDocument>(
     'MigratedBooksBankAccount',
-    MigratedBooksBankAccountSchema
+    MigratedBooksBankAccountSchema,
   );

@@ -3,7 +3,6 @@ import type { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { DB_COLLECTIONS } from '../database.constants.js';
 
-
 export interface MigratedLeadEntity {
   _id?: string;
   zoho_id: string;
@@ -25,12 +24,168 @@ export interface MigratedLeadEntity {
   Fax?: string; // Fax (text)
   Mobile?: string; // Mobile (phone)
   Website?: string; // Website (website)
-  Lead_Source?: 'Advertisement' | 'Walk-in' | 'Any Other' | 'External Referrence' | 'Cold call1' | 'Facebook Ads' | 'WebSite Visit' | 'Data Brought' | 'Cold Call' | 'WhatsApp - World Visa' | 'Employee Referral' | 'Website1' | 'External Referral' | 'Google AdWords' | 'Google Ads' | 'OnlineStore' | 'Partner' | 'Public Relations' | 'Sales Mail Alias' | 'Seminar Partner' | 'Seminar-Internal' | 'Website' | 'Trade Show' | 'Web Download' | 'Web Research' | 'Chat' | 'Twitter' | 'Facebook' | 'Google+' | 'Employee Referrals' | 'Any Tradeshow' | 'Manually created' | 'IVR- Website' | 'IVR - Google' | 'Referral Client' | 'Signage / Trade Shows' | 'MARA' | 'Walk-in client' | 'Email Campaign' | 'Job Page Form' | string; // Lead Source (picklist)
-  Lead_Status?: 'New' | 'Attempted to Contact' | 'Contact in Future' | 'Contacted' | 'Junk Lead' | 'Lost Lead' | 'Not Contacted' | 'Pre Qualified' | 'Not Qualified' | 'Quality Control' | 'Skill Assessment Report 1' | 'Contacted1' | 'Skill Assessment Report 2' | 'Day 1' | 'Qualified (Potential)' | 'Day 2' | 'Coundelled' | 'Day 3' | 'Day 4' | 'Offer Made' | 'Day 5' | 'Offer Pending' | 'Junk Lead1' | 'Offer Accepted' | 'Contact in Future1' | 'Ready to Sign Up' | 'Converted to Deal' | 'Deferred' | 'Done' | 'Pre-Qualified' | 'RNR/DCN' | 'RNR/DCN-2' | 'RNR/DCN-3' | 'RNR/DCN-4' | 'RNR/DCN-5' | 'RNR/DCN-6' | 'RNR/DCN-7' | 'RNR/DCN-8' | 'RNR/DCN-9' | 'Customer Contacted Again' | 'RNR/DCN -1' | 'Generate AR' | 'Regenerate AR' | 'Dis-Qualified' | 'Quality' | 'Pitch' | 'Nuturing -A' | 'Nurturing -B' | 'Nuturing-C' | 'DEFERRED -2' | 'DEFERRED-3' | 'DEFERRED-4' | 'DEFERRED-5' | 'DEFERRED-6' | 'RNR/DCN-1' | 'RNR/DCN- 2' | 'RNR' | 'FUTURE' | 'DEFERRED-1' | 'DEFERRED-2' | 'RNR-1' | 'RNR-2' | 'RNR-3' | 'RNR-4' | 'RNR-5' | 'RNR-6' | 'RNR-7' | 'RNR-8' | 'RNR-9' | 'Call Attempted' | 'Call Attempted 2' | 'Call Attempted 3' | 'Call Attempted 4' | 'Call Attempted 5' | 'Call Attempted 6' | 'Call Attempted 7' | 'Call Attempted 8' | 'Call Attempted 9' | 'Call Attempted 10' | 'Call  Attempted 11' | 'Call Attempted 12' | 'Call Attempted 13' | 'Cal l Attempted 14' | 'Call Attempted 15' | 'Contacted .' | 'Contacted.' | 'Nurture' | 'Call Attempted.' | 'Contact Establish' | string; // Lead Status (picklist)
-  Industry?: 'ASP' | 'Data/Telecom OEM' | 'ERP' | 'Government/Military' | 'Large Enterprise' | 'ManagementISV' | 'MSP (Management Service Provider)' | 'Network Equipment (Enterprise)' | 'Non-management ISV' | 'Optical Networking' | 'Service Provider' | 'Small/Medium Enterprise' | 'Storage Equipment' | 'Storage Service Provider' | 'Systems Integrator' | 'Wireless Industry' | string; // Industry (picklist)
+  Lead_Source?:
+    | 'Advertisement'
+    | 'Walk-in'
+    | 'Any Other'
+    | 'External Referrence'
+    | 'Cold call1'
+    | 'Facebook Ads'
+    | 'WebSite Visit'
+    | 'Data Brought'
+    | 'Cold Call'
+    | 'WhatsApp - World Visa'
+    | 'Employee Referral'
+    | 'Website1'
+    | 'External Referral'
+    | 'Google AdWords'
+    | 'Google Ads'
+    | 'OnlineStore'
+    | 'Partner'
+    | 'Public Relations'
+    | 'Sales Mail Alias'
+    | 'Seminar Partner'
+    | 'Seminar-Internal'
+    | 'Website'
+    | 'Trade Show'
+    | 'Web Download'
+    | 'Web Research'
+    | 'Chat'
+    | 'Twitter'
+    | 'Facebook'
+    | 'Google+'
+    | 'Employee Referrals'
+    | 'Any Tradeshow'
+    | 'Manually created'
+    | 'IVR- Website'
+    | 'IVR - Google'
+    | 'Referral Client'
+    | 'Signage / Trade Shows'
+    | 'MARA'
+    | 'Walk-in client'
+    | 'Email Campaign'
+    | 'Job Page Form'
+    | string; // Lead Source (picklist)
+  Lead_Status?:
+    | 'New'
+    | 'Attempted to Contact'
+    | 'Contact in Future'
+    | 'Contacted'
+    | 'Junk Lead'
+    | 'Lost Lead'
+    | 'Not Contacted'
+    | 'Pre Qualified'
+    | 'Not Qualified'
+    | 'Quality Control'
+    | 'Skill Assessment Report 1'
+    | 'Contacted1'
+    | 'Skill Assessment Report 2'
+    | 'Day 1'
+    | 'Qualified (Potential)'
+    | 'Day 2'
+    | 'Coundelled'
+    | 'Day 3'
+    | 'Day 4'
+    | 'Offer Made'
+    | 'Day 5'
+    | 'Offer Pending'
+    | 'Junk Lead1'
+    | 'Offer Accepted'
+    | 'Contact in Future1'
+    | 'Ready to Sign Up'
+    | 'Converted to Deal'
+    | 'Deferred'
+    | 'Done'
+    | 'Pre-Qualified'
+    | 'RNR/DCN'
+    | 'RNR/DCN-2'
+    | 'RNR/DCN-3'
+    | 'RNR/DCN-4'
+    | 'RNR/DCN-5'
+    | 'RNR/DCN-6'
+    | 'RNR/DCN-7'
+    | 'RNR/DCN-8'
+    | 'RNR/DCN-9'
+    | 'Customer Contacted Again'
+    | 'RNR/DCN -1'
+    | 'Generate AR'
+    | 'Regenerate AR'
+    | 'Dis-Qualified'
+    | 'Quality'
+    | 'Pitch'
+    | 'Nuturing -A'
+    | 'Nurturing -B'
+    | 'Nuturing-C'
+    | 'DEFERRED -2'
+    | 'DEFERRED-3'
+    | 'DEFERRED-4'
+    | 'DEFERRED-5'
+    | 'DEFERRED-6'
+    | 'RNR/DCN-1'
+    | 'RNR/DCN- 2'
+    | 'RNR'
+    | 'FUTURE'
+    | 'DEFERRED-1'
+    | 'DEFERRED-2'
+    | 'RNR-1'
+    | 'RNR-2'
+    | 'RNR-3'
+    | 'RNR-4'
+    | 'RNR-5'
+    | 'RNR-6'
+    | 'RNR-7'
+    | 'RNR-8'
+    | 'RNR-9'
+    | 'Call Attempted'
+    | 'Call Attempted 2'
+    | 'Call Attempted 3'
+    | 'Call Attempted 4'
+    | 'Call Attempted 5'
+    | 'Call Attempted 6'
+    | 'Call Attempted 7'
+    | 'Call Attempted 8'
+    | 'Call Attempted 9'
+    | 'Call Attempted 10'
+    | 'Call  Attempted 11'
+    | 'Call Attempted 12'
+    | 'Call Attempted 13'
+    | 'Cal l Attempted 14'
+    | 'Call Attempted 15'
+    | 'Contacted .'
+    | 'Contacted.'
+    | 'Nurture'
+    | 'Call Attempted.'
+    | 'Contact Establish'
+    | string; // Lead Status (picklist)
+  Industry?:
+    | 'ASP'
+    | 'Data/Telecom OEM'
+    | 'ERP'
+    | 'Government/Military'
+    | 'Large Enterprise'
+    | 'ManagementISV'
+    | 'MSP (Management Service Provider)'
+    | 'Network Equipment (Enterprise)'
+    | 'Non-management ISV'
+    | 'Optical Networking'
+    | 'Service Provider'
+    | 'Small/Medium Enterprise'
+    | 'Storage Equipment'
+    | 'Storage Service Provider'
+    | 'Systems Integrator'
+    | 'Wireless Industry'
+    | string; // Industry (picklist)
   No_of_Employees?: number; // No. of Employees (integer)
   Annual_Revenue?: number; // Annual Revenue (currency)
-  Rating?: 'Acquired' | 'Active' | 'Market Failed' | 'Project Cancelled' | 'ShutDown' | 'Cold (+5 months)' | 'Warm (2-4 months)' | string; // Rating (picklist)
+  Rating?:
+    | 'Acquired'
+    | 'Active'
+    | 'Market Failed'
+    | 'Project Cancelled'
+    | 'ShutDown'
+    | 'Cold (+5 months)'
+    | 'Warm (2-4 months)'
+    | string; // Rating (picklist)
   Email_Opt_Out?: boolean; // Email Opt Out (boolean)
   Skype_ID?: string; // Skype ID (text)
   Created_Time?: Date | string; // Created Time (datetime)
@@ -63,15 +218,64 @@ export interface MigratedLeadEntity {
   Spouse_s_Mobile_Number?: string; // Spouse's Mobile Number (text)
   PTE_Writing?: string; // PTE - Writing score (text)
   Spouse_s_Experience?: string; // Spouse's Experience (text)
-  spouse_education?: 'Advanced Diploma' | 'Associate Degree' | 'Bachelor Degree' | 'Bachelors/Under Graduate' | 'Diploma' | 'Doctoral Level' | 'Dual Degrees' | 'Less than secondary school (high school)' | 'Masters Degree' | 'Master\'s Level or Professional Degree' | 'Masters/Graduate degree' | 'One Year Diploma/Post Secondary' | 'One-year post-secondary credential' | 'PHD' | 'Secondary' | 'Secondary school' | 'Three Year Diploma' | 'Three-year or longer post-secondary credential' | 'Two or more post-secondary credentials, one of which is a three-year or longer post-secondary credential' | 'Two Year Diploma/Post Secondary' | 'Two-year post-secondary credential' | string; // Spouse's highest education qualification (picklist)
+  spouse_education?:
+    | 'Advanced Diploma'
+    | 'Associate Degree'
+    | 'Bachelor Degree'
+    | 'Bachelors/Under Graduate'
+    | 'Diploma'
+    | 'Doctoral Level'
+    | 'Dual Degrees'
+    | 'Less than secondary school (high school)'
+    | 'Masters Degree'
+    | "Master's Level or Professional Degree"
+    | 'Masters/Graduate degree'
+    | 'One Year Diploma/Post Secondary'
+    | 'One-year post-secondary credential'
+    | 'PHD'
+    | 'Secondary'
+    | 'Secondary school'
+    | 'Three Year Diploma'
+    | 'Three-year or longer post-secondary credential'
+    | 'Two or more post-secondary credentials, one of which is a three-year or longer post-secondary credential'
+    | 'Two Year Diploma/Post Secondary'
+    | 'Two-year post-secondary credential'
+    | string; // Spouse's highest education qualification (picklist)
   testing_field?: string; // testing field (text)
   marital_status?: 'Married' | 'Un-married' | 'Divorced / Separated' | string; // Marital Status (picklist)
   Spouse_s_Age?: number; // Spouse's Age (formula)
   Place?: string; // Place (text)
   Middle_Name?: string; // Middle Name (text)
   Service_Required_Others?: string; // Service Required - Others (text)
-  education?: 'Doctoral Level' | 'Master\'s Level or Professional Degree' | 'Two or more post-secondary credentials, one of which is a three-year or longer post-secondary credential' | 'Three-year or longer post-secondary credential' | 'Two-year post-secondary credential' | 'One-year post-secondary credential' | 'Secondary school' | 'Less than secondary school (high school)' | string; // Highest Education Qualification (picklist)
-  intended_country?: Array<'Option 1' | 'Option 2' | 'Australia' | 'Austria' | 'Canada' | 'UK' | 'USA' | 'Germany' | 'Singapore' | 'New Zealand' | 'Hongkong' | 'Denmark' | 'Ireland' | 'Others' | string> | string; // Country looking for (multiselectpicklist)
+  education?:
+    | 'Doctoral Level'
+    | "Master's Level or Professional Degree"
+    | 'Two or more post-secondary credentials, one of which is a three-year or longer post-secondary credential'
+    | 'Three-year or longer post-secondary credential'
+    | 'Two-year post-secondary credential'
+    | 'One-year post-secondary credential'
+    | 'Secondary school'
+    | 'Less than secondary school (high school)'
+    | string; // Highest Education Qualification (picklist)
+  intended_country?:
+    | Array<
+        | 'Option 1'
+        | 'Option 2'
+        | 'Australia'
+        | 'Austria'
+        | 'Canada'
+        | 'UK'
+        | 'USA'
+        | 'Germany'
+        | 'Singapore'
+        | 'New Zealand'
+        | 'Hongkong'
+        | 'Denmark'
+        | 'Ireland'
+        | 'Others'
+        | string
+      >
+    | string; // Country looking for (multiselectpicklist)
   Spouse_appeared_for_IELTS?: boolean; // Spouse appeared for IELTS (boolean)
   Arranged_employment_in_Canada?: boolean; // Arranged employment in Canada (boolean)
   IELTS_Writing_score_Spouse?: number; // IELTS - Writing score(Spouse) (double)
@@ -91,7 +295,14 @@ export interface MigratedLeadEntity {
   Past_studies_in_Canada_Spouse?: boolean; // Past studies in Canada - Spouse (boolean)
   Relative_in_Canada?: boolean; // Relative in Canada (boolean)
   Certificate_of_qualification_Trade_occupations?: boolean; // Certificate of qualification(Trade occupations) (boolean)
-  Partner_skills?: 'Skill Assessable + Language Test' | 'Single/Unmarried' | 'Only Language test' | 'You are single or your partner is an Australian citizen or permanent resident' | 'Your spouse or de facto partner must also be an applicant for this visa and has competent English' | 'Your spouse or de facto partner must also be an applicant for this visa and meet age, English and skill criteria' | string; // Partner skills (picklist)
+  Partner_skills?:
+    | 'Skill Assessable + Language Test'
+    | 'Single/Unmarried'
+    | 'Only Language test'
+    | 'You are single or your partner is an Australian citizen or permanent resident'
+    | 'Your spouse or de facto partner must also be an applicant for this visa and has competent English'
+    | 'Your spouse or de facto partner must also be an applicant for this visa and meet age, English and skill criteria'
+    | string; // Partner skills (picklist)
   TOEFL_Writing_score?: number; // TOEFL - Writing score (double)
   TOEFL_Listening_score?: number; // TOEFL - Listening score (double)
   TOEFL_Speaking_score?: number; // TOEFL - Speaking score (double)
@@ -129,7 +340,108 @@ export interface MigratedLeadEntity {
   Skilled_employment_experience_Total_AUS?: number; // Skilled employment experience - Total - AUS (integer)
   Eligibility_Canada?: string; // Eligibility - Canada (text)
   testing_testing?: string; // testing testing (text)
-  country_addressed?: 'Afghanistan' | 'Albania' | 'Algeria' | 'American Samoa' | 'Andorra' | 'Angola' | 'Anguilla' | 'Antigua And Barbuda' | 'Argentina' | 'Armenia' | 'Aruba' | 'Australia' | 'Austria' | 'Azerbaijan' | 'Bahamas' | 'Bahrain' | 'Bangladesh' | 'Barbados' | 'Belarus' | 'Belgium' | 'Belize' | 'Benin' | 'Bermuda' | 'Bhutan' | 'Bolivia' | 'Bosnia And Herzegovina' | 'Botswana' | 'Brazil' | 'British Virgin Islands' | 'Brunei' | 'Bulgaria' | 'Burkina Faso' | 'Burundi' | 'Cambodia' | 'Cameroon' | 'Canada' | 'Cape Verde' | 'Cayman Islands' | 'Central African Republic' | 'Chad' | 'Chile' | 'China' | 'Colombia' | 'Comoros' | 'Cook Islands' | 'Costa Rica' | 'Croatia' | 'Cuba' | 'Curacao' | 'Cyprus' | 'Czech Republic' | 'Denmark' | 'Djibouti' | 'Dominica' | 'Dominican Republic' | 'Dr Congo' | 'Ecuador' | 'Egypt' | 'El Salvador' | 'Equatorial Guinea' | 'Eritrea' | 'Estonia' | 'Eswatini' | 'Ethiopia' | 'Falkland Islands' | 'Faroe Islands' | 'Fiji' | 'Finland' | 'France' | 'French Guiana' | 'French Polynesia' | 'Gabon' | 'Gambia' | 'Georgia' | 'Germany' | 'Ghana' | 'Gibraltar' | 'Greece' | 'Greenland' | 'Grenada' | 'Guadeloupe' | 'Guam' | 'Guatemala' | 'Guernsey' | 'Guinea' | 'Guinea Bissau' | 'Guyana' | 'Haiti' | 'Honduras' | 'Hong Kong' | 'HongKong' | 'Hungary' | 'Iceland' | 'India' | 'Indonesia' | 'Iran' | 'Iraq' | 'Ireland' | 'Isle Of Man' | 'Israel' | string; // Country Addressed (picklist)
+  country_addressed?:
+    | 'Afghanistan'
+    | 'Albania'
+    | 'Algeria'
+    | 'American Samoa'
+    | 'Andorra'
+    | 'Angola'
+    | 'Anguilla'
+    | 'Antigua And Barbuda'
+    | 'Argentina'
+    | 'Armenia'
+    | 'Aruba'
+    | 'Australia'
+    | 'Austria'
+    | 'Azerbaijan'
+    | 'Bahamas'
+    | 'Bahrain'
+    | 'Bangladesh'
+    | 'Barbados'
+    | 'Belarus'
+    | 'Belgium'
+    | 'Belize'
+    | 'Benin'
+    | 'Bermuda'
+    | 'Bhutan'
+    | 'Bolivia'
+    | 'Bosnia And Herzegovina'
+    | 'Botswana'
+    | 'Brazil'
+    | 'British Virgin Islands'
+    | 'Brunei'
+    | 'Bulgaria'
+    | 'Burkina Faso'
+    | 'Burundi'
+    | 'Cambodia'
+    | 'Cameroon'
+    | 'Canada'
+    | 'Cape Verde'
+    | 'Cayman Islands'
+    | 'Central African Republic'
+    | 'Chad'
+    | 'Chile'
+    | 'China'
+    | 'Colombia'
+    | 'Comoros'
+    | 'Cook Islands'
+    | 'Costa Rica'
+    | 'Croatia'
+    | 'Cuba'
+    | 'Curacao'
+    | 'Cyprus'
+    | 'Czech Republic'
+    | 'Denmark'
+    | 'Djibouti'
+    | 'Dominica'
+    | 'Dominican Republic'
+    | 'Dr Congo'
+    | 'Ecuador'
+    | 'Egypt'
+    | 'El Salvador'
+    | 'Equatorial Guinea'
+    | 'Eritrea'
+    | 'Estonia'
+    | 'Eswatini'
+    | 'Ethiopia'
+    | 'Falkland Islands'
+    | 'Faroe Islands'
+    | 'Fiji'
+    | 'Finland'
+    | 'France'
+    | 'French Guiana'
+    | 'French Polynesia'
+    | 'Gabon'
+    | 'Gambia'
+    | 'Georgia'
+    | 'Germany'
+    | 'Ghana'
+    | 'Gibraltar'
+    | 'Greece'
+    | 'Greenland'
+    | 'Grenada'
+    | 'Guadeloupe'
+    | 'Guam'
+    | 'Guatemala'
+    | 'Guernsey'
+    | 'Guinea'
+    | 'Guinea Bissau'
+    | 'Guyana'
+    | 'Haiti'
+    | 'Honduras'
+    | 'Hong Kong'
+    | 'HongKong'
+    | 'Hungary'
+    | 'Iceland'
+    | 'India'
+    | 'Indonesia'
+    | 'Iran'
+    | 'Iraq'
+    | 'Ireland'
+    | 'Isle Of Man'
+    | 'Israel'
+    | string; // Country Addressed (picklist)
   Query_Form_Filled?: boolean; // Query Form Filled (boolean)
   spouse_education_points_canada?: number; // Spouse Education Pointss (integer)
   Language_Australia?: 'Superior' | 'Proficient' | 'Competent' | string; // Language - Australia (picklist)
@@ -148,8 +460,48 @@ export interface MigratedLeadEntity {
   english_language_ability?: 'Expert' | 'Proficient' | 'Competent' | 'Basic' | string; // English Language (picklist)
   Test_Taken?: 'Yes' | 'No' | string; // Test Taken (picklist)
   Advice?: string; // Call_Advice (textarea)
-  Skill_Assessing_Authority?: 'ICES' | 'Vocational Education and Training Assessment Services(VETASSESS)' | 'Trades Recognition Australia (TRA)' | 'National Accreditation Authority for Translators and Interpreters(NAATI)' | 'Institue of Public Accountant (IPA )' | 'The Institute of Managers and Leaders Australia and New Zealand (IML )' | 'Engineers Australia' | 'Certified Practising Accountants of Australia Skills Assessment Authority (CPAA)' | 'Chartered Accountants Australia and New Zealand (CAANZ)' | 'Australian Community Workers Association' | 'Australian Institute of Quantity Surveyors (AIQS)' | 'Australian Nursing and Midwifery Accreditation Council (ANMAC)' | 'Australian Institute for Teaching and School Leadership Limited (AITSL)' | 'Australian Computer Society (ACS)' | 'Australian Psychological Society ( APS)' | 'Australian Institute of Medical and Clinical Scientists (AIMS )' | 'Architects Accreditation Council Of Australia (AACA)' | 'The Australian Society of Medical Imaging and Radiation Therapy (ASMIRT)' | 'Medical Board of Australia (MBA)' | 'World Education Services (WES)' | 'International Qualifications Assessment Service (IQAS)' | 'International Credential Assessment Service of Canada (ICAS)' | 'Medical Council of Canada (MCC)' | 'World Education Services' | 'Comparative Education Service – University of Toronto School of Continuing Studies' | 'Medical Council of Canada (professional body for Doctors)' | 'Pharmacy Examining Board of Canada (professio' | 'Australian Association of Social Workers (AASW)' | string; // Skill Assessing Authority (picklist)
-  Visa_Type?: 'Skilled Independent Visa (subclass 189)' | 'Skilled Nominated Visa (subclass 190)' | 'Skilled Work Regional (subclass 491)' | 'Federal Skilled Worker Program (FSWP)' | 'Canadian Experience Class (CEC)' | 'Federal Skilled Trades Program (FSTP)' | 'Provincial Nominee Programs (PNP)' | 'Subclass 189/190/491' | 'Express Entry/PNP' | 'Express Entry / PNP' | string; // Visa_Type (picklist)
+  Skill_Assessing_Authority?:
+    | 'ICES'
+    | 'Vocational Education and Training Assessment Services(VETASSESS)'
+    | 'Trades Recognition Australia (TRA)'
+    | 'National Accreditation Authority for Translators and Interpreters(NAATI)'
+    | 'Institue of Public Accountant (IPA )'
+    | 'The Institute of Managers and Leaders Australia and New Zealand (IML )'
+    | 'Engineers Australia'
+    | 'Certified Practising Accountants of Australia Skills Assessment Authority (CPAA)'
+    | 'Chartered Accountants Australia and New Zealand (CAANZ)'
+    | 'Australian Community Workers Association'
+    | 'Australian Institute of Quantity Surveyors (AIQS)'
+    | 'Australian Nursing and Midwifery Accreditation Council (ANMAC)'
+    | 'Australian Institute for Teaching and School Leadership Limited (AITSL)'
+    | 'Australian Computer Society (ACS)'
+    | 'Australian Psychological Society ( APS)'
+    | 'Australian Institute of Medical and Clinical Scientists (AIMS )'
+    | 'Architects Accreditation Council Of Australia (AACA)'
+    | 'The Australian Society of Medical Imaging and Radiation Therapy (ASMIRT)'
+    | 'Medical Board of Australia (MBA)'
+    | 'World Education Services (WES)'
+    | 'International Qualifications Assessment Service (IQAS)'
+    | 'International Credential Assessment Service of Canada (ICAS)'
+    | 'Medical Council of Canada (MCC)'
+    | 'World Education Services'
+    | 'Comparative Education Service – University of Toronto School of Continuing Studies'
+    | 'Medical Council of Canada (professional body for Doctors)'
+    | 'Pharmacy Examining Board of Canada (professio'
+    | 'Australian Association of Social Workers (AASW)'
+    | string; // Skill Assessing Authority (picklist)
+  Visa_Type?:
+    | 'Skilled Independent Visa (subclass 189)'
+    | 'Skilled Nominated Visa (subclass 190)'
+    | 'Skilled Work Regional (subclass 491)'
+    | 'Federal Skilled Worker Program (FSWP)'
+    | 'Canadian Experience Class (CEC)'
+    | 'Federal Skilled Trades Program (FSTP)'
+    | 'Provincial Nominee Programs (PNP)'
+    | 'Subclass 189/190/491'
+    | 'Express Entry/PNP'
+    | 'Express Entry / PNP'
+    | string; // Visa_Type (picklist)
   Campaign_Name?: string; // Campaign Name (text)
   Ad_Set?: string; // Ad Set (text)
   CPC?: string; // CPC (text)
@@ -158,7 +510,13 @@ export interface MigratedLeadEntity {
   Customer_Contacted_Again?: 'Yes' | 'No' | string; // Customer Contacted Again (picklist)
   Attemp_to_Call?: 'RNR' | 'Disconnecting' | 'Defferred' | string; // No open Activties (picklist)
   Arrange_Employement_in_Canada?: 'Yes' | 'No' | string; // Arrange Employement in Canada (picklist)
-  Study_in_regional_Australia1?: '1 Year Australian Study' | 'Professional year' | 'Masters or PHD (2 year)' | 'No need to choose' | 'Regional Area Study (1 year)' | string; // Australian Study (picklist)
+  Study_in_regional_Australia1?:
+    | '1 Year Australian Study'
+    | 'Professional year'
+    | 'Masters or PHD (2 year)'
+    | 'No need to choose'
+    | 'Regional Area Study (1 year)'
+    | string; // Australian Study (picklist)
   Future?: '1 Month' | '2 Months' | '3 Months' | '4 Months' | '5 Months' | '6 Months' | string; // Future (picklist)
   Canada_Eligibility?: boolean; // Canada Eligibility (boolean)
   Australian_Eligibility?: boolean; // Australian Eligibility (boolean)
@@ -178,7 +536,17 @@ export interface MigratedLeadEntity {
   UTM_Content?: string; // UTM Content (text)
   UTM_Lead_Source?: string; // UTM Lead Source (text)
   UTM_Medium?: string; // UTM Medium (text)
-  Dead_Lead?: 'Jobs Only' | 'Doesn\'t Qualify' | 'Wrong Email \'ID & Wrong Number' | 'Above 50 Years' | 'Not Intrested / Not - Enquired' | 'No English Skills' | 'Registered' | 'Information Seeker' | 'B2B' | string; // Reason for making Dead Lead (picklist)
+  Dead_Lead?:
+    | 'Jobs Only'
+    | "Doesn't Qualify"
+    | "Wrong Email 'ID & Wrong Number"
+    | 'Above 50 Years'
+    | 'Not Intrested / Not - Enquired'
+    | 'No English Skills'
+    | 'Registered'
+    | 'Information Seeker'
+    | 'B2B'
+    | string; // Reason for making Dead Lead (picklist)
   Call_Count?: number; // Call Count - (integer)
   Total_Outgoing_Calls?: number; // Total Outgoing Calls (rollup_summary)
   Total_Cancelled_Calls?: number; // Total Cancelled Calls (rollup_summary)
@@ -189,8 +557,27 @@ export interface MigratedLeadEntity {
   ADID?: string; // ADID (text)
   KEYWORDID?: string; // KEYWORDID (text)
   Keyword?: string; // Keyword (text)
-  Click_Type?: 'Other' | 'Phone calls' | 'Headline' | 'Product plusbox offer' | 'Sitelink' | 'Product listing ad' | 'Driving direction' | 'Print offer' | 'Breadcrumbs' | 'Manually dialed phone calls' | 'Mobile phone calls' | 'Get location details' | 'unknown' | string; // Click Type (picklist)
-  Device_Type?: 'Other' | 'Computers' | 'Mobile devices with full browsers' | 'Tablets with full browsers' | string; // Device Type (picklist)
+  Click_Type?:
+    | 'Other'
+    | 'Phone calls'
+    | 'Headline'
+    | 'Product plusbox offer'
+    | 'Sitelink'
+    | 'Product listing ad'
+    | 'Driving direction'
+    | 'Print offer'
+    | 'Breadcrumbs'
+    | 'Manually dialed phone calls'
+    | 'Mobile phone calls'
+    | 'Get location details'
+    | 'unknown'
+    | string; // Click Type (picklist)
+  Device_Type?:
+    | 'Other'
+    | 'Computers'
+    | 'Mobile devices with full browsers'
+    | 'Tablets with full browsers'
+    | string; // Device Type (picklist)
   Ad_Network?: 'Search Network' | 'Display Network' | string; // Ad Network (picklist)
   Search_Partner_Network?: 'Google search' | 'Search partners' | 'Display Network' | string; // Search Partner Network (picklist)
   Ad_Campaign_Name?: string; // Ad Campaign Name (text)
@@ -202,7 +589,16 @@ export interface MigratedLeadEntity {
   Cost_per_Conversion?: number; // Cost per Conversion (currency)
   Conversion_Exported_On?: Date | string; // Conversion Exported On (datetime)
   Conversion_Export_Status?: 'Success' | 'Failure' | 'NA - Invalid' | 'Not started' | string; // Conversion Export Status (picklist)
-  Reason_for_Conversion_Failure?: 'INVALID_CONVERSION_TYPE' | 'UNPARSEABLE_GCLID' | 'CONVERSION_PRECEDES_CLICK' | 'FUTURE_CONVERSION_TIME' | 'EXPIRED_CLICK' | 'UNKNOWN' | 'TOO_RECENT_CLICK' | 'CLICK_MISSING_CONVERSION_LABEL' | string; // Reason for Conversion Failure (picklist)
+  Reason_for_Conversion_Failure?:
+    | 'INVALID_CONVERSION_TYPE'
+    | 'UNPARSEABLE_GCLID'
+    | 'CONVERSION_PRECEDES_CLICK'
+    | 'FUTURE_CONVERSION_TIME'
+    | 'EXPIRED_CLICK'
+    | 'UNKNOWN'
+    | 'TOO_RECENT_CLICK'
+    | 'CLICK_MISSING_CONVERSION_LABEL'
+    | string; // Reason for Conversion Failure (picklist)
   IP_Address?: string; // IP Address (text)
   Re_Contacted_Date?: Date | string; // Re Contacted Date (date)
   facebookadvertmanager__Facebook_Ad?: any; // Facebook Ad (lookup)
@@ -215,7 +611,61 @@ export interface MigratedLeadEntity {
   Total_Open_Calls?: number; // Total  Open Calls (integer)
   Duplicate_Record?: boolean; // Duplicate Record (boolean)
   Please_Confrim_for_Conatct_in_future?: 'Yes' | 'No' | string; // Please Confrim for Conatct in future (picklist)
-  Data_Source?: 'Manual' | 'API' | 'Manual (Mobile)' | 'Webform' | 'Microsoft Outlook' | 'Social' | 'Workflow' | 'Import' | 'Bulk Write' | 'Migration' | 'System Generated' | 'Google' | 'Microsoft' | 'Phonebridge API' | 'Zoho Docs' | 'Manual Mass Add' | 'Sandbox' | 'Mail Parser' | 'SalesInbox' | 'Email workflow' | 'BCC Dropbox' | 'Zoho Finance Suite' | 'Zoho Desk' | 'Zoho Survey' | 'Google Adwords' | 'SalesIQ' | 'Zoho Mail' | 'Zoho Forms' | 'Custom Function' | 'Zoho Recruit' | 'Zoho Sheet View' | 'Sample Data' | 'Zia Voice' | 'Prediction' | 'Zoho Campaign' | 'Zoho Webinar' | 'Zoho Backstage' | 'Blueprint' | 'ApprovalProcess' | 'Macro' | 'Mass Transfer' | 'Change Owner' | 'Mass Update' | 'DeDuplicate' | 'Find And Merge' | 'Bigin' | 'Zoho CRM' | 'Mailchimp' | 'Constant Contact' | 'EmailIn' | 'Kiosk' | 'Connected Workflow' | 'Calendar Booking' | string; // Data Source (picklist)
+  Data_Source?:
+    | 'Manual'
+    | 'API'
+    | 'Manual (Mobile)'
+    | 'Webform'
+    | 'Microsoft Outlook'
+    | 'Social'
+    | 'Workflow'
+    | 'Import'
+    | 'Bulk Write'
+    | 'Migration'
+    | 'System Generated'
+    | 'Google'
+    | 'Microsoft'
+    | 'Phonebridge API'
+    | 'Zoho Docs'
+    | 'Manual Mass Add'
+    | 'Sandbox'
+    | 'Mail Parser'
+    | 'SalesInbox'
+    | 'Email workflow'
+    | 'BCC Dropbox'
+    | 'Zoho Finance Suite'
+    | 'Zoho Desk'
+    | 'Zoho Survey'
+    | 'Google Adwords'
+    | 'SalesIQ'
+    | 'Zoho Mail'
+    | 'Zoho Forms'
+    | 'Custom Function'
+    | 'Zoho Recruit'
+    | 'Zoho Sheet View'
+    | 'Sample Data'
+    | 'Zia Voice'
+    | 'Prediction'
+    | 'Zoho Campaign'
+    | 'Zoho Webinar'
+    | 'Zoho Backstage'
+    | 'Blueprint'
+    | 'ApprovalProcess'
+    | 'Macro'
+    | 'Mass Transfer'
+    | 'Change Owner'
+    | 'Mass Update'
+    | 'DeDuplicate'
+    | 'Find And Merge'
+    | 'Bigin'
+    | 'Zoho CRM'
+    | 'Mailchimp'
+    | 'Constant Contact'
+    | 'EmailIn'
+    | 'Kiosk'
+    | 'Connected Workflow'
+    | 'Calendar Booking'
+    | string; // Data Source (picklist)
   onshore_work_experience_points_australia?: number; // Australian Experience (integer)
   spouse_english_language_ability?: 'Expert' | 'Proficient' | 'Competent' | 'Basic' | string; // Spouse English Language Ability (picklist)
   spouse_education_points_australia?: number; // Spouse Education Points (integer)
@@ -233,11 +683,70 @@ export interface MigratedLeadEntity {
   Lead_ID?: string; // Lead ID- (text)
   Lead_Score?: number; // Lead _Score (integer)
   Notmodify?: string; // Notmodify (text)
-  Service_Required1?: 'Work Permit' | 'University Admission' | 'Investor Migration' | 'College Admission' | 'UK Global Talent visa' | 'Student Visa' | 'Permanent Residency' | 'Dependent Spouse' | 'Intra Office' | 'Visit Visa' | 'Job Seeker Visa' | 'Germany Opportunity Card' | 'Parent Visa RRV' | 'Australia Parent Visa' | 'Australia Child Visa' | 'Australia Partner Visa' | 'Parent Visa Australia SC804' | 'Australia RRV' | 'Child Visa Agreement Australia' | 'Retainer Agreement JSV Germany' | 'Parent Visa Australia retainer agreement' | 'EOI & Visa Stage 2' | 'National Innovation Visa (NIV)' | 'Temporary Dependent Visa' | 'Australian Student Visa' | 'Skill Assessment' | 'Visitor Visa Rejection' | 'Australia Work in Holiday Visa' | 'Germany Family Re-Union Visa' | 'Partner of Student Work Visa' | 'Business Visitor Visa' | 'Super Visa' | 'SC 403 Visa Application' | 'National Innovation Visa' | 'Business Visa' | 'Intra-office Transfer' | 'Others' | 'Parent Visa' | 'Partner Visa' | 'Residential Return Visa' | 'Spouse Visa' | 'Student / Exchange Visa' | 'Study Abroad' | 'Temporary Graduate Visa (SC485)' | string; // Service _Required (picklist)
+  Service_Required1?:
+    | 'Work Permit'
+    | 'University Admission'
+    | 'Investor Migration'
+    | 'College Admission'
+    | 'UK Global Talent visa'
+    | 'Student Visa'
+    | 'Permanent Residency'
+    | 'Dependent Spouse'
+    | 'Intra Office'
+    | 'Visit Visa'
+    | 'Job Seeker Visa'
+    | 'Germany Opportunity Card'
+    | 'Parent Visa RRV'
+    | 'Australia Parent Visa'
+    | 'Australia Child Visa'
+    | 'Australia Partner Visa'
+    | 'Parent Visa Australia SC804'
+    | 'Australia RRV'
+    | 'Child Visa Agreement Australia'
+    | 'Retainer Agreement JSV Germany'
+    | 'Parent Visa Australia retainer agreement'
+    | 'EOI & Visa Stage 2'
+    | 'National Innovation Visa (NIV)'
+    | 'Temporary Dependent Visa'
+    | 'Australian Student Visa'
+    | 'Skill Assessment'
+    | 'Visitor Visa Rejection'
+    | 'Australia Work in Holiday Visa'
+    | 'Germany Family Re-Union Visa'
+    | 'Partner of Student Work Visa'
+    | 'Business Visitor Visa'
+    | 'Super Visa'
+    | 'SC 403 Visa Application'
+    | 'National Innovation Visa'
+    | 'Business Visa'
+    | 'Intra-office Transfer'
+    | 'Others'
+    | 'Parent Visa'
+    | 'Partner Visa'
+    | 'Residential Return Visa'
+    | 'Spouse Visa'
+    | 'Student / Exchange Visa'
+    | 'Study Abroad'
+    | 'Temporary Graduate Visa (SC485)'
+    | string; // Service _Required (picklist)
   Lead_Owner_Changed?: 'Yes' | 'No' | string; // Lead Owner Changed (picklist)
   Ad_Account?: string; // Ad Account (text)
   Account_id?: string; // Account id (text)
-  Record_Assigned?: 'Worldvisa' | 'Jyothi' | 'Nitin' | 'Anjana' | 'Amardeep' | 'Aswin' | 'Satish' | 'swapnil' | 'Prejual' | 'Shabaz' | 'Roshini' | 'Naveen' | 'Zubaid' | string; // Record Assigned (picklist)
+  Record_Assigned?:
+    | 'Worldvisa'
+    | 'Jyothi'
+    | 'Nitin'
+    | 'Anjana'
+    | 'Amardeep'
+    | 'Aswin'
+    | 'Satish'
+    | 'swapnil'
+    | 'Prejual'
+    | 'Shabaz'
+    | 'Roshini'
+    | 'Naveen'
+    | 'Zubaid'
+    | string; // Record Assigned (picklist)
   Description_2?: string; // Description 2 (text)
   Secondary_Source?: string; // Secondary Source (text)
   Owner_4?: string; // Owner 4 (text)
@@ -258,7 +767,31 @@ export interface MigratedLeadEntity {
   Total_Points_Germany?: number; // Total Points Germany (double)
   Assessment_Report_Germany?: boolean; // Assessment Report - Germany (boolean)
   Germany_Language?: 'A1' | 'B1' | 'B2' | string; // Germany Language (picklist)
-  Occupation_Germany?: 'Technology and Engineering' | 'Healthcare' | 'Teachers' | 'Finance and accounting professionals' | 'Others' | 'Social workers' | 'Sales and marketing specialists' | 'Skilled tradespeople (e.g., carpenters, electricians, plumbers)' | 'Renewable energy specialists' | 'Environmental scientists' | 'Sustainability experts' | 'Mechanical engineers' | 'Electrical engineers' | 'Civil engineers' | 'Industrial engineers' | 'Software developers' | 'Data analysts' | 'Cybersecurity experts' | 'IT systems engineers' | 'Doctors and specialists in various medical fields' | 'Nurses' | 'Pharmacists' | 'Allied health professionals' | string; // Occupation Germany (picklist)
+  Occupation_Germany?:
+    | 'Technology and Engineering'
+    | 'Healthcare'
+    | 'Teachers'
+    | 'Finance and accounting professionals'
+    | 'Others'
+    | 'Social workers'
+    | 'Sales and marketing specialists'
+    | 'Skilled tradespeople (e.g., carpenters, electricians, plumbers)'
+    | 'Renewable energy specialists'
+    | 'Environmental scientists'
+    | 'Sustainability experts'
+    | 'Mechanical engineers'
+    | 'Electrical engineers'
+    | 'Civil engineers'
+    | 'Industrial engineers'
+    | 'Software developers'
+    | 'Data analysts'
+    | 'Cybersecurity experts'
+    | 'IT systems engineers'
+    | 'Doctors and specialists in various medical fields'
+    | 'Nurses'
+    | 'Pharmacists'
+    | 'Allied health professionals'
+    | string; // Occupation Germany (picklist)
   Joint_Application_for_Germanys?: 'Yes' | 'No' | string; // Joint Application for Germanys (picklist)
   Arrange_Employement_Germanys?: 'Yes' | 'No' | string; // Arrange Employement Germanys (picklist)
   Campaigns_Name?: string; // Campaigns Name (text)
@@ -271,7 +804,18 @@ export interface MigratedLeadEntity {
   Contact_Created_TIme?: Date | string; // Contact Created TIme (datetime)
   Australia_Assesment_Report?: boolean; // Australia Assesment Report (boolean)
   Data_Processing_Basis_Details?: any; // Data Processing Basis Details (consent_lookup)
-  Data_Processing_Basis?: 'Not Applicable' | 'Legitimate Interests' | 'Contract' | 'Legal Obligation' | 'Vital Interests' | 'Public Interests' | 'Pending' | 'Awaiting' | 'Obtained' | 'Not Responded' | string; // Data Processing Basis (picklist)
+  Data_Processing_Basis?:
+    | 'Not Applicable'
+    | 'Legitimate Interests'
+    | 'Contract'
+    | 'Legal Obligation'
+    | 'Vital Interests'
+    | 'Public Interests'
+    | 'Pending'
+    | 'Awaiting'
+    | 'Obtained'
+    | 'Not Responded'
+    | string; // Data Processing Basis (picklist)
   News_Letter_Access?: 'Yes' | 'No' | string; // News Letter Access (picklist)
   FBCLID?: string; // FBCLID (text)
   Reason_for_making_future_Lead?: string; // Reason for making  future Lead (textarea)
@@ -279,23 +823,87 @@ export interface MigratedLeadEntity {
   Total_Unaswered_Calls?: number; // Total Unaswered Calls (rollup_summary)
   Status?: string; // Status (text)
   Current_Date?: Date | string; // Current Date (formula)
-  Client_Occupation?: 'Accountant' | 'Software Engineer' | 'Teacher' | 'Nurse' | 'Doctor / General Practitioner' | 'Civil Engineer' | 'Electrician' | 'Plumber' | 'Carpenter' | 'Construction Worker' | 'Retail Manager' | 'Chef' | 'Hospitality Staff (Waiter/Barista)' | 'Sales Executive' | 'Marketing Specialist' | 'Student' | 'IT Support Technician' | 'Truck Driver' | 'Aged Care Worker' | 'Childcare Worker' | 'Farmer / Agricultural Worker' | 'Mining Engineer' | 'Architect' | 'Project Manager' | 'Lawyer' | 'Business Analyst' | 'Customer Service Representative' | 'Graphic Designer' | 'Mechanic' | 'Unemployed' | string; // Client Occupation (picklist)
+  Client_Occupation?:
+    | 'Accountant'
+    | 'Software Engineer'
+    | 'Teacher'
+    | 'Nurse'
+    | 'Doctor / General Practitioner'
+    | 'Civil Engineer'
+    | 'Electrician'
+    | 'Plumber'
+    | 'Carpenter'
+    | 'Construction Worker'
+    | 'Retail Manager'
+    | 'Chef'
+    | 'Hospitality Staff (Waiter/Barista)'
+    | 'Sales Executive'
+    | 'Marketing Specialist'
+    | 'Student'
+    | 'IT Support Technician'
+    | 'Truck Driver'
+    | 'Aged Care Worker'
+    | 'Childcare Worker'
+    | 'Farmer / Agricultural Worker'
+    | 'Mining Engineer'
+    | 'Architect'
+    | 'Project Manager'
+    | 'Lawyer'
+    | 'Business Analyst'
+    | 'Customer Service Representative'
+    | 'Graphic Designer'
+    | 'Mechanic'
+    | 'Unemployed'
+    | string; // Client Occupation (picklist)
   leadchain0__Social_Lead_ID?: string; // Social Lead ID (text)
-  Industries_Type?: 'Option 1' | 'Mining' | 'Engineering' | 'Information Communications Technology' | 'Artificial Intelligence' | 'Financial Technology' | 'Agricultural Technology' | string; // Industries Type (picklist)
+  Industries_Type?:
+    | 'Option 1'
+    | 'Mining'
+    | 'Engineering'
+    | 'Information Communications Technology'
+    | 'Artificial Intelligence'
+    | 'Financial Technology'
+    | 'Agricultural Technology'
+    | string; // Industries Type (picklist)
   Template_Name?: string; // Template_Name (text)
   Job_Occupation?: string; // Designation  Role (text)
   WhatsApp_Message_Count?: number; // WhatsApp_Message_Count (double)
   ProposalLink?: string; // ProposalLink (website)
   Job_profile?: string; // Job profile (text)
-  Languages_known?: Array<'Telugu' | 'Hindi' | 'English' | 'Tamil' | 'Kannada' | 'Bengali' | string> | string; // Languages known (multiselectpicklist)
+  Languages_known?:
+    Array<'Telugu' | 'Hindi' | 'English' | 'Tamil' | 'Kannada' | 'Bengali' | string> | string; // Languages known (multiselectpicklist)
   Number_of_kids?: string; // Number of kids (text)
   spouse_Job_Profile?: string; // spouse Job Profile (text)
-  Reason_For_Nurture?: 'Job Only' | 'Do Not Qualify' | 'Deffered' | 'Others' | 'Insufficient Education' | 'Over Age' | 'Study Plan' | 'Drop Plan' | 'In Sufficient Education' | 'Language Incompitance' | string; // Reason For Nurture (picklist)
-  Do_Not_Qualify?: Array<'Wrong Email/Wrong Number' | 'Above 50 Years' | 'No English Skills' | 'Only 10th/12th Pass' | 'Occupation Code Not Eligible' | 'No Qualification' | 'Medical ( PCC & MCC )' | string> | string; // Do Not Qualify (multiselectpicklist)
+  Reason_For_Nurture?:
+    | 'Job Only'
+    | 'Do Not Qualify'
+    | 'Deffered'
+    | 'Others'
+    | 'Insufficient Education'
+    | 'Over Age'
+    | 'Study Plan'
+    | 'Drop Plan'
+    | 'In Sufficient Education'
+    | 'Language Incompitance'
+    | string; // Reason For Nurture (picklist)
+  Do_Not_Qualify?:
+    | Array<
+        | 'Wrong Email/Wrong Number'
+        | 'Above 50 Years'
+        | 'No English Skills'
+        | 'Only 10th/12th Pass'
+        | 'Occupation Code Not Eligible'
+        | 'No Qualification'
+        | 'Medical ( PCC & MCC )'
+        | string
+      >
+    | string; // Do Not Qualify (multiselectpicklist)
   Others?: 'No Funds' | 'Trust Issues' | string; // Others (picklist)
   Job_Only?: 'Yes' | 'No' | string; // Job Only (picklist)
-  Deffered?: '2 Months' | '3 Months' | '4 Months' | '5 Months' | '6 Months' | '6 Months Plus' | string; // Deffered (picklist)
-  Reason_For_Not_Defferred?: 'Completing Education' | 'Family commitment' | 'Short of Funds' | 'Language Test' | string; // Reason For Defferred (picklist)
+  Deffered?:
+    '2 Months' | '3 Months' | '4 Months' | '5 Months' | '6 Months' | '6 Months Plus' | string; // Deffered (picklist)
+  Reason_For_Not_Defferred?:
+    'Completing Education' | 'Family commitment' | 'Short of Funds' | 'Language Test' | string; // Reason For Defferred (picklist)
   Mcube_Answered_Calls?: number; // Mcube Answered Calls (rollup_summary)
   Mcube_Un_Answered_Calls?: number; // Mcube Un Answered Calls (rollup_summary)
 
@@ -600,7 +1208,7 @@ const MigratedLeadSchema = new Schema<MigratedLeadDocument>(
     Mcube_Answered_Calls: { type: Number, default: null },
     Mcube_Un_Answered_Calls: { type: Number, default: null },
   },
-  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_LEADS, strict: true }
+  { timestamps: true, collection: DB_COLLECTIONS.MIGRATED_LEADS, strict: true },
 );
 
 export const MigratedLeadModel =

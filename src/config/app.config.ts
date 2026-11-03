@@ -55,3 +55,21 @@ export const swaggerConfig = registerAs('swagger', (): SwaggerConfig => ({
   version: '1.0.0',
   path: 'api/docs',
 }));
+
+export interface R2Config {
+  accountId?: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
+  bucketName?: string;
+  publicDomain?: string;
+  expiresIn: number;
+}
+
+export const r2Config = registerAs('r2', (): R2Config => ({
+  accountId: process.env.R2_ACCOUNT_ID,
+  accessKeyId: process.env.R2_ACCESS_KEY_ID,
+  secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  bucketName: process.env.R2_BUCKET_NAME,
+  publicDomain: process.env.R2_PUBLIC_DOMAIN,
+  expiresIn: parseInt(process.env.R2_EXPIRES_IN ?? '3600', 10),
+}));

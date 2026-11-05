@@ -161,6 +161,10 @@ describe('NotesController (e2e)', () => {
       .useValue(mockLeadModel)
       .overrideProvider(getModelToken('MigratedTask'))
       .useValue(mockLeadModel)
+      .overrideProvider(getModelToken('MigratedEvent'))
+      .useValue(mockLeadModel)
+      .overrideProvider(getModelToken('MigratedMeetingRecording'))
+      .useValue(mockLeadModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

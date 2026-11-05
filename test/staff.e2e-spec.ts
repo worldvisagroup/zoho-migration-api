@@ -149,6 +149,10 @@ describe('StaffController (e2e)', () => {
       .useValue(mockNoteModel)
       .overrideProvider(getModelToken('MigratedTask'))
       .useValue(mockNoteModel)
+      .overrideProvider(getModelToken('MigratedEvent'))
+      .useValue(mockNoteModel)
+      .overrideProvider(getModelToken('MigratedMeetingRecording'))
+      .useValue(mockNoteModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

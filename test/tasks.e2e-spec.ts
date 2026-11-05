@@ -133,6 +133,10 @@ describe('TasksController (e2e)', () => {
       .useValue(mockEmptyModel)
       .overrideProvider(getModelToken('MigratedAttachment'))
       .useValue(mockEmptyModel)
+      .overrideProvider(getModelToken('MigratedEvent'))
+      .useValue(mockEmptyModel)
+      .overrideProvider(getModelToken('MigratedMeetingRecording'))
+      .useValue(mockEmptyModel)
       .overrideProvider(getModelToken('MigratedNote'))
       .useValue(mockEmptyModel)
       .compile();

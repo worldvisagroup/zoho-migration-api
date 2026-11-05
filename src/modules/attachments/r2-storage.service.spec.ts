@@ -78,4 +78,3 @@ describe('R2StorageService', () => {
     expect(result).toBe('https://stored-url.com/file.pdf');
   });
 });
-

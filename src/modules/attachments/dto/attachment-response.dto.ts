@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * Transformed attachment record for migration API.
@@ -39,19 +39,21 @@ export class AttachmentItemDto {
   })
   sizeBytes: number;
 
-  @ApiProperty({
-    description: 'Email address of the staff user who uploaded the attachment',
+  @ApiPropertyOptional({
+    description: 'Email address of the staff user who uploaded the attachment (null if not found)',
     example: 'asha@worldvisa.com',
     type: String,
+    nullable: true,
   })
-  uploadedByEmail: string;
+  uploadedByEmail: string | null;
 
-  @ApiProperty({
-    description: 'Zoho User ID of the uploader/creator',
+  @ApiPropertyOptional({
+    description: 'Zoho User ID of the uploader/creator (null if missing)',
     example: '164193000000030001',
     type: String,
+    nullable: true,
   })
-  uploadedByZohoId: string;
+  uploadedByZohoId: string | null;
 
   @ApiProperty({
     description: 'UTC ISO 8601 timestamp when the file was uploaded/created',
@@ -68,25 +70,30 @@ export class AttachmentItemDto {
   createdAt: string;
 
   @ApiProperty({
-    description: 'UTC ISO 8601 timestamp when the attachment record was last modified',
+    description:
+      'UTC ISO 8601 timestamp when the attachment record was last modified (falls back to Created_Time if Modified_Time is missing; never null)',
     example: '2024-03-05T10:00:00.000Z',
     type: String,
   })
   modifiedAt: string;
 
-  @ApiProperty({
-    description: 'Email address of the staff user who last modified the attachment',
+  @ApiPropertyOptional({
+    description:
+      'Email address of the staff user who last modified the attachment (null if missing or not found)',
     example: 'asha@worldvisa.com',
     type: String,
+    nullable: true,
   })
-  modifiedByEmail: string;
+  modifiedByEmail: string | null;
 
-  @ApiProperty({
-    description: 'Zoho User ID of the staff user who last modified the attachment',
+  @ApiPropertyOptional({
+    description:
+      'Zoho User ID of the staff user who last modified the attachment (null if missing)',
     example: '164193000000030001',
     type: String,
+    nullable: true,
   })
-  modifiedByZohoId: string;
+  modifiedByZohoId: string | null;
 
   constructor(data: {
     externalId: string;
@@ -94,13 +101,13 @@ export class AttachmentItemDto {
     fileName: string;
     mimeType: string;
     sizeBytes: number;
-    uploadedByEmail: string;
-    uploadedByZohoId: string;
+    uploadedByEmail: string | null;
+    uploadedByZohoId: string | null;
     uploadedAt: string;
     createdAt: string;
     modifiedAt: string;
-    modifiedByEmail: string;
-    modifiedByZohoId: string;
+    modifiedByEmail: string | null;
+    modifiedByZohoId: string | null;
   }) {
     this.externalId = data.externalId;
     this.url = data.url;

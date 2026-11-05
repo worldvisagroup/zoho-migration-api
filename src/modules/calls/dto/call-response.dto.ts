@@ -67,12 +67,13 @@ export class CallItemDto {
   })
   customerPhone: string;
 
-  @ApiProperty({
-    description: 'Normalized email of the agent / owner handling the call',
+  @ApiPropertyOptional({
+    description: 'Normalized email of the agent / owner handling the call (null if not found)',
     example: 'asha@example.com',
     type: String,
+    nullable: true,
   })
-  agentEmail: string;
+  agentEmail: string | null;
 
   @ApiProperty({
     description: 'Call start timestamp in UTC ISO 8601 format',
@@ -111,19 +112,21 @@ export class CallItemDto {
   })
   recording: CallRecordingDto | null;
 
-  @ApiProperty({
-    description: 'Normalized email of the user who logged the call',
+  @ApiPropertyOptional({
+    description: 'Normalized email of the user who logged the call (null if not found)',
     example: 'asha@example.com',
     type: String,
+    nullable: true,
   })
-  createdByEmail: string;
+  createdByEmail: string | null;
 
-  @ApiProperty({
-    description: 'Original Zoho user ID of the creator (_zoho_created_by_id)',
+  @ApiPropertyOptional({
+    description: 'Original Zoho user ID of the creator (_zoho_created_by_id, null if missing)',
     example: 'zoho_user_id',
     type: String,
+    nullable: true,
   })
-  createdByZohoId: string;
+  createdByZohoId: string | null;
 
   @ApiProperty({
     description: 'Original Zoho creation timestamp in UTC ISO 8601 format',
@@ -132,19 +135,22 @@ export class CallItemDto {
   })
   createdAt: string;
 
-  @ApiProperty({
-    description: 'Normalized email of the user who last modified the call',
+  @ApiPropertyOptional({
+    description:
+      'Normalized email of the user who last modified the call (null if missing or not found)',
     example: 'asha@example.com',
     type: String,
+    nullable: true,
   })
-  modifiedByEmail: string;
+  modifiedByEmail: string | null;
 
-  @ApiProperty({
-    description: 'Original Zoho user ID of the modifier (_zoho_modified_by_id)',
+  @ApiPropertyOptional({
+    description: 'Original Zoho user ID of the modifier (_zoho_modified_by_id, null if missing)',
     example: 'zoho_user_id',
     type: String,
+    nullable: true,
   })
-  modifiedByZohoId: string;
+  modifiedByZohoId: string | null;
 
   @ApiProperty({
     description: 'Original Zoho modification timestamp in UTC ISO 8601 format',
@@ -158,17 +164,17 @@ export class CallItemDto {
     direction: CallDirection;
     status: CallStatus;
     customerPhone: string;
-    agentEmail: string;
+    agentEmail: string | null;
     startedAt: string;
     durationSeconds: number;
     notes: string | null;
     followUpAt: string | null;
     recording: CallRecordingDto | null;
-    createdByEmail: string;
-    createdByZohoId: string;
+    createdByEmail: string | null;
+    createdByZohoId: string | null;
     createdAt: string;
-    modifiedByEmail: string;
-    modifiedByZohoId: string;
+    modifiedByEmail: string | null;
+    modifiedByZohoId: string | null;
     modifiedAt: string;
   }) {
     this.externalId = data.externalId;

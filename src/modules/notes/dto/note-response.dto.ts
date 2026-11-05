@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * Transformed note migration record.
@@ -18,19 +18,21 @@ export class NoteItemDto {
   })
   body: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Normalized lowercase email of the staff member who created the note',
     example: 'asha@example.com',
     type: String,
+    nullable: true,
   })
-  createdByEmail: string;
+  createdByEmail: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Original Zoho user ID of the creator (_zoho_created_by_id)',
     example: '164193000000000001',
     type: String,
+    nullable: true,
   })
-  createdByZohoId: string;
+  createdByZohoId: string | null;
 
   @ApiProperty({
     description: 'Original Zoho creation timestamp in UTC ISO 8601 format',
@@ -39,19 +41,21 @@ export class NoteItemDto {
   })
   createdAt: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Normalized lowercase email of the staff member who last modified the note',
     example: 'asha@example.com',
     type: String,
+    nullable: true,
   })
-  modifiedByEmail: string;
+  modifiedByEmail: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Original Zoho user ID of the modifier (_zoho_modified_by_id)',
     example: '164193000000000001',
     type: String,
+    nullable: true,
   })
-  modifiedByZohoId: string;
+  modifiedByZohoId: string | null;
 
   @ApiProperty({
     description: 'Original Zoho modification timestamp in UTC ISO 8601 format',
@@ -63,11 +67,11 @@ export class NoteItemDto {
   constructor(data: {
     externalId: string;
     body: string;
-    createdByEmail: string;
-    createdByZohoId: string;
+    createdByEmail: string | null;
+    createdByZohoId: string | null;
     createdAt: string;
-    modifiedByEmail: string;
-    modifiedByZohoId: string;
+    modifiedByEmail: string | null;
+    modifiedByZohoId: string | null;
     modifiedAt: string;
   }) {
     this.externalId = data.externalId;

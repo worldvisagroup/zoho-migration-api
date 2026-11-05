@@ -93,7 +93,7 @@ describe('NotesService', () => {
       expect(result.data).toEqual([]);
     });
 
-    it('should fallback to default email if user not found in email map', async () => {
+    it('should set emails to null if user not found in email map', async () => {
       const mockNote: MigratedNoteEntity = {
         zoho_id: 'note_102',
         _zoho_created_by_id: 'unknown_user_999',
@@ -112,9 +112,10 @@ describe('NotesService', () => {
 
       expect(result.data).toHaveLength(1);
       const note = result.data[0]!;
-      expect(note.createdByEmail).toBe('notprovided@gmail.com');
-      expect(note.modifiedByEmail).toBe('notprovided@gmail.com');
-      expect(note.modifiedByZohoId).toBe('unknown_user_999');
+      expect(note.createdByEmail).toBeNull();
+      expect(note.createdByZohoId).toBe('unknown_user_999');
+      expect(note.modifiedByEmail).toBeNull();
+      expect(note.modifiedByZohoId).toBeNull();
       expect(note.modifiedAt).toBe('2024-01-10T08:00:00.000Z');
     });
   });

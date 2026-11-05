@@ -17,14 +17,14 @@ export interface MigratedEventEntity {
   _spouse_skill_assessment_id?: Schema.Types.ObjectId;
   _zoho_spouse_skill_assessment_id?: string;
   parent_entity_type?:
-    | 'lead'
-    | 'contact'
-    | 'deal'
-    | 'visa_application'
-    | 'spouse_skill_assessment'
-    | 'task'
-    | 'event'
-    | 'signed_document';
+  | 'lead'
+  | 'contact'
+  | 'deal'
+  | 'visa_application'
+  | 'spouse_skill_assessment'
+  | 'task'
+  | 'event'
+  | 'signed_document';
   _owner_id?: Schema.Types.ObjectId;
   _zoho_owner_id?: string;
   _created_by_id?: Schema.Types.ObjectId;

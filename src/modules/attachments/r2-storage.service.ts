@@ -71,9 +71,7 @@ export class R2StorageService {
     if (this.s3Client && this.bucketName) {
       try {
         const safeName = fileName ? fileName.replace(/["\r\n]/g, '').trim() : '';
-        const disposition = safeName
-          ? `attachment; filename="${safeName}"`
-          : 'attachment';
+        const disposition = safeName ? `attachment; filename="${safeName}"` : 'attachment';
 
         const command = new GetObjectCommand({
           Bucket: this.bucketName,

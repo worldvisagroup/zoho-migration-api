@@ -94,7 +94,7 @@ describe('AttachmentsService', () => {
     expect(second.mimeType).toBe('image/png');
     expect(second.sizeBytes).toBe(1024);
     expect(second.url).toBe('https://r2.example.com/presigned-photo.png');
-    expect(second.uploadedByEmail).toBe('notprovided@gmail.com');
+    expect(second.uploadedByEmail).toBeNull();
   });
 
   it('should handle missing size and unknown extension with fallback', async () => {

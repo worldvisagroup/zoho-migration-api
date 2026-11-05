@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { DEFAULT_FALLBACK_EMAIL, normalizeZohoTimestamp } from '../../../common/utils/index.js';
+import { normalizeZohoTimestamp } from '../../../common/utils/index.js';
 import type { MigratedAttachmentEntity } from '../../../database/schema/index.js';
 import {
   AttachmentItemDto,
@@ -72,16 +72,11 @@ export class AttachmentsService {
     resolvedUrl: string,
     userEmailMap: Map<string, string>,
   ): AttachmentItemDto {
-    const creatorId = record._zoho_created_by_id ?? record._zoho_owner_id ?? '';
-    const modifierId = record._zoho_modified_by_id ?? '';
+    const creatorId = record._zoho_created_by_id?.trim() || record._zoho_owner_id?.trim() || null;
+    const modifierId = record._zoho_modified_by_id?.trim() || null;
 
-    const uploadedByEmail = creatorId
-      ? (userEmailMap.get(creatorId) ?? DEFAULT_FALLBACK_EMAIL)
-      : DEFAULT_FALLBACK_EMAIL;
-
-    const modifiedByEmail = modifierId
-      ? (userEmailMap.get(modifierId) ?? DEFAULT_FALLBACK_EMAIL)
-      : DEFAULT_FALLBACK_EMAIL;
+    const uploadedByEmail = creatorId ? (userEmailMap.get(creatorId) ?? null) : null;
+    const modifiedByEmail = modifierId ? (userEmailMap.get(modifierId) ?? null) : null;
 
     // Parse size in bytes safely
     let sizeBytes = 0;
@@ -105,7 +100,7 @@ export class AttachmentsService {
       uploadedByZohoId: creatorId,
       uploadedAt: normalizeZohoTimestamp(record.Created_Time, record.createdAt),
       createdAt: normalizeZohoTimestamp(record.Created_Time, record.createdAt),
-      modifiedAt: normalizeZohoTimestamp(record.Modified_Time),
+      modifiedAt: normalizeZohoTimestamp(record.Modified_Time, record.Created_Time),
       modifiedByEmail,
       modifiedByZohoId: modifierId,
     });

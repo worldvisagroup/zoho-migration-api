@@ -161,6 +161,8 @@ describe('CallsController (e2e)', () => {
       .useValue(mockEmptyModel)
       .overrideProvider(getModelToken('MigratedBooksContact'))
       .useValue(mockEmptyModel)
+      .overrideProvider(getModelToken('MigratedTask'))
+      .useValue(mockEmptyModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

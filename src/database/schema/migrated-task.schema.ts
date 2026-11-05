@@ -29,6 +29,8 @@ export interface MigratedTaskEntity {
   _zoho_owner_id?: string;
   _created_by_id?: Schema.Types.ObjectId;
   _zoho_created_by_id?: string;
+  _modified_by_id?: Schema.Types.ObjectId;
+  _zoho_modified_by_id?: string;
   _who_id?: Schema.Types.ObjectId;
   _zoho_who_id?: string;
   _what_id?: Schema.Types.ObjectId;
@@ -40,6 +42,7 @@ export interface MigratedTaskEntity {
     'Not Started' | 'Deferred' | 'In Progress' | 'Completed' | 'Waiting on someone else' | string; // Status (picklist)
   Priority?: 'High' | 'Highest' | 'Low' | 'Lowest' | 'Normal' | string; // Priority (picklist)
   Closed_Time?: Date | string; // Closed Time (datetime)
+  Modified_Time?: Date | string; // Modified Time (datetime)
   Send_Notification_Email?: boolean; // Send Notification Email (boolean)
   Recurring_Activity?: any; // Repeat (RRULE)
   Remind_At?: any; // Reminder (ALARM)
@@ -103,6 +106,8 @@ const MigratedTaskSchema = new Schema<MigratedTaskDocument>(
     _zoho_owner_id: { type: String, default: null },
     _created_by_id: { type: Schema.Types.ObjectId, ref: 'MigratedUser', default: null },
     _zoho_created_by_id: { type: String, default: null },
+    _modified_by_id: { type: Schema.Types.ObjectId, ref: 'MigratedUser', default: null },
+    _zoho_modified_by_id: { type: String, default: null },
     _who_id: { type: Schema.Types.ObjectId, ref: 'MigratedReferenceEntity', default: null },
     _zoho_who_id: { type: String, default: null },
     _what_id: { type: Schema.Types.ObjectId, ref: 'MigratedReferenceEntity', default: null },
@@ -113,6 +118,7 @@ const MigratedTaskSchema = new Schema<MigratedTaskDocument>(
     Status: { type: String, default: null },
     Priority: { type: String, default: null },
     Closed_Time: { type: Date, default: null },
+    Modified_Time: { type: Date, default: null },
     Send_Notification_Email: { type: Boolean, default: null },
     Recurring_Activity: { type: Schema.Types.Mixed, default: null },
     Remind_At: { type: Schema.Types.Mixed, default: null },

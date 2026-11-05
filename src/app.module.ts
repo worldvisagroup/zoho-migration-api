@@ -12,6 +12,7 @@ import { StaffModule } from './modules/staff/staff.module.js';
 import { NotesModule } from './modules/notes/notes.module.js';
 import { CallsModule } from './modules/calls/calls.module.js';
 import { AttachmentsModule } from './modules/attachments/attachments.module.js';
+import { TasksModule } from './modules/tasks/tasks.module.js';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware.js';
 
 @Module({
@@ -37,6 +38,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware.j
     NotesModule,
     CallsModule,
     AttachmentsModule,
+    TasksModule,
   ],
   providers: [
     {

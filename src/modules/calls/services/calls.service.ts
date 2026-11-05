@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DEFAULT_FALLBACK_EMAIL,
-  DEFAULT_FALLBACK_PHONE,
-  normalizeZohoTimestamp,
-} from '../../../common/utils/index.js';
+import { DEFAULT_FALLBACK_PHONE, normalizeZohoTimestamp } from '../../../common/utils/index.js';
 import type { MigratedCallEntity } from '../../../database/schema/index.js';
 import {
   CallDirection,
@@ -146,15 +142,15 @@ export class CallsService {
     const customerPhone = phoneMap.get(call.zoho_id) || DEFAULT_FALLBACK_PHONE;
 
     const agentEmail =
-      (call._zoho_owner_id && emailMap.get(call._zoho_owner_id)) || DEFAULT_FALLBACK_EMAIL;
+      call._zoho_owner_id && emailMap.has(call._zoho_owner_id)
+        ? emailMap.get(call._zoho_owner_id)!
+        : null;
 
-    const createdByZohoId = call._zoho_created_by_id || '';
-    const createdByEmail =
-      (createdByZohoId && emailMap.get(createdByZohoId)) || DEFAULT_FALLBACK_EMAIL;
+    const createdByZohoId = call._zoho_created_by_id?.trim() || null;
+    const createdByEmail = createdByZohoId ? (emailMap.get(createdByZohoId) ?? null) : null;
 
-    const modifiedByZohoId = call._zoho_modified_by_id || call._zoho_created_by_id || '';
-    const modifiedByEmail =
-      (call._zoho_modified_by_id && emailMap.get(call._zoho_modified_by_id)) || createdByEmail;
+    const modifiedByZohoId = call._zoho_modified_by_id?.trim() || null;
+    const modifiedByEmail = modifiedByZohoId ? (emailMap.get(modifiedByZohoId) ?? null) : null;
 
     const startedAt = normalizeZohoTimestamp(call.Call_Start_Time);
     const createdAt = normalizeZohoTimestamp(call.Created_Time);

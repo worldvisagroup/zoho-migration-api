@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DEFAULT_FALLBACK_EMAIL, normalizeZohoTimestamp } from '../../../common/utils/index.js';
+import { normalizeZohoTimestamp } from '../../../common/utils/index.js';
 import type { MigratedNoteEntity } from '../../../database/schema/index.js';
 import { NoteItemDto, NotesResponseDto, QueryNotesDto } from '../dto/index.js';
 import { NotesRepository } from '../repositories/notes.repository.js';
@@ -72,13 +72,11 @@ export class NotesService {
   ): NoteItemDto {
     const body = this.formatBody(record.Note_Title, record.Note_Content);
 
-    const createdByZohoId = record._zoho_created_by_id || '';
-    const createdByEmail =
-      (createdByZohoId && emailMap.get(createdByZohoId)) || DEFAULT_FALLBACK_EMAIL;
+    const createdByZohoId = record._zoho_created_by_id?.trim() || null;
+    const createdByEmail = createdByZohoId ? (emailMap.get(createdByZohoId) ?? null) : null;
 
-    const modifiedByZohoId = record._zoho_modified_by_id || record._zoho_created_by_id || '';
-    const modifiedByEmail =
-      (record._zoho_modified_by_id && emailMap.get(record._zoho_modified_by_id)) || createdByEmail;
+    const modifiedByZohoId = record._zoho_modified_by_id?.trim() || null;
+    const modifiedByEmail = modifiedByZohoId ? (emailMap.get(modifiedByZohoId) ?? null) : null;
 
     const createdAt = normalizeZohoTimestamp(record.Created_Time);
     const updatedAt = normalizeZohoTimestamp(record.Modified_Time, record.Created_Time);

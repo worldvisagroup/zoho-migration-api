@@ -1,6 +1,7 @@
 # Compiled output
 dist/
-
+.next/
+.next
 # Dependencies
 node_modules/
 

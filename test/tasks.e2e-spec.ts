@@ -20,6 +20,7 @@ describe('TasksController (e2e)', () => {
       _zoho_owner_id: 'user_001',
       _zoho_created_by_id: 'user_001',
       _zoho_modified_by_id: 'user_001',
+      parent_entity_type: 'lead',
       _zoho_lead_id: 'lead_001',
       Created_Time: new Date('2024-03-02T10:00:00.000Z'),
       Modified_Time: new Date('2024-03-05T12:00:00.000Z'),
@@ -32,6 +33,7 @@ describe('TasksController (e2e)', () => {
       Status: 'In Progress',
       is_closed: true, // Should override status to done!
       Priority: 'Highest',
+      parent_entity_type: 'contact',
       _zoho_contact_id: 'contact_001',
       Created_Time: new Date('2024-03-03T10:00:00.000Z'),
       Closed_Time: new Date('2024-03-04T08:00:00.000Z'),
@@ -42,6 +44,7 @@ describe('TasksController (e2e)', () => {
       Status: 'Not Started',
       is_closed: false,
       Priority: 'Normal',
+      parent_entity_type: 'deal',
       _zoho_deal_id: 'deal_001',
       Created_Time: new Date('2024-03-04T10:00:00.000Z'),
     },
@@ -162,9 +165,22 @@ describe('TasksController (e2e)', () => {
     await app.close();
   });
 
+  const apiKey = 'wv_sec_api_key_migration_2026';
+
   describe('GET /api/v1/tasks', () => {
+    it('should reject request without valid x-api-key with 401 Unauthorized', async () => {
+      await request(app.getHttpServer()).get('/api/v1/tasks').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/tasks')
+        .set('x-api-key', 'wrong_key')
+        .expect(401);
+    });
+
     it('should return 200 with transformed tasks, normalized statuses, and pagination envelope', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/tasks').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/tasks')
+        .set('x-api-key', apiKey)
+        .expect(200);
 
       expect(res.body).toHaveProperty('data');
       expect(res.body).toHaveProperty('total', 3);
@@ -178,6 +194,8 @@ describe('TasksController (e2e)', () => {
       // Record 1: completed task
       const first = items[0];
       expect(first.externalId).toBe('task_001');
+      expect(first.parentType).toBe('lead');
+      expect(first.parentZohoId).toBe('lead_001');
       expect(first.title).toBe('Document Checklist Discussion');
       expect(first.description).toBe('Discussed required documentation with applicant.');
       expect(first.status).toBe('done');
@@ -196,6 +214,8 @@ describe('TasksController (e2e)', () => {
       // Record 2: In Progress overridden to done by is_closed: true
       const second = items[1];
       expect(second.externalId).toBe('task_002');
+      expect(second.parentType).toBe('contact');
+      expect(second.parentZohoId).toBe('contact_001');
       expect(second.status).toBe('done');
       expect(second.priority).toBe('urgent');
       expect(second.description).toBeNull();
@@ -204,6 +224,8 @@ describe('TasksController (e2e)', () => {
       // Record 3: Not Started -> todo, completedAt: null
       const third = items[2];
       expect(third.externalId).toBe('task_003');
+      expect(third.parentType).toBe('deal');
+      expect(third.parentZohoId).toBe('deal_001');
       expect(third.status).toBe('todo');
       expect(third.priority).toBe('medium');
       expect(third.completedAt).toBeNull();
@@ -215,32 +237,40 @@ describe('TasksController (e2e)', () => {
         .get(
           '/api/v1/tasks?page=1&limit=50&type=contact&zohoContactId=contact_001&from=2024-01-01T00:00:00.000Z&to=2024-12-31T23:59:59.000Z',
         )
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(res.body.page).toBe(1);
       expect(res.body.pageSize).toBe(50);
     });
 
-    it('should accept zohoLeadId, zohoDealId, visaApplicationId, and spouseSkillAssementId filters', async () => {
+    it('should accept zohoLeadId, zohoDealId, visaApplicationId, and spouseSkillAssessmentId filters', async () => {
       await request(app.getHttpServer())
         .get('/api/v1/tasks?zohoLeadId=lead_123&type=lead')
+        .set('x-api-key', apiKey)
         .expect(200);
 
       await request(app.getHttpServer())
         .get('/api/v1/tasks?zohoDealId=deal_123&type=deal')
+        .set('x-api-key', apiKey)
         .expect(200);
 
       await request(app.getHttpServer())
         .get('/api/v1/tasks?visaApplicationId=visa_123&type=visa_application')
+        .set('x-api-key', apiKey)
         .expect(200);
 
       await request(app.getHttpServer())
-        .get('/api/v1/tasks?spouseSkillAssementId=spouse_123&type=spouse_skill_assessment')
+        .get('/api/v1/tasks?spouseSkillAssessmentId=spouse_123&type=spouse_skill_assessment')
+        .set('x-api-key', apiKey)
         .expect(200);
     });
 
     it('should return 400 Bad Request when page is less than 1', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/tasks?page=0').expect(400);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/tasks?page=0')
+        .set('x-api-key', apiKey)
+        .expect(400);
 
       expect(res.body.message).toEqual(
         expect.arrayContaining([
@@ -250,7 +280,10 @@ describe('TasksController (e2e)', () => {
     });
 
     it('should return 400 Bad Request when limit exceeds 1000', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/tasks?limit=1001').expect(400);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/tasks?limit=1001')
+        .set('x-api-key', apiKey)
+        .expect(400);
 
       expect(res.body.message).toEqual(
         expect.arrayContaining([expect.stringContaining('limit must be between 1 and 1000')]),
@@ -260,6 +293,7 @@ describe('TasksController (e2e)', () => {
     it('should return 400 Bad Request when type is not an allowed parent entity', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/tasks?type=invalid_type')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -272,6 +306,7 @@ describe('TasksController (e2e)', () => {
     it('should return 400 Bad Request when from is not a valid ISO 8601 string', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/tasks?from=invalid-date')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -282,7 +317,10 @@ describe('TasksController (e2e)', () => {
     });
 
     it('should return 400 Bad Request when to is not a valid ISO 8601 string', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/tasks?to=not-a-date').expect(400);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/tasks?to=not-a-date')
+        .set('x-api-key', apiKey)
+        .expect(400);
 
       expect(res.body.message).toEqual(
         expect.arrayContaining([

@@ -4,13 +4,16 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
 import { QueryTasksDto, TasksResponseDto } from '../dto/index.js';
 import { TasksService } from '../services/tasks.service.js';
 
 @ApiTags('Tasks')
+@ApiSecurity('ApiKeyAuth')
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
@@ -25,6 +28,9 @@ export class TasksController {
   @ApiOkResponse({
     description: 'Paginated migration tasks in standardized format',
     type: TasksResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing API key in x-api-key header',
   })
   @ApiBadRequestResponse({
     description:

@@ -46,7 +46,7 @@ export class MeetingsRepository implements IMeetingsRepository {
     private readonly dealModel: Model<MigratedDealDocument>,
     @InjectModel('MigratedSpouseSkillAssessment')
     private readonly spouseSkillAssessmentModel: Model<MigratedSpouseSkillAssessmentDocument>,
-  ) {}
+  ) { }
 
   /**
    * Constructs MongoDB query filter object from validated query parameters.
@@ -70,7 +70,7 @@ export class MeetingsRepository implements IMeetingsRepository {
       filter['_zoho_visa_application_id'] = query.visaApplicationId;
     }
 
-    const spouseId = query.spouseSkillAssementId ?? query.spouseSkillAssessmentId;
+    const spouseId = query.spouseSkillAssessmentId;
     if (spouseId) {
       filter['_zoho_spouse_skill_assessment_id'] = spouseId;
     }
@@ -217,45 +217,45 @@ export class MeetingsRepository implements IMeetingsRepository {
     const [leads, contacts, visaApps, deals, spouseAssessments] = await Promise.all([
       uniqueLeadIds.length > 0
         ? this.leadModel
-            .find({ zoho_id: { $in: uniqueLeadIds } })
-            .select({ zoho_id: 1, First_Name: 1, Last_Name: 1, Full_Name: 1, Email: 1 })
-            .lean<MigratedLeadEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: uniqueLeadIds } })
+          .select({ zoho_id: 1, First_Name: 1, Last_Name: 1, Full_Name: 1, Email: 1 })
+          .lean<MigratedLeadEntity[]>()
+          .exec()
         : Promise.resolve([]),
       uniqueContactIds.length > 0
         ? this.contactModel
-            .find({ zoho_id: { $in: uniqueContactIds } })
-            .select({ zoho_id: 1, First_Name: 1, Last_Name: 1, Full_Name: 1, Email: 1 })
-            .lean<MigratedContactEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: uniqueContactIds } })
+          .select({ zoho_id: 1, First_Name: 1, Last_Name: 1, Full_Name: 1, Email: 1 })
+          .lean<MigratedContactEntity[]>()
+          .exec()
         : Promise.resolve([]),
       uniqueVisaAppIds.length > 0
         ? this.visaApplicationModel
-            .find({ zoho_id: { $in: uniqueVisaAppIds } })
-            .select({ zoho_id: 1, Name: 1, Email: 1, _zoho_contact_id: 1 })
-            .lean<MigratedVisaApplicationEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: uniqueVisaAppIds } })
+          .select({ zoho_id: 1, Name: 1, Email: 1, _zoho_contact_id: 1 })
+          .lean<MigratedVisaApplicationEntity[]>()
+          .exec()
         : Promise.resolve([]),
       uniqueDealIds.length > 0
         ? this.dealModel
-            .find({ zoho_id: { $in: uniqueDealIds } })
-            .select({
-              zoho_id: 1,
-              Deal_Name: 1,
-              Email: 1,
-              Email_1: 1,
-              _zoho_contact_id: 1,
-              _zoho_lead_id: 1,
-            })
-            .lean<MigratedDealEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: uniqueDealIds } })
+          .select({
+            zoho_id: 1,
+            Deal_Name: 1,
+            Email: 1,
+            Email_1: 1,
+            _zoho_contact_id: 1,
+            _zoho_lead_id: 1,
+          })
+          .lean<MigratedDealEntity[]>()
+          .exec()
         : Promise.resolve([]),
       uniqueSpouseAssessmentIds.length > 0
         ? this.spouseSkillAssessmentModel
-            .find({ zoho_id: { $in: uniqueSpouseAssessmentIds } })
-            .select({ zoho_id: 1, Name: 1, Email: 1 })
-            .lean<MigratedSpouseSkillAssessmentEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: uniqueSpouseAssessmentIds } })
+          .select({ zoho_id: 1, Name: 1, Email: 1 })
+          .lean<MigratedSpouseSkillAssessmentEntity[]>()
+          .exec()
         : Promise.resolve([]),
     ]);
 
@@ -326,17 +326,17 @@ export class MeetingsRepository implements IMeetingsRepository {
       const [secContacts, secLeads] = await Promise.all([
         secondaryContactIds.length > 0
           ? this.contactModel
-              .find({ zoho_id: { $in: [...new Set(secondaryContactIds)] } })
-              .select({ zoho_id: 1, First_Name: 1, Last_Name: 1, Full_Name: 1, Email: 1 })
-              .lean<MigratedContactEntity[]>()
-              .exec()
+            .find({ zoho_id: { $in: [...new Set(secondaryContactIds)] } })
+            .select({ zoho_id: 1, First_Name: 1, Last_Name: 1, Full_Name: 1, Email: 1 })
+            .lean<MigratedContactEntity[]>()
+            .exec()
           : Promise.resolve([]),
         secondaryLeadIds.length > 0
           ? this.leadModel
-              .find({ zoho_id: { $in: [...new Set(secondaryLeadIds)] } })
-              .select({ zoho_id: 1, First_Name: 1, Last_Name: 1, Full_Name: 1, Email: 1 })
-              .lean<MigratedLeadEntity[]>()
-              .exec()
+            .find({ zoho_id: { $in: [...new Set(secondaryLeadIds)] } })
+            .select({ zoho_id: 1, First_Name: 1, Last_Name: 1, Full_Name: 1, Email: 1 })
+            .lean<MigratedLeadEntity[]>()
+            .exec()
           : Promise.resolve([]),
       ]);
 

@@ -16,6 +16,7 @@ import { TasksModule } from './modules/tasks/tasks.module.js';
 import { MeetingsModule } from './modules/meetings/meetings.module.js';
 import { EnquiriesModule } from './modules/enquiries/enquiries.module.js';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware.js';
+import { ApiKeyGuard } from './common/guards/api-key.guard.js';
 
 @Module({
   imports: [
@@ -48,6 +49,10 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware.j
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ApiKeyGuard,
     },
   ],
 })

@@ -46,6 +46,9 @@ export default function StaffApiDocPage() {
               <span>Collection:</span>
               <code className="text-sky-300 font-mono">migrated_users</code>
             </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-300 font-mono">
+              <span>Header: x-api-key</span>
+            </div>
           </div>
         </div>
 

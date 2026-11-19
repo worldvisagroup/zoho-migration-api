@@ -114,6 +114,7 @@ describe('EnquiriesController (e2e)', () => {
   const mockNotesData = [
     {
       zoho_id: 'note_001',
+      parent_entity_type: 'lead',
       _zoho_lead_id: 'lead_001',
       Note_Title: 'Initial Review',
       Note_Content: 'Client wants Australia 189 visa',
@@ -126,6 +127,7 @@ describe('EnquiriesController (e2e)', () => {
   const mockCallsData = [
     {
       zoho_id: 'call_001',
+      parent_entity_type: 'lead',
       _zoho_lead_id: 'lead_001',
       Subject: 'Intro Call',
       Call_Type: 'Outbound',
@@ -140,6 +142,7 @@ describe('EnquiriesController (e2e)', () => {
   const mockTasksData = [
     {
       zoho_id: 'task_001',
+      parent_entity_type: 'lead',
       _zoho_lead_id: 'lead_001',
       Subject: 'Follow up on docs',
       Status: 'In Progress',
@@ -153,6 +156,7 @@ describe('EnquiriesController (e2e)', () => {
   const mockEventsData = [
     {
       zoho_id: 'event_001',
+      parent_entity_type: 'lead',
       _zoho_lead_id: 'lead_001',
       Event_Title: 'Consultation session',
       Meeting_Status: 'Attended',
@@ -167,6 +171,7 @@ describe('EnquiriesController (e2e)', () => {
   const mockAttachmentsData = [
     {
       zoho_id: 'att_001',
+      parent_entity_type: 'lead',
       _zoho_lead_id: 'lead_001',
       File_Name: 'resume.pdf',
       Size: 1024,
@@ -393,10 +398,21 @@ describe('EnquiriesController (e2e)', () => {
     await app.close();
   });
 
+  const apiKey = 'wv_sec_api_key_migration_2026';
+
   describe('GET /api/v1/enquiries', () => {
+    it('should reject request without valid x-api-key with 401 Unauthorized', async () => {
+      await request(app.getHttpServer()).get('/api/v1/enquiries?type=leads').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/enquiries?type=leads')
+        .set('x-api-key', 'wrong_key')
+        .expect(401);
+    });
+
     it('should return 200 with transformed leads, unified attribution, and activities', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/enquiries?type=leads')
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(response.body).toHaveProperty('data');
@@ -418,11 +434,21 @@ describe('EnquiriesController (e2e)', () => {
       expect(lead1.sourceDetails).toBe('Meta Ads');
       expect(lead1.attribution.campaignName).toBe('AU PR Campaign');
       expect(lead1.notes.length).toBe(1);
+      expect(lead1.notes[0].parentType).toBe('lead');
+      expect(lead1.notes[0].parentZohoId).toBe('lead_001');
       expect(lead1.notes[0].body).toBe('Initial Review:- Client wants Australia 189 visa');
       expect(lead1.calls.length).toBe(1);
+      expect(lead1.calls[0].parentType).toBe('lead');
+      expect(lead1.calls[0].parentZohoId).toBe('lead_001');
       expect(lead1.tasks.length).toBe(1);
+      expect(lead1.tasks[0].parentType).toBe('lead');
+      expect(lead1.tasks[0].parentZohoId).toBe('lead_001');
       expect(lead1.meetings.length).toBe(1);
+      expect(lead1.meetings[0].parentType).toBe('lead');
+      expect(lead1.meetings[0].parentZohoId).toBe('lead_001');
       expect(lead1.attachments.length).toBe(1);
+      expect(lead1.attachments[0].parentType).toBe('lead');
+      expect(lead1.attachments[0].parentZohoId).toBe('lead_001');
       expect(lead1.invoices).toEqual([]);
 
       // Second lead falls back to unified entry for country and service
@@ -434,6 +460,7 @@ describe('EnquiriesController (e2e)', () => {
     it('should return 200 with transformed contacts and contact priority cascading', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/enquiries?type=contacts')
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(response.body.data.length).toBe(1);
@@ -452,6 +479,7 @@ describe('EnquiriesController (e2e)', () => {
     it('should support pagination parameters', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/enquiries?type=leads&page=2&limit=1')
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(response.body.page).toBe(2);
@@ -467,6 +495,7 @@ describe('EnquiriesController (e2e)', () => {
         .get(
           '/api/v1/enquiries?type=leads&from=2024-03-03T00:00:00.000Z&to=2024-03-06T00:00:00.000Z',
         )
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(response.body.total).toBe(1);
@@ -474,7 +503,10 @@ describe('EnquiriesController (e2e)', () => {
     });
 
     it('should return 400 Bad Request when type parameter is missing', async () => {
-      const response = await request(app.getHttpServer()).get('/api/v1/enquiries').expect(400);
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/enquiries')
+        .set('x-api-key', apiKey)
+        .expect(400);
 
       expect(response.body.message).toEqual(
         expect.arrayContaining([expect.stringContaining('type')]),
@@ -484,6 +516,7 @@ describe('EnquiriesController (e2e)', () => {
     it('should return 400 Bad Request when type parameter is invalid', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/enquiries?type=invalid')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(response.body.message).toEqual(
@@ -492,16 +525,23 @@ describe('EnquiriesController (e2e)', () => {
     });
 
     it('should return 400 Bad Request when page is less than 1', async () => {
-      await request(app.getHttpServer()).get('/api/v1/enquiries?type=leads&page=0').expect(400);
+      await request(app.getHttpServer())
+        .get('/api/v1/enquiries?type=leads&page=0')
+        .set('x-api-key', apiKey)
+        .expect(400);
     });
 
     it('should return 400 Bad Request when limit exceeds 1000', async () => {
-      await request(app.getHttpServer()).get('/api/v1/enquiries?type=leads&limit=1001').expect(400);
+      await request(app.getHttpServer())
+        .get('/api/v1/enquiries?type=leads&limit=1001')
+        .set('x-api-key', apiKey)
+        .expect(400);
     });
 
     it('should return 400 Bad Request when from is not a valid ISO date', async () => {
       await request(app.getHttpServer())
         .get('/api/v1/enquiries?type=leads&from=invalid-date')
+        .set('x-api-key', apiKey)
         .expect(400);
     });
   });

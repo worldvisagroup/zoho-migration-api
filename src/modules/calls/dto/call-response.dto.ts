@@ -47,6 +47,32 @@ export class CallItemDto {
   externalId: string;
 
   @ApiProperty({
+    description: 'Type of the parent record',
+    enum: [
+      'lead',
+      'contact',
+      'deal',
+      'visa_application',
+      'spouse_skill_assessment',
+      'task',
+      'event',
+      'signed_document',
+    ],
+    example: 'lead',
+    type: String,
+    nullable: true,
+  })
+  parentType: string | null;
+
+  @ApiProperty({
+    description: 'Original Zoho ID of the parent record',
+    example: '164193000000811047',
+    type: String,
+    nullable: true,
+  })
+  parentZohoId: string | null;
+
+  @ApiProperty({
     description: 'Call direction (inbound or outbound)',
     enum: ['inbound', 'outbound'],
     example: 'outbound',
@@ -161,6 +187,8 @@ export class CallItemDto {
 
   constructor(data: {
     externalId: string;
+    parentType?: string | null;
+    parentZohoId?: string | null;
     direction: CallDirection;
     status: CallStatus;
     customerPhone: string;
@@ -178,6 +206,8 @@ export class CallItemDto {
     modifiedAt: string;
   }) {
     this.externalId = data.externalId;
+    this.parentType = data.parentType ?? null;
+    this.parentZohoId = data.parentZohoId ?? null;
     this.direction = data.direction;
     this.status = data.status;
     this.customerPhone = data.customerPhone;

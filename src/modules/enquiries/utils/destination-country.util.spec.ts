@@ -88,4 +88,3 @@ describe('destination-country.util', () => {
     });
   });
 });
-

@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { normalizeDob, normalizeZohoTimestamp } from '../../../common/utils/index.js';
+import {
+  normalizeDob,
+  normalizeZohoTimestamp,
+  resolveParentEntity,
+} from '../../../common/utils/index.js';
 import type { MigratedTaskEntity } from '../../../database/schema/index.js';
 import { QueryTasksDto, TaskItemDto, TasksResponseDto } from '../dto/index.js';
 import { TasksRepository } from '../repositories/tasks.repository.js';
@@ -122,6 +126,9 @@ export class TasksService {
     // modifiedAt must never be null when Created_Time is available
     const modifiedAt = normalizeZohoTimestamp(record.Modified_Time, record.Created_Time);
 
+    // Parent Entity Resolution
+    const { parentType, parentZohoId } = resolveParentEntity(record);
+
     // CompletedAt
     const completedAt = this.resolveCompletedAt(
       status === 'done',
@@ -132,6 +139,8 @@ export class TasksService {
 
     return new TaskItemDto({
       externalId: record.zoho_id,
+      parentType,
+      parentZohoId,
       title,
       description,
       status,

@@ -12,6 +12,32 @@ export class AttachmentItemDto {
   externalId: string;
 
   @ApiProperty({
+    description: 'Type of the parent record',
+    enum: [
+      'lead',
+      'contact',
+      'deal',
+      'visa_application',
+      'spouse_skill_assessment',
+      'task',
+      'event',
+      'signed_document',
+    ],
+    example: 'lead',
+    type: String,
+    nullable: true,
+  })
+  parentType: string | null;
+
+  @ApiProperty({
+    description: 'Original Zoho ID of the parent record',
+    example: '164193000000811047',
+    type: String,
+    nullable: true,
+  })
+  parentZohoId: string | null;
+
+  @ApiProperty({
     description: 'Direct or presigned download URL for the attachment file',
     example: 'https://files.example.com/attachments/passport.pdf',
     type: String,
@@ -97,6 +123,8 @@ export class AttachmentItemDto {
 
   constructor(data: {
     externalId: string;
+    parentType?: string | null;
+    parentZohoId?: string | null;
     url: string;
     fileName: string;
     mimeType: string;
@@ -110,6 +138,8 @@ export class AttachmentItemDto {
     modifiedByZohoId: string | null;
   }) {
     this.externalId = data.externalId;
+    this.parentType = data.parentType ?? null;
+    this.parentZohoId = data.parentZohoId ?? null;
     this.url = data.url;
     this.fileName = data.fileName;
     this.mimeType = data.mimeType;

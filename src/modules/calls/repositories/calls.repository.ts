@@ -41,7 +41,7 @@ export class CallsRepository implements ICallsRepository {
     private readonly visaAppModel: Model<MigratedVisaApplicationDocument>,
     @InjectModel('MigratedSpouseSkillAssessment')
     private readonly spouseModel: Model<MigratedSpouseSkillAssessmentDocument>,
-  ) {}
+  ) { }
 
   /**
    * Constructs MongoDB filter object from validated query parameters.
@@ -65,7 +65,7 @@ export class CallsRepository implements ICallsRepository {
       filter['_zoho_visa_application_id'] = query.visaApplicationId;
     }
 
-    const spouseSkillId = query.spouseSkillAssementId || query.spouseSkillAssessmentId;
+    const spouseSkillId = query.spouseSkillAssessmentId;
     if (spouseSkillId) {
       filter['_zoho_spouse_skill_assessment_id'] = spouseSkillId;
     }
@@ -145,38 +145,38 @@ export class CallsRepository implements ICallsRepository {
     const [leads, contacts, deals, visaApps, spouseAssessments] = await Promise.all([
       leadIds.size > 0
         ? this.leadModel
-            .find({ zoho_id: { $in: Array.from(leadIds) } })
-            .select({ zoho_id: 1, Phone: 1, Mobile: 1, Country_Code: 1 })
-            .lean<MigratedLeadEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: Array.from(leadIds) } })
+          .select({ zoho_id: 1, Phone: 1, Mobile: 1, Country_Code: 1 })
+          .lean<MigratedLeadEntity[]>()
+          .exec()
         : [],
       contactIds.size > 0
         ? this.contactModel
-            .find({ zoho_id: { $in: Array.from(contactIds) } })
-            .select({ zoho_id: 1, Phone: 1, Mobile: 1, Country_Code: 1 })
-            .lean<MigratedContactEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: Array.from(contactIds) } })
+          .select({ zoho_id: 1, Phone: 1, Mobile: 1, Country_Code: 1 })
+          .lean<MigratedContactEntity[]>()
+          .exec()
         : [],
       dealIds.size > 0
         ? this.dealModel
-            .find({ zoho_id: { $in: Array.from(dealIds) } })
-            .select({ zoho_id: 1, Phone: 1, _zoho_contact_id: 1 })
-            .lean<MigratedDealEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: Array.from(dealIds) } })
+          .select({ zoho_id: 1, Phone: 1, _zoho_contact_id: 1 })
+          .lean<MigratedDealEntity[]>()
+          .exec()
         : [],
       visaAppIds.size > 0
         ? this.visaAppModel
-            .find({ zoho_id: { $in: Array.from(visaAppIds) } })
-            .select({ zoho_id: 1, _zoho_contact_id: 1 })
-            .lean<MigratedVisaApplicationEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: Array.from(visaAppIds) } })
+          .select({ zoho_id: 1, _zoho_contact_id: 1 })
+          .lean<MigratedVisaApplicationEntity[]>()
+          .exec()
         : [],
       spouseIds.size > 0
         ? this.spouseModel
-            .find({ zoho_id: { $in: Array.from(spouseIds) } })
-            .select({ zoho_id: 1, Phone: 1 })
-            .lean<MigratedSpouseSkillAssessmentEntity[]>()
-            .exec()
+          .find({ zoho_id: { $in: Array.from(spouseIds) } })
+          .select({ zoho_id: 1, Phone: 1 })
+          .lean<MigratedSpouseSkillAssessmentEntity[]>()
+          .exec()
         : [],
     ]);
 
@@ -239,7 +239,7 @@ export class CallsRepository implements ICallsRepository {
         const phone = deal.Phone
           ? normalizePhoneNumber(deal.Phone)
           : (deal._zoho_contact_id && contactPhoneMap.get(deal._zoho_contact_id)) ||
-            DEFAULT_FALLBACK_PHONE;
+          DEFAULT_FALLBACK_PHONE;
         dealPhoneMap.set(deal.zoho_id, phone);
       }
     }

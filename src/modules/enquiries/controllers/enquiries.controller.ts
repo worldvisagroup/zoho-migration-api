@@ -4,13 +4,16 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
 import { EnquiriesResponseDto, QueryEnquiriesDto } from '../dto/index.js';
 import { EnquiriesService } from '../services/enquiries.service.js';
 
 @ApiTags('Enquiries')
+@ApiSecurity('ApiKeyAuth')
 @Controller('enquiries')
 export class EnquiriesController {
   constructor(private readonly enquiriesService: EnquiriesService) {}
@@ -26,6 +29,9 @@ export class EnquiriesController {
     description: 'Paginated migration enquiries in standardized format',
     type: EnquiriesResponseDto,
   })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing API key in x-api-key header',
+  })
   @ApiBadRequestResponse({
     description:
       'Validation error in query parameters (e.g. missing required type, invalid page/limit/dates)',
@@ -37,4 +43,3 @@ export class EnquiriesController {
     return this.enquiriesService.getEnquiries(query);
   }
 }
-

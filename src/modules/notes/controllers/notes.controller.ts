@@ -4,13 +4,16 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
 import { QueryNotesDto, NotesResponseDto } from '../dto/index.js';
 import { NotesService } from '../services/notes.service.js';
 
 @ApiTags('Notes')
+@ApiSecurity('ApiKeyAuth')
 @Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
@@ -25,6 +28,9 @@ export class NotesController {
   @ApiOkResponse({
     description: 'Paginated migration notes in standardized format',
     type: NotesResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing API key in x-api-key header',
   })
   @ApiBadRequestResponse({
     description:

@@ -4,6 +4,7 @@
 - **Controller:** [`EnquiriesController`](file:///e:/World%20visa/zoho-api/src/modules/enquiries/controllers/enquiries.controller.ts)
 - **Service:** [`EnquiriesService`](file:///e:/World%20visa/zoho-api/src/modules/enquiries/services/enquiries.service.ts)
 - **Repository:** [`EnquiriesRepository`](file:///e:/World%20visa/zoho-api/src/modules/enquiries/repositories/enquiries.repository.ts)
+- **Authentication:** `x-api-key: <API_KEY>` (Required header, 401 Unauthorized if missing/invalid)
 - **Primary Collections:** `migrated_leads` (when `type=leads`) or `migrated_contacts` (when `type=contacts`)
 - **Related Collections:** `migrated_users`, `migrated_visa_applications`, `unified_entries`, `migrated_notes`, `migrated_calls`, `migrated_tasks`, `migrated_events`, `migrated_attachments`
 - **Status:** Complete & Production Ready
@@ -396,6 +397,8 @@ export interface EnquiriesResponseDto {
       "notes": [
         {
           "externalId": "164193000000543210",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "body": "Initial Consultation:- Candidate has 65 points for Australia Subclass 189. Recommended PTE coaching.",
           "createdByZohoId": "164193000000028001",
           "createdByEmail": "asha@worldvisa.in",
@@ -408,6 +411,8 @@ export interface EnquiriesResponseDto {
       "calls": [
         {
           "externalId": "164193000000654321",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "direction": "outbound",
           "status": "answered",
           "customerPhone": "+919876543210",
@@ -432,9 +437,11 @@ export interface EnquiriesResponseDto {
       "tasks": [
         {
           "externalId": "164193000000765432",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "title": "Collect Resume and Degree Certificates",
           "description": "Collect verified degree transcripts and detailed resume for skills assessment.",
-          "status": "completed",
+          "status": "done",
           "priority": "high",
           "dueDate": "2024-03-05T00:00:00.000Z",
           "assigneeId": "164193000000028001",
@@ -451,6 +458,8 @@ export interface EnquiriesResponseDto {
       "meetings": [
         {
           "externalId": "164193000000876543",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "title": "Australia PR Strategy Consultation",
           "description": "Virtual meeting to finalize migration roadmap.",
           "status": "ended",
@@ -481,6 +490,8 @@ export interface EnquiriesResponseDto {
       "attachments": [
         {
           "externalId": "164193000000987654",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "url": "https://r2.worldvisa.com/attachments/164193000000987654_resume.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600...",
           "fileName": "Priya_Sharma_CV.pdf",
           "mimeType": "application/pdf",
@@ -499,7 +510,7 @@ export interface EnquiriesResponseDto {
   ],
   "total": 14250,
   "page": 1,
-  "limit": 200,
+  "pageSize": 200,
   "hasMore": true
 }
 ```

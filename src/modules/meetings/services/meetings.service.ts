@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { normalizeZohoTimestamp, sanitizeEmail } from '../../../common/utils/index.js';
+import {
+  normalizeZohoTimestamp,
+  resolveParentEntity,
+  sanitizeEmail,
+} from '../../../common/utils/index.js';
 import type {
   MigratedEventEntity,
   MigratedMeetingRecordingEntity,
@@ -289,8 +293,13 @@ export class MeetingsService {
       }
     }
 
+    // Parent Entity Resolution
+    const { parentType, parentZohoId } = resolveParentEntity(record);
+
     return new MeetingItemDto({
       externalId: record.zoho_id,
+      parentType,
+      parentZohoId,
       title,
       description,
       status,

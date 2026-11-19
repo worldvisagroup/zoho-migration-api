@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { normalizeZohoTimestamp } from '../../../common/utils/index.js';
+import { normalizeZohoTimestamp, resolveParentEntity } from '../../../common/utils/index.js';
 import type { MigratedAttachmentEntity } from '../../../database/schema/index.js';
 import {
   AttachmentItemDto,
@@ -90,8 +90,12 @@ export class AttachmentsService {
     const fileName = record.File_Name ?? '';
     const mimeType = getMimeType(fileName || record.r2_key);
 
+    const { parentType, parentZohoId } = resolveParentEntity(record);
+
     return new AttachmentItemDto({
       externalId: record.zoho_id,
+      parentType,
+      parentZohoId,
       url: resolvedUrl,
       fileName,
       mimeType,

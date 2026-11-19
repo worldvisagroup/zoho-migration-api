@@ -86,19 +86,6 @@ export class QueryAttachmentsDto {
     type: String,
   })
   @IsOptional()
-  @IsString({ message: 'spouseSkillAssementId must be a string' })
-  spouseSkillAssementId?: string;
-
-  /**
-   * Standard spelling alias for spouseSkillAssementId.
-   */
-  @ApiPropertyOptional({
-    description:
-      'Standard spelling alias for spouseSkillAssementId (_zoho_spouse_skill_assessment_id)',
-    example: '164193000130038037',
-    type: String,
-  })
-  @IsOptional()
   @IsString({ message: 'spouseSkillAssessmentId must be a string' })
   spouseSkillAssessmentId?: string;
 

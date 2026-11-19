@@ -42,6 +42,8 @@ describe('TasksService', () => {
           is_closed: true,
           Priority: 'High',
           Due_Date: '2024-03-15T00:00:00.000Z',
+          parent_entity_type: 'lead',
+          _zoho_lead_id: 'lead_123',
           _zoho_owner_id: 'user_1',
           _zoho_created_by_id: 'user_2',
           _zoho_modified_by_id: 'user_3',
@@ -67,6 +69,8 @@ describe('TasksService', () => {
       const task = result.data[0];
 
       expect(task.externalId).toBe('task_001');
+      expect(task.parentType).toBe('lead');
+      expect(task.parentZohoId).toBe('lead_123');
       expect(task.title).toBe('Call Prabhu back');
       expect(task.description).toBe('Client asked for skilled visa update.');
       expect(task.status).toBe('done');

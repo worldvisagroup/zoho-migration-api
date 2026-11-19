@@ -143,4 +143,3 @@ export function normalizeEnquirySource(candidate?: string | null): EnquirySource
 
   return DEFAULT_SOURCE;
 }
-

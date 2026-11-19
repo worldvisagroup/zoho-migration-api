@@ -18,4 +18,3 @@ describe('EnquiriesController', () => {
     expect(result).toBe(mockResponse);
   });
 });
-

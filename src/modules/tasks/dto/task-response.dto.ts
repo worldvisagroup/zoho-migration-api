@@ -14,6 +14,32 @@ export class TaskItemDto {
   externalId: string;
 
   @ApiProperty({
+    description: 'Type of the parent record',
+    enum: [
+      'lead',
+      'contact',
+      'deal',
+      'visa_application',
+      'spouse_skill_assessment',
+      'task',
+      'event',
+      'signed_document',
+    ],
+    example: 'lead',
+    type: String,
+    nullable: true,
+  })
+  parentType: string | null;
+
+  @ApiProperty({
+    description: 'Original Zoho ID of the parent record',
+    example: '164193000000811047',
+    type: String,
+    nullable: true,
+  })
+  parentZohoId: string | null;
+
+  @ApiProperty({
     description: 'Title / Subject of the task',
     example: 'Missed Call Notification from Prabhu Kalluimath',
     type: String,
@@ -125,6 +151,8 @@ export class TaskItemDto {
 
   constructor(data: {
     externalId: string;
+    parentType?: string | null;
+    parentZohoId?: string | null;
     title: string;
     description: string | null;
     status: TargetTaskStatus;
@@ -141,6 +169,8 @@ export class TaskItemDto {
     completedAt: string | null;
   }) {
     this.externalId = data.externalId;
+    this.parentType = data.parentType ?? null;
+    this.parentZohoId = data.parentZohoId ?? null;
     this.title = data.title;
     this.description = data.description;
     this.status = data.status;

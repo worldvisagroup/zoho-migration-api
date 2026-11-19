@@ -6,7 +6,9 @@ import {
   Database,
   FileText,
   Inbox,
+  Key,
   Layers,
+  Paperclip,
   PhoneCall,
   Server,
   Sparkles,
@@ -68,7 +70,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="rounded-xl border border-slate-800 bg-[#0f172a] p-6 space-y-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
               <Database className="h-5 w-5" />
@@ -105,6 +107,18 @@ export default function HomePage() {
               <code className="text-emerald-300 font-mono">@BypassTransform()</code>, serving direct
               migration contracts with chronological sorting (<code className="text-slate-300 font-mono">created_time: 1</code>)
               and <code className="text-emerald-300 font-mono">hasMore</code> pagination.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-800 bg-[#0f172a] p-6 space-y-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <Key className="h-5 w-5" />
+            </div>
+            <h3 className="font-semibold text-white text-base">4. Header Authentication</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Every data endpoint enforces server-to-server security via the{' '}
+              <code className="text-amber-300 font-mono">x-api-key</code> header. Missing or invalid keys
+              return immediate <code className="text-amber-300 font-mono">401 Unauthorized</code> responses.
             </p>
           </div>
         </div>
@@ -285,6 +299,29 @@ export default function HomePage() {
                 <td className="px-5 py-3.5 text-right">
                   <Link
                     href="/apis/enquiries"
+                    className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-medium"
+                  >
+                    <span>View Docs</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </td>
+              </tr>
+              <tr className="hover:bg-slate-800/40 transition">
+                <td className="px-5 py-3.5 font-semibold text-white flex items-center gap-2">
+                  <Paperclip className="h-4 w-4 text-sky-400" />
+                  <span>Attachments</span>
+                </td>
+                <td className="px-5 py-3.5 font-mono text-sky-400">GET /api/v1/attachments</td>
+                <td className="px-5 py-3.5 font-mono text-slate-400">migrated_attachments</td>
+                <td className="px-5 py-3.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400 border border-emerald-500/20">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Complete & Documented
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-right">
+                  <Link
+                    href="/apis/attachments"
                     className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-medium"
                   >
                     <span>View Docs</span>

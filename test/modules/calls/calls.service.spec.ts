@@ -78,6 +78,8 @@ describe('CallsService', () => {
 
       const call = result.data[0]!;
       expect(call.externalId).toBe('call_101');
+      expect(call.parentType).toBe('lead');
+      expect(call.parentZohoId).toBe('lead_001');
       expect(call.direction).toBe('outbound');
       expect(call.status).toBe('answered');
       expect(call.customerPhone).toBe('+919876543210');

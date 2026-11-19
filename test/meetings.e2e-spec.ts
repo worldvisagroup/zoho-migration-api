@@ -20,6 +20,7 @@ describe('MeetingsController (e2e)', () => {
       _zoho_owner_id: 'user_host_1',
       _zoho_created_by_id: 'user_host_1',
       _zoho_modified_by_id: 'user_host_1',
+      parent_entity_type: 'lead',
       _zoho_lead_id: 'lead_001',
       Created_Time: new Date('2024-03-01T10:00:00.000Z'),
       Modified_Time: new Date('2024-03-05T10:00:00.000Z'),
@@ -47,6 +48,7 @@ describe('MeetingsController (e2e)', () => {
       Start_DateTime: new Date('2024-03-06T14:00:00.000Z'),
       End_DateTime: new Date('2024-03-06T14:30:00.000Z'),
       _zoho_owner_id: 'user_host_1',
+      parent_entity_type: 'contact',
       _zoho_contact_id: 'contact_001',
       Created_Time: new Date('2024-03-02T10:00:00.000Z'),
       Participants: [], // Needs fallback to contact
@@ -58,6 +60,7 @@ describe('MeetingsController (e2e)', () => {
       Start_DateTime: new Date('2026-12-01T10:00:00.000Z'),
       End_DateTime: new Date('2026-12-01T11:00:00.000Z'),
       _zoho_owner_id: 'user_host_1',
+      parent_entity_type: 'deal',
       _zoho_deal_id: 'deal_001',
       Created_Time: new Date('2024-03-03T10:00:00.000Z'),
       Participants: [],
@@ -270,9 +273,22 @@ describe('MeetingsController (e2e)', () => {
     await app.close();
   });
 
+  const apiKey = 'wv_sec_api_key_migration_2026';
+
   describe('GET /api/v1/meetings', () => {
+    it('should reject request without valid x-api-key with 401 Unauthorized', async () => {
+      await request(app.getHttpServer()).get('/api/v1/meetings').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/meetings')
+        .set('x-api-key', 'wrong_key')
+        .expect(401);
+    });
+
     it('should return paginated list of meetings with default parameters', async () => {
-      const response = await request(app.getHttpServer()).get('/api/v1/meetings').expect(200);
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/meetings')
+        .set('x-api-key', apiKey)
+        .expect(200);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('total', 3);
@@ -283,6 +299,8 @@ describe('MeetingsController (e2e)', () => {
 
       const firstMeeting = response.body.data[0];
       expect(firstMeeting.externalId).toBe('event_001');
+      expect(firstMeeting.parentType).toBe('lead');
+      expect(firstMeeting.parentZohoId).toBe('lead_001');
       expect(firstMeeting.title).toBe('Eligibility discussion');
       expect(firstMeeting.description).toBe('Initial discussion on PR options');
       expect(firstMeeting.status).toBe('ended');
@@ -309,10 +327,15 @@ describe('MeetingsController (e2e)', () => {
     });
 
     it('should correctly normalize cancelled and scheduled statuses', async () => {
-      const response = await request(app.getHttpServer()).get('/api/v1/meetings').expect(200);
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/meetings')
+        .set('x-api-key', apiKey)
+        .expect(200);
 
       const secondMeeting = response.body.data[1];
       expect(secondMeeting.externalId).toBe('event_002');
+      expect(secondMeeting.parentType).toBe('contact');
+      expect(secondMeeting.parentZohoId).toBe('contact_001');
       expect(secondMeeting.status).toBe('cancelled');
       expect(secondMeeting.startedAt).toBeNull();
       // Contact fallback participant
@@ -332,6 +355,7 @@ describe('MeetingsController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/meetings')
         .query({ zohoLeadId: 'lead_001' })
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(response.body.total).toBe(1);
@@ -343,6 +367,7 @@ describe('MeetingsController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/meetings')
         .query({ zohoContactId: 'contact_001' })
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(response.body.total).toBe(1);
@@ -354,6 +379,7 @@ describe('MeetingsController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/meetings')
         .query({ zohoDealId: 'deal_001' })
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(response.body.total).toBe(1);
@@ -365,6 +391,7 @@ describe('MeetingsController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/meetings')
         .query({ limit: 1001 })
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(response.body.message).toBeDefined();
@@ -374,6 +401,7 @@ describe('MeetingsController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/meetings')
         .query({ page: 0 })
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(response.body.message).toBeDefined();
@@ -383,6 +411,7 @@ describe('MeetingsController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/meetings')
         .query({ type: 'invalid_type' })
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(response.body.message).toBeDefined();
@@ -392,6 +421,7 @@ describe('MeetingsController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/meetings')
         .query({ from: 'invalid-date' })
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(response.body.message).toBeDefined();

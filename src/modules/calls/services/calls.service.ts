@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DEFAULT_FALLBACK_PHONE, normalizeZohoTimestamp } from '../../../common/utils/index.js';
+import {
+  DEFAULT_FALLBACK_PHONE,
+  normalizeZohoTimestamp,
+  resolveParentEntity,
+} from '../../../common/utils/index.js';
 import type { MigratedCallEntity } from '../../../database/schema/index.js';
 import {
   CallDirection,
@@ -168,9 +172,12 @@ export class CallsService {
       : null;
 
     const recording = this.resolveRecording(call.Voice_Recording__s);
+    const { parentType, parentZohoId } = resolveParentEntity(call);
 
     return new CallItemDto({
       externalId: call.zoho_id || '',
+      parentType,
+      parentZohoId,
       direction,
       status,
       customerPhone,

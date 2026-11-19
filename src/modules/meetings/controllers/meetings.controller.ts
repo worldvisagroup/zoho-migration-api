@@ -4,13 +4,16 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
 import { MeetingsResponseDto, QueryMeetingsDto } from '../dto/index.js';
 import { MeetingsService } from '../services/meetings.service.js';
 
 @ApiTags('Meetings')
+@ApiSecurity('ApiKeyAuth')
 @Controller('meetings')
 export class MeetingsController {
   constructor(private readonly meetingsService: MeetingsService) {}
@@ -25,6 +28,9 @@ export class MeetingsController {
   @ApiOkResponse({
     description: 'Paginated migration meetings in standardized format',
     type: MeetingsResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing API key in x-api-key header',
   })
   @ApiBadRequestResponse({
     description:

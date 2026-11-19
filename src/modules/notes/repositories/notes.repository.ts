@@ -17,7 +17,7 @@ export class NotesRepository implements INotesRepository {
     private readonly noteModel: Model<MigratedNoteDocument>,
     @InjectModel('MigratedUser')
     private readonly userModel: Model<MigratedUserDocument>,
-  ) {}
+  ) { }
 
   /**
    * Constructs a MongoDB filter object from validated query parameters.
@@ -41,7 +41,7 @@ export class NotesRepository implements INotesRepository {
       filter['_zoho_visa_application_id'] = query.visaApplicationId;
     }
 
-    const spouseSkillId = query.spouseSkillAssementId || query.spouseSkillAssessmentId;
+    const spouseSkillId = query.spouseSkillAssessmentId;
     if (spouseSkillId) {
       filter['_zoho_spouse_skill_assessment_id'] = spouseSkillId;
     }

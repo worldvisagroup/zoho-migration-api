@@ -4,13 +4,16 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
 import { QueryCallsDto, CallsResponseDto } from '../dto/index.js';
 import { CallsService } from '../services/calls.service.js';
 
 @ApiTags('Calls')
+@ApiSecurity('ApiKeyAuth')
 @Controller('calls')
 export class CallsController {
   constructor(private readonly callsService: CallsService) {}
@@ -25,6 +28,9 @@ export class CallsController {
   @ApiOkResponse({
     description: 'Paginated migration calls in standardized format',
     type: CallsResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing API key in x-api-key header',
   })
   @ApiBadRequestResponse({
     description:

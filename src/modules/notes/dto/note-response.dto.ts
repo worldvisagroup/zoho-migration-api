@@ -12,6 +12,32 @@ export class NoteItemDto {
   externalId: string;
 
   @ApiProperty({
+    description: 'Type of the parent record',
+    enum: [
+      'lead',
+      'contact',
+      'deal',
+      'visa_application',
+      'spouse_skill_assessment',
+      'task',
+      'event',
+      'signed_document',
+    ],
+    example: 'lead',
+    type: String,
+    nullable: true,
+  })
+  parentType: string | null;
+
+  @ApiProperty({
+    description: 'Original Zoho ID of the parent record',
+    example: '164193000000811047',
+    type: String,
+    nullable: true,
+  })
+  parentZohoId: string | null;
+
+  @ApiProperty({
     description: 'Combined note title and content in "Note_Title:- Note_Content" format',
     example: 'Client Call:- Client wants to start in January.',
     type: String,
@@ -66,6 +92,8 @@ export class NoteItemDto {
 
   constructor(data: {
     externalId: string;
+    parentType?: string | null;
+    parentZohoId?: string | null;
     body: string;
     createdByEmail: string | null;
     createdByZohoId: string | null;
@@ -75,6 +103,8 @@ export class NoteItemDto {
     modifiedAt: string;
   }) {
     this.externalId = data.externalId;
+    this.parentType = data.parentType ?? null;
+    this.parentZohoId = data.parentZohoId ?? null;
     this.body = data.body;
     this.createdByEmail = data.createdByEmail;
     this.createdByZohoId = data.createdByZohoId;

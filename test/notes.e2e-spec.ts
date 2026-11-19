@@ -188,9 +188,22 @@ describe('NotesController (e2e)', () => {
     await app.close();
   });
 
+  const apiKey = 'wv_sec_api_key_migration_2026';
+
   describe('GET /api/v1/notes', () => {
+    it('should reject request without valid x-api-key with 401 Unauthorized', async () => {
+      await request(app.getHttpServer()).get('/api/v1/notes').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/notes')
+        .set('x-api-key', 'wrong_key')
+        .expect(401);
+    });
+
     it('should return 200 with transformed notes, formatted body, and pagination defaults', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/notes').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/notes')
+        .set('x-api-key', apiKey)
+        .expect(200);
 
       expect(res.body).toHaveProperty('data');
       expect(res.body).toHaveProperty('total', 1);
@@ -200,6 +213,8 @@ describe('NotesController (e2e)', () => {
 
       const record = res.body.data[0];
       expect(record.externalId).toBe('note_001');
+      expect(record.parentType).toBe('contact');
+      expect(record.parentZohoId).toBe('contact_001');
       expect(record.body).toBe(
         'Consultation Discussion:- Client plans to apply for subclass 189 visa.',
       );
@@ -216,6 +231,7 @@ describe('NotesController (e2e)', () => {
         .get(
           '/api/v1/notes?page=1&limit=50&type=contact&zohoContactId=contact_001&from=2024-01-01T00:00:00.000Z&to=2024-12-31T23:59:59.000Z',
         )
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(res.body.page).toBe(1);
@@ -223,7 +239,10 @@ describe('NotesController (e2e)', () => {
     });
 
     it('should return 400 Bad Request when page is less than 1', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/notes?page=0').expect(400);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/notes?page=0')
+        .set('x-api-key', apiKey)
+        .expect(400);
 
       expect(res.body.message).toEqual(
         expect.arrayContaining(['page must be greater than or equal to 1']),
@@ -231,7 +250,10 @@ describe('NotesController (e2e)', () => {
     });
 
     it('should return 400 Bad Request when limit exceeds 1000', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/notes?limit=1001').expect(400);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/notes?limit=1001')
+        .set('x-api-key', apiKey)
+        .expect(400);
 
       expect(res.body.message).toEqual(
         expect.arrayContaining(['limit must be between 1 and 1000']),
@@ -241,6 +263,7 @@ describe('NotesController (e2e)', () => {
     it('should return 400 Bad Request when type is not an allowed parent entity', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/notes?type=invalid_parent')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -251,6 +274,7 @@ describe('NotesController (e2e)', () => {
     it('should return 400 Bad Request when from is not a valid ISO 8601 string', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/notes?from=not-a-valid-date')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -263,6 +287,7 @@ describe('NotesController (e2e)', () => {
     it('should return 400 Bad Request when to is not a valid ISO 8601 string', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/notes?to=not-a-valid-date')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(

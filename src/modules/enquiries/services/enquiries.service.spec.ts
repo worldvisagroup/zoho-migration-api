@@ -107,6 +107,7 @@ describe('EnquiriesService', () => {
 
       const mockNote: MigratedNoteEntity = {
         zoho_id: 'note_1',
+        parent_entity_type: 'lead',
         _zoho_lead_id: 'lead_100',
         Note_Title: 'First call summary',
         Note_Content: 'Client interested in 189 visa',
@@ -117,6 +118,7 @@ describe('EnquiriesService', () => {
 
       const mockCall: MigratedCallEntity = {
         zoho_id: 'call_1',
+        parent_entity_type: 'lead',
         _zoho_lead_id: 'lead_100',
         Subject: 'Initial screening',
         Call_Duration: '05:30',
@@ -128,6 +130,7 @@ describe('EnquiriesService', () => {
 
       const mockTask: MigratedTaskEntity = {
         zoho_id: 'task_1',
+        parent_entity_type: 'lead',
         _zoho_lead_id: 'lead_100',
         Subject: 'Collect IELTS score',
         Status: 'In Progress',
@@ -139,6 +142,7 @@ describe('EnquiriesService', () => {
 
       const mockEvent: MigratedEventEntity = {
         zoho_id: 'event_1',
+        parent_entity_type: 'lead',
         _zoho_lead_id: 'lead_100',
         Event_Title: 'Eligibility counseling',
         Meeting_Status: 'Attended',
@@ -151,6 +155,7 @@ describe('EnquiriesService', () => {
 
       const mockAttachment: MigratedAttachmentEntity = {
         zoho_id: 'att_1',
+        parent_entity_type: 'lead',
         _zoho_lead_id: 'lead_100',
         File_Name: 'resume.pdf',
         Size: 2048,
@@ -193,10 +198,20 @@ describe('EnquiriesService', () => {
       expect(enquiry.sourceDetails).toBe('Meta Ads');
       expect(enquiry.attribution?.campaignName).toBe('AU PR Campaign');
       expect(enquiry.notes.length).toBe(1);
+      expect(enquiry.notes[0].parentType).toBe('lead');
+      expect(enquiry.notes[0].parentZohoId).toBe('lead_100');
       expect(enquiry.calls.length).toBe(1);
+      expect(enquiry.calls[0].parentType).toBe('lead');
+      expect(enquiry.calls[0].parentZohoId).toBe('lead_100');
       expect(enquiry.tasks.length).toBe(1);
+      expect(enquiry.tasks[0].parentType).toBe('lead');
+      expect(enquiry.tasks[0].parentZohoId).toBe('lead_100');
       expect(enquiry.meetings.length).toBe(1);
+      expect(enquiry.meetings[0].parentType).toBe('lead');
+      expect(enquiry.meetings[0].parentZohoId).toBe('lead_100');
       expect(enquiry.attachments.length).toBe(1);
+      expect(enquiry.attachments[0].parentType).toBe('lead');
+      expect(enquiry.attachments[0].parentZohoId).toBe('lead_100');
       expect(enquiry.attachments[0].url).toBe('https://signed.r2.cloud/resume.pdf');
       expect(enquiry.invoices).toEqual([]);
       expect(enquiry.createdById).toBe('user_owner_1');

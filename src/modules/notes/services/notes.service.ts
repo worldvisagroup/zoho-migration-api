@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { normalizeZohoTimestamp } from '../../../common/utils/index.js';
+import { normalizeZohoTimestamp, resolveParentEntity } from '../../../common/utils/index.js';
 import type { MigratedNoteEntity } from '../../../database/schema/index.js';
 import { NoteItemDto, NotesResponseDto, QueryNotesDto } from '../dto/index.js';
 import { NotesRepository } from '../repositories/notes.repository.js';
@@ -80,9 +80,12 @@ export class NotesService {
 
     const createdAt = normalizeZohoTimestamp(record.Created_Time);
     const updatedAt = normalizeZohoTimestamp(record.Modified_Time, record.Created_Time);
+    const { parentType, parentZohoId } = resolveParentEntity(record);
 
     return new NoteItemDto({
       externalId: record.zoho_id || '',
+      parentType,
+      parentZohoId,
       body,
       createdByEmail,
       createdByZohoId,

@@ -85,19 +85,6 @@ export class QueryCallsDto {
     type: String,
   })
   @IsOptional()
-  @IsString({ message: 'spouseSkillAssementId must be a string' })
-  spouseSkillAssementId?: string;
-
-  /**
-   * Alias for spouseSkillAssementId with corrected spelling.
-   */
-  @ApiPropertyOptional({
-    description:
-      'Alias for spouseSkillAssementId with standard spelling (_zoho_spouse_skill_assessment_id)',
-    example: '164193000020539888',
-    type: String,
-  })
-  @IsOptional()
   @IsString({ message: 'spouseSkillAssessmentId must be a string' })
   spouseSkillAssessmentId?: string;
 

@@ -97,6 +97,7 @@ export class EnquiryItemDto {
     description: 'Normalized interested service',
     nullable: true,
     example: 'permanent_residency',
+    type: String,
   })
   interestedService: InterestedService | null;
 
@@ -104,21 +105,33 @@ export class EnquiryItemDto {
     description: 'Target destination country',
     nullable: true,
     example: 'Australia',
+    type: String,
   })
   destinationCountry: string | null;
 
-  @ApiProperty({ description: 'Enquiry stage (hardcoded null)', nullable: true, example: null })
-  stage: null;
+  @ApiProperty({
+    description: 'Enquiry stage (hardcoded null)',
+    nullable: true,
+    example: null,
+    type: String,
+  })
+  stage: string | null;
 
-  @ApiProperty({ description: 'Enquiry status (hardcoded null)', nullable: true, example: null })
-  status: null;
+  @ApiProperty({
+    description: 'Enquiry status (hardcoded null)',
+    nullable: true,
+    example: null,
+    type: String,
+  })
+  status: string | null;
 
   @ApiProperty({
     description: 'Enquiry closure reason (hardcoded null)',
     nullable: true,
     example: null,
+    type: String,
   })
-  closure: null;
+  closure: string | null;
 
   @ApiProperty({
     description: 'Normalized enquiry source',

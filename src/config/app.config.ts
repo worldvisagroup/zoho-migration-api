@@ -18,6 +18,7 @@ export interface SecurityConfig {
   corsOrigin: string;
   throttleTtl: number;
   throttleLimit: number;
+  apiKey: string;
 }
 
 export interface SwaggerConfig {
@@ -45,6 +46,7 @@ export const securityConfig = registerAs('security', (): SecurityConfig => ({
   corsOrigin: process.env.CORS_ORIGIN ?? '*',
   throttleTtl: parseInt(process.env.THROTTLE_TTL ?? '60000', 10),
   throttleLimit: parseInt(process.env.THROTTLE_LIMIT ?? '100', 10),
+  apiKey: process.env.API_KEY ?? 'wv_sec_api_key_migration_2026',
 }));
 
 export const swaggerConfig = registerAs('swagger', (): SwaggerConfig => ({

@@ -4,6 +4,7 @@
 - **Controller:** [`TasksController`](file:///e:/World%20visa/zoho-api/src/modules/tasks/controllers/tasks.controller.ts)
 - **Service:** [`TasksService`](file:///e:/World%20visa/zoho-api/src/modules/tasks/services/tasks.service.ts)
 - **Repository:** [`TasksRepository`](file:///e:/World%20visa/zoho-api/src/modules/tasks/repositories/tasks.repository.ts)
+- **Authentication:** `x-api-key: <API_KEY>` (Required header, 401 Unauthorized if missing/invalid)
 - **Source Collection:** `migrated_tasks` ([`MigratedTaskModel`](file:///e:/World%20visa/zoho-api/src/database/schema/migrated-task.schema.ts))
 - **Related Collections:** `migrated_users` (for staff email resolution)
 - **Status:** Complete & Production Ready
@@ -43,6 +44,8 @@ Direct mapping from MongoDB `migrated_tasks` to [`TaskItemDto`](file:///e:/World
 | Target Field | Target Type | Zoho Source Field | Source Type | Transformation Summary |
 | :--- | :--- | :--- | :--- | :--- |
 | `externalId` | `string` | `zoho_id` | String | Direct 1:1 copy of Zoho task unique ID. |
+| `parentType` | `string \| null` | `parent_entity_type` | String | Standardized parent entity type (`lead`, `contact`, `deal`, `visa_application`, `spouse_skill_assessment`, `task`, `event`, `signed_document`), or `null`. |
+| `parentZohoId` | `string \| null` | `_zoho_*_id` | String | Original Zoho ID of the linked parent record (`_zoho_lead_id`, `_zoho_contact_id`, etc.), or `null`. |
 | `title` | `string` | `Subject` | String | Trimmed string. Defaults to empty string `""` if missing. |
 | `description` | `string \| null` | `Description` | String | Trimmed plain text. Returns `null` if empty or missing. |
 | `status` | `TargetTaskStatus` | `Status`, `is_closed` | String, Boolean | Normalized to `todo`, `in_progress`, or `done`. `is_closed === true` forces `done`. |
@@ -129,6 +132,9 @@ To prevent N+1 database queries during pagination:
 
 | Field | Condition | Resolution Path | Final Value |
 | :--- | :--- | :--- | :--- |
+| `externalId` | Missing or null `zoho_id` | Empty string assignment | `""` |
+| `parentType` | Missing or unrecognized `parent_entity_type` | Unresolved entity | `null` |
+| `parentZohoId` | Missing ID in matched `_zoho_*_id` | Null fallback | `null` |
 | `title` | Missing or null `Subject` | Empty string assignment | `""` |
 | `description` | Missing or whitespace-only `Description` | Nullable string assignment | `null` |
 | `status` | Missing or unrecognized `Status` without closed flag | Open default assignment | `"todo"` |
@@ -162,6 +168,8 @@ export type TargetTaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 export interface TaskItemDto {
   externalId: string;                 // Original Zoho ID (zoho_id)
+  parentType: string | null;          // Type of parent record (lead, contact, deal, etc.)
+  parentZohoId: string | null;        // Original Zoho ID of parent record
   title: string;                      // Task Subject
   description: string | null;         // Plain text description or null
   status: TargetTaskStatus;           // 'todo' | 'in_progress' | 'done'
@@ -193,6 +201,8 @@ export interface TasksResponseDto {
   "data": [
     {
       "externalId": "164193000053851467",
+      "parentType": "lead",
+      "parentZohoId": "164193000000811047",
       "title": "Call client regarding skill assessment document verification",
       "description": "Client requested guidance on ACS Australia employment reference letters.",
       "status": "done",
@@ -210,6 +220,8 @@ export interface TasksResponseDto {
     },
     {
       "externalId": "164193000053851999",
+      "parentType": "contact",
+      "parentZohoId": "164193000000822091",
       "title": "Follow up on visa fee payment confirmation",
       "description": null,
       "status": "todo",

@@ -4,13 +4,16 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
 import { ClientsResponseDto, QueryClientsDto } from '../dto/index.js';
 import { ClientsService } from '../services/clients.service.js';
 
 @ApiTags('Clients')
+@ApiSecurity('ApiKeyAuth')
 @Controller('clients')
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
@@ -25,6 +28,9 @@ export class ClientsController {
   @ApiOkResponse({
     description: 'Paginated migration client list in standardized format',
     type: ClientsResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing API key in x-api-key header',
   })
   @ApiBadRequestResponse({
     description:

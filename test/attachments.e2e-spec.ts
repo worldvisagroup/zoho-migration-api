@@ -162,9 +162,22 @@ describe('AttachmentsController (e2e)', () => {
     await app.close();
   });
 
+  const apiKey = 'wv_sec_api_key_migration_2026';
+
   describe('GET /api/v1/attachments', () => {
+    it('should reject request without valid x-api-key with 401 Unauthorized', async () => {
+      await request(app.getHttpServer()).get('/api/v1/attachments').expect(401);
+      await request(app.getHttpServer())
+        .get('/api/v1/attachments')
+        .set('x-api-key', 'wrong_key')
+        .expect(401);
+    });
+
     it('should return 200 with transformed attachments and normalized fields', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/attachments').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/attachments')
+        .set('x-api-key', apiKey)
+        .expect(200);
 
       expect(res.body).toHaveProperty('data');
       expect(res.body).toHaveProperty('total', 1);
@@ -174,6 +187,8 @@ describe('AttachmentsController (e2e)', () => {
 
       const record = res.body.data[0];
       expect(record.externalId).toBe('att_001');
+      expect(record.parentType).toBe('lead');
+      expect(record.parentZohoId).toBe('lead_001');
       expect(record.fileName).toBe('passport.pdf');
       expect(record.mimeType).toBe('application/pdf');
       expect(record.sizeBytes).toBe(245760);
@@ -191,13 +206,17 @@ describe('AttachmentsController (e2e)', () => {
         .get(
           '/api/v1/attachments?page=2&limit=50&zohoLeadId=lead_001&type=lead&from=2024-01-01T00:00:00Z&to=2024-12-31T23:59:59Z',
         )
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(mockAttachmentModel.find).toHaveBeenCalled();
     });
 
     it('should reject invalid page numbers (< 1)', async () => {
-      const res = await request(app.getHttpServer()).get('/api/v1/attachments?page=0').expect(400);
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/attachments?page=0')
+        .set('x-api-key', apiKey)
+        .expect(400);
 
       expect(res.body.message).toEqual(
         expect.arrayContaining([
@@ -209,6 +228,7 @@ describe('AttachmentsController (e2e)', () => {
     it('should reject invalid limit (> 1000)', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/attachments?limit=1001')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -219,6 +239,7 @@ describe('AttachmentsController (e2e)', () => {
     it('should reject invalid parent type', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/attachments?type=invalid_type')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -229,6 +250,7 @@ describe('AttachmentsController (e2e)', () => {
     it('should reject non-ISO date formats', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/attachments?from=invalid-date')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(

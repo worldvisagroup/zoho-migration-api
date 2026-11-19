@@ -47,6 +47,9 @@ export default function CallsApiDocPage() {
               <span>Collection:</span>
               <code className="text-sky-300 font-mono">migrated_calls</code>
             </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-300 font-mono">
+              <span>Header: x-api-key</span>
+            </div>
           </div>
         </div>
 
@@ -196,6 +199,20 @@ export default function CallsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-sky-300">zoho_id</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
                   <td className="px-4 py-2.5">Direct 1:1 copy of Zoho call unique identifier.</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">parentType</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">parent_entity_type</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
+                  <td className="px-4 py-2.5">Standardized parent entity type (<code className="font-mono text-slate-200">lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document</code>), or <code className="text-slate-400 font-mono">null</code>.</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">parentZohoId</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">_zoho_*_id</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
+                  <td className="px-4 py-2.5">Original Zoho ID of the linked parent record (<code className="font-mono text-slate-200">_zoho_lead_id, _zoho_contact_id</code>, etc.), or <code className="text-slate-400 font-mono">null</code>.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">direction</td>
@@ -505,6 +522,18 @@ export default function CallsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-slate-300">&quot;&quot;</td>
                 </tr>
                 <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">parentType</td>
+                  <td className="px-4 py-2.5">Missing or unrecognized <code className="font-mono">parent_entity_type</code></td>
+                  <td className="px-4 py-2.5">Unresolved entity</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">parentZohoId</td>
+                  <td className="px-4 py-2.5">Missing ID in matched <code className="font-mono">_zoho_*_id</code></td>
+                  <td className="px-4 py-2.5">Null fallback</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
+                </tr>
+                <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">direction</td>
                   <td className="px-4 py-2.5">Missing, empty, or unmapped <code className="font-mono">Call_Type</code></td>
                   <td className="px-4 py-2.5">Standard telecalling direction assumption</td>
@@ -664,6 +693,8 @@ export interface CallRecordingDto {
 
 export interface CallItemDto {
   externalId: string;                 // Original Zoho ID (zoho_id)
+  parentType: string | null;          // Type of parent record (lead, contact, deal, etc.)
+  parentZohoId: string | null;        // Original Zoho ID of parent record
   direction: CallDirection;           // 'inbound' | 'outbound'
   status: CallStatus;                 // 'answered' | 'missed' | 'cancelled' | 'busy'
   customerPhone: string;              // Normalized international phone (+91XXXXXXXXXX)
@@ -700,6 +731,8 @@ export interface CallsResponseDto {
   "data": [
     {
       "externalId": "164193000020539001",
+      "parentType": "lead",
+      "parentZohoId": "164193000000811047",
       "direction": "outbound",
       "status": "answered",
       "customerPhone": "+919876543210",
@@ -722,6 +755,8 @@ export interface CallsResponseDto {
     },
     {
       "externalId": "164193000020539045",
+      "parentType": "contact",
+      "parentZohoId": "164193000000822091",
       "direction": "inbound",
       "status": "missed",
       "customerPhone": "+919123456789",
@@ -740,6 +775,8 @@ export interface CallsResponseDto {
     },
     {
       "externalId": "164193000020539120",
+      "parentType": "deal",
+      "parentZohoId": "164193000000899014",
       "direction": "outbound",
       "status": "busy",
       "customerPhone": "+919988776655",

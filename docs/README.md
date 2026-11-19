@@ -28,6 +28,24 @@ npm run start
 
 ---
 
+## Authentication & Security
+
+All migration endpoints (with the exception of `/api/v1/health`) require server-to-server header-based authentication:
+
+- **Header Name:** `x-api-key`
+- **Environment Variable:** `API_KEY` (stored in `.env`, defaults to `wv_sec_api_key_migration_2026`)
+- **HTTP Status Codes:**
+  - `401 Unauthorized`: Returned when `x-api-key` is missing or does not match the configured `API_KEY`.
+- **Swagger Integration:** Global `ApiKeyAuth` security requirement in `/api/docs`. Use the **Authorize** button in Swagger UI to test authenticated requests.
+
+Example Request:
+```bash
+curl -X GET "http://localhost:5050/api/v1/staff" \
+  -H "x-api-key: wv_sec_api_key_migration_2026"
+```
+
+---
+
 ## Documentation Structure
 
 Each API module follows a standardized technical reference structure:
@@ -53,7 +71,7 @@ Each API module follows a standardized technical reference structure:
 | **Meetings** | `GET /api/v1/meetings` | `migrated_events`, `migrated_meeting_recordings` | ✅ **Complete & Documented** (`/apis/meetings`) |
 | **Notes** | `GET /api/v1/notes` | `migrated_notes` | ✅ **Complete & Documented** (`/apis/notes`) |
 | **Enquiries** | `GET /api/v1/enquiries` | `migrated_leads`, `migrated_contacts` | ✅ **Complete & Documented** (`/apis/enquiries`) |
-| **Attachments** | `GET /api/v1/attachments` | `migrated_attachments` | ⏳ *Scheduled* |
+| **Attachments** | `GET /api/v1/attachments` | `migrated_attachments` | ✅ **Complete & Documented** (`/apis/attachments`) |
 | **Invoices** | `GET /api/v1/invoices` | `migrated_books_invoices` | ⏳ *Scheduled* |
 | **Payments** | `GET /api/v1/payments` | `migrated_books_customer_payments` | ⏳ *Scheduled* |
 

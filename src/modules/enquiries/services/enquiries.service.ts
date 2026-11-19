@@ -4,6 +4,7 @@ import {
   normalizeEmail,
   normalizePhoneNumber,
   normalizeZohoTimestamp,
+  resolveParentEntity,
   sanitizeEmail,
 } from '../../../common/utils/index.js';
 import type {
@@ -402,8 +403,11 @@ export class EnquiriesService {
       const body = title && content ? `${title}:- ${content}` : title || content;
       const cId = n._zoho_created_by_id?.trim() || null;
       const mId = n._zoho_modified_by_id?.trim() || null;
+      const { parentType, parentZohoId } = resolveParentEntity(n);
       return new NoteItemDto({
         externalId: n.zoho_id || '',
+        parentType,
+        parentZohoId,
         body,
         createdByZohoId: cId,
         createdByEmail: cId ? (userMap.get(cId)?.email ?? null) : null,
@@ -438,6 +442,7 @@ export class EnquiriesService {
       const cId = c._zoho_created_by_id?.trim() || null;
       const mId = c._zoho_modified_by_id?.trim() || null;
       const oId = c._zoho_owner_id?.trim() || null;
+      const { parentType, parentZohoId } = resolveParentEntity(c);
 
       const recording = c.Voice_Recording__s?.trim()
         ? new CallRecordingDto({ url: c.Voice_Recording__s.trim(), mimeType: '', sizeBytes: '' })
@@ -445,6 +450,8 @@ export class EnquiriesService {
 
       return new CallItemDto({
         externalId: c.zoho_id || '',
+        parentType,
+        parentZohoId,
         direction,
         status: callStatus,
         customerPhone: phone,
@@ -470,8 +477,11 @@ export class EnquiriesService {
       const cId = t._zoho_created_by_id?.trim() || null;
       const mId = t._zoho_modified_by_id?.trim() || null;
       const oId = t._zoho_owner_id?.trim() || null;
+      const { parentType, parentZohoId } = resolveParentEntity(t);
       return new TaskItemDto({
         externalId: t.zoho_id || '',
+        parentType,
+        parentZohoId,
         title: t.Subject?.trim() || '',
         description: t.Description?.trim() || null,
         status: normalizeTaskStatus(t.Status, t.is_closed),
@@ -498,6 +508,7 @@ export class EnquiriesService {
       const oId = m._zoho_owner_id?.trim() || null;
       const cId = m._zoho_created_by_id?.trim() || null;
       const mId = m._zoho_modified_by_id?.trim() || null;
+      const { parentType, parentZohoId } = resolveParentEntity(m);
 
       const hostEmail = oId ? (userMap.get(oId)?.email ?? null) : null;
       const participants: MeetingParticipantDto[] = [];
@@ -522,6 +533,8 @@ export class EnquiriesService {
 
       return new MeetingItemDto({
         externalId: m.zoho_id || '',
+        parentType,
+        parentZohoId,
         title: m.Event_Title?.trim() || '',
         description: m.Description?.trim() || null,
         status: meetingStatus,
@@ -546,6 +559,7 @@ export class EnquiriesService {
         presignedUrlMap.get(a.zoho_id) || a.r2_download_url || a.r2_preview_url || '';
       const cId = a._zoho_created_by_id?.trim() || a._zoho_owner_id?.trim() || null;
       const mId = a._zoho_modified_by_id?.trim() || null;
+      const { parentType, parentZohoId } = resolveParentEntity(a);
 
       let sizeBytes = 0;
       if (typeof a.Size === 'number') {
@@ -560,6 +574,8 @@ export class EnquiriesService {
       const uploadedAt = normalizeZohoTimestamp(a.Created_Time);
       return new AttachmentItemDto({
         externalId: a.zoho_id || '',
+        parentType,
+        parentZohoId,
         url: resolvedUrl,
         fileName,
         mimeType: getMimeType(fileName || a.r2_key),

@@ -20,7 +20,7 @@ export class AttachmentsRepository implements IAttachmentsRepository {
     private readonly attachmentModel: Model<MigratedAttachmentDocument>,
     @InjectModel('MigratedUser')
     private readonly userModel: Model<MigratedUserDocument>,
-  ) {}
+  ) { }
 
   /**
    * Constructs MongoDB filter object from validated query parameters.
@@ -44,7 +44,7 @@ export class AttachmentsRepository implements IAttachmentsRepository {
       filter['_zoho_visa_application_id'] = query.visaApplicationId;
     }
 
-    const spouseId = query.spouseSkillAssementId ?? query.spouseSkillAssessmentId;
+    const spouseId = query.spouseSkillAssessmentId;
     if (spouseId) {
       filter['_zoho_spouse_skill_assessment_id'] = spouseId;
     }

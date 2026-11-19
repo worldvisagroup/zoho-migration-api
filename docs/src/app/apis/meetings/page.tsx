@@ -49,6 +49,9 @@ export default function MeetingsApiDocPage() {
               <span className="text-slate-500">&amp;</span>
               <code className="text-sky-300 font-mono">migrated_meeting_recordings</code>
             </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-300 font-mono">
+              <span>Header: x-api-key</span>
+            </div>
           </div>
         </div>
 
@@ -198,6 +201,20 @@ export default function MeetingsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-sky-300">zoho_id</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
                   <td className="px-4 py-2.5">Direct 1:1 copy of Zoho event unique identifier.</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">parentType</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">parent_entity_type</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
+                  <td className="px-4 py-2.5">Standardized parent entity type (<code className="font-mono text-slate-200">lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document</code>), or <code className="text-slate-400 font-mono">null</code>.</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">parentZohoId</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">_zoho_*_id</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
+                  <td className="px-4 py-2.5">Original Zoho ID of the linked parent record (<code className="font-mono text-slate-200">_zoho_lead_id, _zoho_contact_id</code>, etc.), or <code className="text-slate-400 font-mono">null</code>.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">title</td>
@@ -497,6 +514,18 @@ export default function MeetingsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-slate-300">&quot;&quot;</td>
                 </tr>
                 <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">parentType</td>
+                  <td className="px-4 py-2.5">Missing or unrecognized <code className="font-mono">parent_entity_type</code></td>
+                  <td className="px-4 py-2.5">Unresolved entity</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">parentZohoId</td>
+                  <td className="px-4 py-2.5">Missing ID in matched <code className="font-mono">_zoho_*_id</code></td>
+                  <td className="px-4 py-2.5">Null fallback</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
+                </tr>
+                <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">title</td>
                   <td className="px-4 py-2.5">Missing or null <code className="font-mono">Event_Title</code></td>
                   <td className="px-4 py-2.5">Empty string assignment</td>
@@ -638,6 +667,8 @@ export interface MeetingRecordingDto {
 
 export interface MeetingItemDto {
   externalId: string;                 // Original Zoho ID (zoho_id)
+  parentType: string | null;          // Type of parent record (lead, contact, deal, etc.)
+  parentZohoId: string | null;        // Original Zoho ID of parent record
   title: string;                      // Meeting title / subject
   description: string | null;         // Plain text description or null
   status: TargetMeetingStatus;        // 'scheduled' | 'ended' | 'cancelled'
@@ -673,6 +704,8 @@ export interface MeetingsResponseDto {
   "data": [
     {
       "externalId": "164193000005186138",
+      "parentType": "lead",
+      "parentZohoId": "164193000000811047",
       "title": "Australia PR Initial Eligibility Consultation",
       "description": "Reviewed client qualifications, ACS points calculator, and English proficiency test plans.",
       "status": "ended",
@@ -705,6 +738,8 @@ export interface MeetingsResponseDto {
     },
     {
       "externalId": "164193000005186210",
+      "parentType": "contact",
+      "parentZohoId": "164193000000822091",
       "title": "Document Verification Follow-up",
       "description": null,
       "status": "cancelled",

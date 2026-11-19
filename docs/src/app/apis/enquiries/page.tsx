@@ -49,6 +49,9 @@ export default function EnquiriesApiDocPage() {
               <span className="text-slate-500">|</span>
               <code className="text-sky-300 font-mono">migrated_contacts</code>
             </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-300 font-mono">
+              <span>Header: x-api-key</span>
+            </div>
           </div>
         </div>
 
@@ -1082,8 +1085,8 @@ export interface EnquiriesResponseDto {
   data: EnquiryItemDto[];              // Array of paginated enquiries
   total: number;                       // Total matching records in collection
   page: number;                        // Current page number (1-indexed)
-  limit: number;                       // Records requested per page
-  hasMore: boolean;                    // true if page * limit < total
+  pageSize: number;                    // Records requested per page
+  hasMore: boolean;                    // true if page * pageSize < total
 }`}
               />
             </div>
@@ -1131,6 +1134,8 @@ export interface EnquiriesResponseDto {
       "notes": [
         {
           "externalId": "164193000000543210",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "body": "Initial Consultation:- Candidate has 65 points for Australia Subclass 189. Recommended PTE coaching.",
           "createdByZohoId": "164193000000028001",
           "createdByEmail": "asha@worldvisa.in",
@@ -1143,6 +1148,8 @@ export interface EnquiriesResponseDto {
       "calls": [
         {
           "externalId": "164193000000654321",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "direction": "outbound",
           "status": "answered",
           "customerPhone": "+919876543210",
@@ -1167,9 +1174,11 @@ export interface EnquiriesResponseDto {
       "tasks": [
         {
           "externalId": "164193000000765432",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "title": "Collect Resume and Degree Certificates",
           "description": "Collect verified degree transcripts and detailed resume for skills assessment.",
-          "status": "completed",
+          "status": "done",
           "priority": "high",
           "dueDate": "2024-03-05T00:00:00.000Z",
           "assigneeId": "164193000000028001",
@@ -1186,6 +1195,8 @@ export interface EnquiriesResponseDto {
       "meetings": [
         {
           "externalId": "164193000000876543",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "title": "Australia PR Strategy Consultation",
           "description": "Virtual meeting to finalize migration roadmap.",
           "status": "ended",
@@ -1216,6 +1227,8 @@ export interface EnquiriesResponseDto {
       "attachments": [
         {
           "externalId": "164193000000987654",
+          "parentType": "lead",
+          "parentZohoId": "164193000000192070",
           "url": "https://r2.worldvisa.com/attachments/164193000000987654_resume.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600...",
           "fileName": "Priya_Sharma_CV.pdf",
           "mimeType": "application/pdf",
@@ -1234,7 +1247,7 @@ export interface EnquiriesResponseDto {
   ],
   "total": 14250,
   "page": 1,
-  "limit": 200,
+  "pageSize": 200,
   "hasMore": true
 }`}
               />

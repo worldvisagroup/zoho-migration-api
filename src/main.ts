@@ -16,7 +16,6 @@ async function bootstrap(): Promise<void> {
     bufferLogs: true,
   });
 
-
   const logger = app.get(AppLoggerService);
   app.useLogger(logger);
 
@@ -43,7 +42,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin: allowedOrigin === '*' ? true : allowedOrigin.split(',').map(o => o.trim()),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'x-api-key', 'Accept'],
     credentials: true,
   });
 
@@ -80,19 +79,23 @@ async function bootstrap(): Promise<void> {
       .setVersion(swaggerCfg?.version ?? '1.0.0')
       .addTag('Clients', 'Zoho CRM Leads & Contacts migration operations')
       .addTag('Staff', 'Zoho CRM Staff (migrated_users) migration operations')
-      .addTag('Notes', 'Zoho CRM Notes (migrated_notes) migration operations')
+      .addTag('Tasks', 'Zoho CRM Tasks (migrated_tasks) migration operations')
       .addTag('Calls', 'Zoho CRM Calls (migrated_calls) migration operations')
+      .addTag('Meetings', 'Zoho CRM Meetings (migrated_events) migration operations')
+      .addTag('Notes', 'Zoho CRM Notes (migrated_notes) migration operations')
+      .addTag('Enquiries', 'Zoho CRM Enquiries unified lead/contact migration operations')
+      .addTag('Attachments', 'Zoho CRM Attachments (migrated_attachments) migration operations')
       .addTag('Health', 'Operational health, telemetry, and database connectivity')
-      .addBearerAuth(
+      .addApiKey(
         {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          name: 'Authorization',
-          description: 'Enter your JWT bearer token for authorized operations',
+          type: 'apiKey',
+          name: 'x-api-key',
+          in: 'header',
+          description: 'API key required for all migration API endpoints',
         },
-        'BearerAuth',
+        'ApiKeyAuth',
       )
+      .addSecurityRequirements('ApiKeyAuth')
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerOptions);

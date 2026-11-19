@@ -68,6 +68,8 @@ describe('NotesService', () => {
 
       const note = result.data[0]!;
       expect(note.externalId).toBe('note_101');
+      expect(note.parentType).toBe('lead');
+      expect(note.parentZohoId).toBe('lead_001');
       expect(note.body).toBe('Initial Assessment:- Client has 8 bands in IELTS.');
       expect(note.createdByEmail).toBe('creator@worldvisa.in');
       expect(note.createdByZohoId).toBe('user_1');

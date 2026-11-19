@@ -4,13 +4,16 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
 import { AttachmentsResponseDto, QueryAttachmentsDto } from '../dto/index.js';
 import { AttachmentsService } from '../services/attachments.service.js';
 
 @ApiTags('Attachments')
+@ApiSecurity('ApiKeyAuth')
 @Controller('attachments')
 export class AttachmentsController {
   constructor(private readonly attachmentsService: AttachmentsService) {}
@@ -25,6 +28,9 @@ export class AttachmentsController {
   @ApiOkResponse({
     description: 'Paginated migration attachments in standardized format',
     type: AttachmentsResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid or missing API key in x-api-key header',
   })
   @ApiBadRequestResponse({
     description:

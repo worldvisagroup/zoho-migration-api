@@ -65,6 +65,8 @@ describe('MeetingsService', () => {
         End_DateTime: new Date('2024-03-04T11:45:00.000Z'),
         Created_Time: new Date('2024-03-01T09:00:00.000Z'),
         Modified_Time: new Date('2024-03-04T12:00:00.000Z'),
+        parent_entity_type: 'lead',
+        _zoho_lead_id: 'lead_123',
         _zoho_owner_id: 'user_host_1',
         _zoho_created_by_id: 'user_creator_1',
         _zoho_modified_by_id: 'user_modifier_1',
@@ -116,6 +118,8 @@ describe('MeetingsService', () => {
 
       const meeting = result.data[0];
       expect(meeting.externalId).toBe('event_001');
+      expect(meeting.parentType).toBe('lead');
+      expect(meeting.parentZohoId).toBe('lead_123');
       expect(meeting.title).toBe('Initial Consultation');
       expect(meeting.description).toBe('Discussion regarding Australia 189 PR visa pathway.');
       expect(meeting.status).toBe('ended');

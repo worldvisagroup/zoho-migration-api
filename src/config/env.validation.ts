@@ -59,6 +59,10 @@ export class EnvironmentVariables {
   @IsOptional()
   THROTTLE_LIMIT: number = 100;
 
+  @IsString()
+  @IsOptional()
+  API_KEY: string = 'wv_sec_api_key_migration_2026';
+
   @IsEnum(LogLevel)
   @IsOptional()
   LOG_LEVEL: LogLevel = LogLevel.Log;

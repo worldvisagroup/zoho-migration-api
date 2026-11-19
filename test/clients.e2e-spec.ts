@@ -183,10 +183,24 @@ describe('ClientsController (e2e)', () => {
     await app.close();
   });
 
+  const apiKey = 'wv_sec_api_key_migration_2026';
+
   describe('GET /api/v1/clients', () => {
+    it('should reject request without valid x-api-key with 401 Unauthorized', async () => {
+      await request(app.getHttpServer())
+        .get('/api/v1/clients?page=1&limit=200&type=leads')
+        .expect(401);
+
+      await request(app.getHttpServer())
+        .get('/api/v1/clients?page=1&limit=200&type=leads')
+        .set('x-api-key', 'wrong_key')
+        .expect(401);
+    });
+
     it('should return 200 with transformed clients and pagination when type=leads', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/clients?page=1&limit=200&type=leads')
+        .set('x-api-key', apiKey)
         .expect(200);
 
       expect(res.body).toHaveProperty('data');
@@ -217,6 +231,7 @@ describe('ClientsController (e2e)', () => {
     it('should return 400 Bad Request when type parameter is missing', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/clients?page=1&limit=200')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -227,6 +242,7 @@ describe('ClientsController (e2e)', () => {
     it('should return 400 Bad Request when type parameter is invalid', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/clients?type=invalidType')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -237,6 +253,7 @@ describe('ClientsController (e2e)', () => {
     it('should return 400 Bad Request when page is less than 1', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/clients?type=leads&page=0')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(
@@ -247,6 +264,7 @@ describe('ClientsController (e2e)', () => {
     it('should return 400 Bad Request when from is not a valid ISO 8601 string', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/clients?type=leads&from=invalid-date')
+        .set('x-api-key', apiKey)
         .expect(400);
 
       expect(res.body.message).toEqual(

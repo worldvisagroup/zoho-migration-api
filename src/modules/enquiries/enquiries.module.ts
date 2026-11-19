@@ -38,4 +38,3 @@ import { EnquiriesService } from './services/enquiries.service.js';
   exports: [EnquiriesService, EnquiriesRepository],
 })
 export class EnquiriesModule {}
-

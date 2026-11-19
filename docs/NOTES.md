@@ -4,6 +4,7 @@
 - **Controller:** [`NotesController`](file:///e:/World%20visa/zoho-api/src/modules/notes/controllers/notes.controller.ts)
 - **Service:** [`NotesService`](file:///e:/World%20visa/zoho-api/src/modules/notes/services/notes.service.ts)
 - **Repository:** [`NotesRepository`](file:///e:/World%20visa/zoho-api/src/modules/notes/repositories/notes.repository.ts)
+- **Authentication:** `x-api-key: <API_KEY>` (Required header, 401 Unauthorized if missing/invalid)
 - **Source Collection:** `migrated_notes` ([`MigratedNoteModel`](file:///e:/World%20visa/zoho-api/src/database/schema/migrated-note.schema.ts))
 - **Related Collections:** `migrated_users` (for staff creator/modifier email resolution)
 - **Status:** Complete & Production Ready
@@ -23,8 +24,7 @@ The Notes API extracts CRM consultation notes, internal agent remarks, and clien
 | `zohoContactId` | `string` | No | `undefined` | `@IsString()` | Filter notes linked to a specific Zoho Contact (`_zoho_contact_id`). |
 | `zohoDealId` | `string` | No | `undefined` | `@IsString()` | Filter notes linked to a specific Zoho Deal (`_zoho_deal_id`). |
 | `visaApplicationId` | `string` | No | `undefined` | `@IsString()` | Filter notes linked to a Visa Application (`_zoho_visa_application_id`). |
-| `spouseSkillAssementId` | `string` | No | `undefined` | `@IsString()` | Filter notes linked to a Spouse Skill Assessment (schema spelling). |
-| `spouseSkillAssessmentId` | `string` | No | `undefined` | `@IsString()` | Standardized alias for `spouseSkillAssementId`. |
+| `spouseSkillAssessmentId` | `string` | No | `undefined` | `@IsString()` | Filter notes linked to a Spouse Skill Assessment (`_zoho_spouse_skill_assessment_id`). |
 | `type` | `enum` | No | `undefined` | `@IsIn(NOTE_PARENT_TYPES)` | Filter by parent record type (`lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document`). |
 | `page` | `number` | No | `1` | `@IsInt()`, `@Min(1)` | 1-indexed pagination page number. |
 | `limit` | `number` | No | `200` | `@IsInt()`, `@Min(1)`, `@Max(1000)` | Records per page (capped at 1,000). |
@@ -44,6 +44,8 @@ Direct mapping from MongoDB `migrated_notes` and `migrated_users` to [`NoteItemD
 | Target Field | Target Type | Zoho Source Field | Source Type | Transformation Summary |
 | :--- | :--- | :--- | :--- | :--- |
 | `externalId` | `string` | `zoho_id` | String | Direct 1:1 copy of Zoho note unique identifier. |
+| `parentType` | `string \| null` | `parent_entity_type` | String | Standardized parent entity type (`lead`, `contact`, `deal`, `visa_application`, `spouse_skill_assessment`, `task`, `event`, `signed_document`), or `null`. |
+| `parentZohoId` | `string \| null` | `_zoho_*_id` | String | Original Zoho ID of the linked parent record (`_zoho_lead_id`, `_zoho_contact_id`, etc.), or `null`. |
 | `body` | `string` | `Note_Title`, `Note_Content` | Text, Text | Combined into `"${title}:- ${content}"`. Gracefully handles notes with title-only, content-only, or empty strings. |
 | `createdByEmail` | `string \| null` | `_zoho_created_by_id` &rarr; `migrated_users.email` | Lookup | Resolved creator email address via single-pass batch lookup, or `null`. |
 | `createdByZohoId` | `string \| null` | `_zoho_created_by_id` | String | Cleaned Zoho user ID of the creator, or `null`. |
@@ -97,8 +99,8 @@ The Notes API supports querying across 8 polymorphic parent record types:
   - `'Draft'` — Draft note
   - `'Trash'` — Soft-deleted note
 
-### Parameter Spelling Alias
-- `spouseSkillAssementId` (original schema spelling) and `spouseSkillAssessmentId` (standardized spelling) both resolve to MongoDB `_zoho_spouse_skill_assessment_id`.
+### Parameter Spelling
+- `spouseSkillAssessmentId` maps to MongoDB `_zoho_spouse_skill_assessment_id`.
 
 ---
 
@@ -107,6 +109,8 @@ The Notes API supports querying across 8 polymorphic parent record types:
 | Target Field | Condition | Resolution Path | Final Fallback Value |
 | :--- | :--- | :--- | :--- |
 | `externalId` | Missing or null `zoho_id` | Empty string assignment | `""` |
+| `parentType` | Missing or unrecognized `parent_entity_type` | Unresolved entity | `null` |
+| `parentZohoId` | Missing ID in matched `_zoho_*_id` | Null fallback | `null` |
 | `body` | Missing both `Note_Title` and `Note_Content` | Empty string assignment | `""` |
 | `body` | Missing `Note_Content` but title present | Output title only | `title` |
 | `body` | Missing `Note_Title` but content present | Output content only | `content` |
@@ -136,6 +140,8 @@ The Notes API supports querying across 8 polymorphic parent record types:
 ```typescript
 export interface NoteItemDto {
   externalId: string;                 // Original Zoho ID (zoho_id)
+  parentType: string | null;          // Type of parent record (lead, contact, deal, etc.)
+  parentZohoId: string | null;        // Original Zoho ID of parent record
   body: string;                       // Combined "Note_Title:- Note_Content"
   createdByEmail: string | null;      // Creator staff email or null
   createdByZohoId: string | null;     // Creator Zoho user ID or null
@@ -161,6 +167,8 @@ export interface NotesResponseDto {
   "data": [
     {
       "externalId": "164193000020539649",
+      "parentType": "lead",
+      "parentZohoId": "164193000000811047",
       "body": "Initial Assessment:- Client scored 8 bands in IELTS and has 5 years of experience as a Software Engineer. Eligible for subclass 189 visa.",
       "createdByEmail": "asha.sharma@worldvisa.in",
       "createdByZohoId": "164193000000028001",
@@ -171,6 +179,8 @@ export interface NotesResponseDto {
     },
     {
       "externalId": "164193000020539702",
+      "parentType": "contact",
+      "parentZohoId": "164193000000822091",
       "body": "Client requested call back after 6 PM due to office hours.",
       "createdByEmail": "rahul.patel@worldvisa.in",
       "createdByZohoId": "164193000000028005",
@@ -181,6 +191,8 @@ export interface NotesResponseDto {
     },
     {
       "externalId": "164193000020539810",
+      "parentType": "spouse_skill_assessment",
+      "parentZohoId": "164193000000933015",
       "body": "Spouse Assessment Review:- Need marriage certificate and spouse degree transcripts before submission.",
       "createdByEmail": "priya.nair@worldvisa.in",
       "createdByZohoId": "164193000000028012",

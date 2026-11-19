@@ -2,9 +2,11 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectConnection } from '@nestjs/mongoose';
 import type { Connection } from 'mongoose';
+import { Public } from '../../common/decorators/public.decorator.js';
 import { DatabaseHealthDto, HealthResponseDto, MemoryUsageDto } from './dto/health-response.dto.js';
 
 @ApiTags('Health')
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(@InjectConnection() private readonly connection: Connection) {}

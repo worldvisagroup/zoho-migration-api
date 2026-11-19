@@ -4,6 +4,7 @@
 - **Controller:** [`ClientsController`](file:///e:/World%20visa/zoho-api/src/modules/clients/controllers/clients.controller.ts)
 - **Service:** [`ClientsService`](file:///e:/World%20visa/zoho-api/src/modules/clients/services/clients.service.ts)
 - **Repositories:** [`ClientsRepository`](file:///e:/World%20visa/zoho-api/src/modules/clients/repositories/clients.repository.ts)
+- **Authentication:** `x-api-key: <API_KEY>` (Required header, 401 Unauthorized if missing/invalid)
 - **Source Collections:** `migrated_leads` ([`MigratedLeadModel`](file:///e:/World%20visa/zoho-api/src/database/schema/migrated-lead.schema.ts)) and `migrated_contacts` ([`MigratedContactModel`](file:///e:/World%20visa/zoho-api/src/database/schema/migrated-contact.schema.ts))
 - **Related Collections:** `migrated_books_invoices`, `migrated_books_contacts`
 - **Status:** Complete & Production Ready

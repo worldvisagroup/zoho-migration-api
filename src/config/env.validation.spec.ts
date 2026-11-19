@@ -16,6 +16,7 @@ describe('validateEnvironment', () => {
     expect(validated.PORT).toBe(5050);
     expect(validated.MONGODB_URI).toBe('mongodb://localhost:27017/zoho_crm');
     expect(validated.LOG_LEVEL).toBe(LogLevel.Log);
+    expect(validated.API_KEY).toBe('wv_sec_api_key_migration_2026');
   });
 
   it('should throw an error when an invalid PORT is provided', () => {

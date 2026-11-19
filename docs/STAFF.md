@@ -3,6 +3,7 @@
 - **Endpoint:** `GET /api/v1/staff`
 - **Controller:** [`StaffController`](file:///e:/World%20visa/zoho-api/src/modules/staff/controllers/staff.controller.ts)
 - **Service:** [`StaffService`](file:///e:/World%20visa/zoho-api/src/modules/staff/services/staff.service.ts)
+- **Authentication:** `x-api-key: <API_KEY>` (Required header, 401 Unauthorized if missing/invalid)
 - **Source Collection:** `migrated_users` ([`MigratedUserModel`](file:///e:/World%20visa/zoho-api/src/database/schema/migrated-user.schema.ts))
 - **Status:** Complete & Production Ready
 

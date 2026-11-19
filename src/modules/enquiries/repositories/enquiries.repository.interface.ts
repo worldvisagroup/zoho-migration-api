@@ -51,4 +51,3 @@ export interface IEnquiriesRepository {
     type: 'leads' | 'contacts',
   ): Promise<Map<string, MigratedAttachmentEntity[]>>;
 }
-

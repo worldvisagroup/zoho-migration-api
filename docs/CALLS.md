@@ -4,6 +4,7 @@
 - **Controller:** [`CallsController`](file:///e:/World%20visa/zoho-api/src/modules/calls/controllers/calls.controller.ts)
 - **Service:** [`CallsService`](file:///e:/World%20visa/zoho-api/src/modules/calls/services/calls.service.ts)
 - **Repository:** [`CallsRepository`](file:///e:/World%20visa/zoho-api/src/modules/calls/repositories/calls.repository.ts)
+- **Authentication:** `x-api-key: <API_KEY>` (Required header, 401 Unauthorized if missing/invalid)
 - **Source Collection:** `migrated_calls` ([`MigratedCallModel`](file:///e:/World%20visa/zoho-api/src/database/schema/migrated-call.schema.ts))
 - **Related Collections:** `migrated_leads`, `migrated_contacts`, `migrated_deals`, `migrated_visa_applications`, `migrated_spouse_skill_assessments`, `migrated_users`
 - **Status:** Complete & Production Ready
@@ -23,8 +24,7 @@ The Calls API extracts call activity logs and telephony history from `migrated_c
 | `zohoContactId` | `string` | No | `undefined` | `@IsString()` | Filter calls linked to a specific Zoho Contact (`_zoho_contact_id`). |
 | `zohoDealId` | `string` | No | `undefined` | `@IsString()` | Filter calls linked to a specific Zoho Deal (`_zoho_deal_id`). |
 | `visaApplicationId` | `string` | No | `undefined` | `@IsString()` | Filter calls linked to a Visa Application (`_zoho_visa_application_id`). |
-| `spouseSkillAssementId` | `string` | No | `undefined` | `@IsString()` | Filter calls linked to a Spouse Skill Assessment (schema spelling). |
-| `spouseSkillAssessmentId` | `string` | No | `undefined` | `@IsString()` | Alias for `spouseSkillAssementId` with standardized spelling. |
+| `spouseSkillAssessmentId` | `string` | No | `undefined` | `@IsString()` | Filter calls linked to a Spouse Skill Assessment (`_zoho_spouse_skill_assessment_id`). |
 | `type` | `enum` | No | `undefined` | `@IsIn(CALL_PARENT_TYPES)` | Filter by parent type (`lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document`). |
 | `page` | `number` | No | `1` | `@IsInt()`, `@Min(1)` | 1-indexed pagination page number. |
 | `limit` | `number` | No | `200` | `@IsInt()`, `@Min(1)`, `@Max(1000)` | Records per page (capped at 1,000). |
@@ -44,6 +44,8 @@ Direct mapping from MongoDB `migrated_calls` and related collections to [`CallIt
 | Target Field | Target Type | Zoho Source Field | Source Type | Transformation Summary |
 | :--- | :--- | :--- | :--- | :--- |
 | `externalId` | `string` | `zoho_id` | String | Direct 1:1 copy of Zoho call unique identifier. |
+| `parentType` | `string \| null` | `parent_entity_type` | String | Standardized parent entity type (`lead`, `contact`, `deal`, `visa_application`, `spouse_skill_assessment`, `task`, `event`, `signed_document`), or `null`. |
+| `parentZohoId` | `string \| null` | `_zoho_*_id` | String | Original Zoho ID of the linked parent record (`_zoho_lead_id`, `_zoho_contact_id`, etc.), or `null`. |
 | `direction` | `CallDirection` | `Call_Type` | Picklist | Mapped to `'inbound'` or `'outbound'`. Missed calls map to `'inbound'`. Defaults to `'outbound'`. |
 | `status` | `CallStatus` | `Call_Duration_in_seconds`, `Outgoing_Call_Status`, `Call_Result` | Number, Picklists | Evaluates talk time first (`> 0` &rarr; `'answered'`), then checks cancelled and busy indicators, defaulting to `'missed'`. |
 | `customerPhone` | `string` | Polymorphic parent record &rarr; `Phone`, `Mobile`, `Country_Code` | String | Resolved in parallel across Lead, Contact, Deal, Visa Application, or Spouse Assessment. Normalized to international E.164. Fallback: `+919999999999`. |
@@ -158,6 +160,8 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
 | Target Field | Condition | Resolution Path | Final Fallback Value |
 | :--- | :--- | :--- | :--- |
 | `externalId` | Missing or null `zoho_id` | Empty string assignment | `""` |
+| `parentType` | Missing or unrecognized `parent_entity_type` | Unresolved entity | `null` |
+| `parentZohoId` | Missing ID in matched `_zoho_*_id` | Null fallback | `null` |
 | `direction` | Missing, empty, or unmapped `Call_Type` | Standard telecalling direction assumption | `'outbound'` |
 | `status` | Missing duration, status, and result | Unanswered assumption | `'missed'` |
 | `customerPhone` | Missing entity, empty phone, or invalid syntax | Fallback phone assignment | `"+919999999999"` |
@@ -208,6 +212,8 @@ export interface CallRecordingDto {
 
 export interface CallItemDto {
   externalId: string;
+  parentType: string | null;
+  parentZohoId: string | null;
   direction: CallDirection;
   status: CallStatus;
   customerPhone: string;
@@ -241,6 +247,8 @@ export interface CallsResponseDto {
   "data": [
     {
       "externalId": "164193000020539001",
+      "parentType": "lead",
+      "parentZohoId": "164193000000811047",
       "direction": "outbound",
       "status": "answered",
       "customerPhone": "+919876543210",
@@ -263,6 +271,8 @@ export interface CallsResponseDto {
     },
     {
       "externalId": "164193000020539045",
+      "parentType": "contact",
+      "parentZohoId": "164193000000822091",
       "direction": "inbound",
       "status": "missed",
       "customerPhone": "+919123456789",
@@ -281,6 +291,8 @@ export interface CallsResponseDto {
     },
     {
       "externalId": "164193000020539120",
+      "parentType": "deal",
+      "parentZohoId": "164193000000899014",
       "direction": "outbound",
       "status": "busy",
       "customerPhone": "+919988776655",

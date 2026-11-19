@@ -64,4 +64,3 @@ describe('enquiry-source.util', () => {
     expect(normalizeEnquirySource('Some Unknown Source')).toBe('website');
   });
 });
-

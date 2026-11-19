@@ -4,6 +4,7 @@
 - **Controller:** [`MeetingsController`](file:///e:/World%20visa/zoho-api/src/modules/meetings/controllers/meetings.controller.ts)
 - **Service:** [`MeetingsService`](file:///e:/World%20visa/zoho-api/src/modules/meetings/services/meetings.service.ts)
 - **Repository:** [`MeetingsRepository`](file:///e:/World%20visa/zoho-api/src/modules/meetings/repositories/meetings.repository.ts)
+- **Authentication:** `x-api-key: <API_KEY>` (Required header, 401 Unauthorized if missing/invalid)
 - **Primary Collection:** `migrated_events` ([`MigratedEventModel`](file:///e:/World%20visa/zoho-api/src/database/schema/migrated-event.schema.ts))
 - **Related Collections:** `migrated_meeting_recordings`, `migrated_users`, `migrated_leads`, `migrated_contacts`, `migrated_visa_applications`, `migrated_deals`, `migrated_spouse_skill_assessments`
 - **Status:** Complete & Production Ready
@@ -23,8 +24,7 @@ The Meetings API extracts consultation meetings, client appointments, and operat
 | `zohoContactId` | `string` | No | `undefined` | `@IsString()` | Filter meetings linked to a specific Zoho Contact (`_zoho_contact_id`). |
 | `zohoDealId` | `string` | No | `undefined` | `@IsString()` | Filter meetings linked to a specific Zoho Deal (`_zoho_deal_id`). |
 | `visaApplicationId` | `string` | No | `undefined` | `@IsString()` | Filter meetings linked to a Visa Application (`_zoho_visa_application_id`). |
-| `spouseSkillAssementId` | `string` | No | `undefined` | `@IsString()` | Filter meetings linked to a Spouse Skill Assessment (schema spelling). |
-| `spouseSkillAssessmentId` | `string` | No | `undefined` | `@IsString()` | Standardized alias for `spouseSkillAssementId`. |
+| `spouseSkillAssessmentId` | `string` | No | `undefined` | `@IsString()` | Filter meetings linked to a Spouse Skill Assessment (`_zoho_spouse_skill_assessment_id`). |
 | `type` | `enum` | No | `undefined` | `@IsIn(MEETING_PARENT_TYPES)` | Filter by parent record type (`lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document`). |
 | `page` | `number` | No | `1` | `@IsInt()`, `@Min(1)` | 1-indexed pagination page number. |
 | `limit` | `number` | No | `200` | `@IsInt()`, `@Min(1)`, `@Max(1000)` | Records per page (capped at 1,000). |
@@ -44,6 +44,8 @@ Direct mapping from MongoDB `migrated_events`, `migrated_meeting_recordings`, an
 | Target Field | Target Type | Zoho Source Field | Source Type | Transformation Summary |
 | :--- | :--- | :--- | :--- | :--- |
 | `externalId` | `string` | `zoho_id` | String | Direct 1:1 copy of Zoho event unique identifier. |
+| `parentType` | `string \| null` | `parent_entity_type` | String | Standardized parent entity type (`lead`, `contact`, `deal`, `visa_application`, `spouse_skill_assessment`, `task`, `event`, `signed_document`), or `null`. |
+| `parentZohoId` | `string \| null` | `_zoho_*_id` | String | Original Zoho ID of the linked parent record (`_zoho_lead_id`, `_zoho_contact_id`, etc.), or `null`. |
 | `title` | `string` | `Event_Title` | String | Trimmed event title. Defaults to empty string `""` if missing. |
 | `description` | `string \| null` | `Description` | Textarea | Trimmed plain text notes. Returns `null` if empty or missing. |
 | `status` | `TargetMeetingStatus` | `Meeting_Status`, `is_closed` | Picklist, Boolean | Normalized to `'scheduled'`, `'ended'`, or `'cancelled'` via status ladder. |
@@ -137,6 +139,8 @@ Meetings require comprehensive attendee attribution distinguishing internal cons
 | Target Field | Condition | Resolution Path | Final Fallback Value |
 | :--- | :--- | :--- | :--- |
 | `externalId` | Missing or null `zoho_id` | Empty string assignment | `""` |
+| `parentType` | Missing or unrecognized `parent_entity_type` | Unresolved entity | `null` |
+| `parentZohoId` | Missing ID in matched `_zoho_*_id` | Null fallback | `null` |
 | `title` | Missing or null `Event_Title` | Empty string assignment | `""` |
 | `description` | Missing or whitespace `Description` | Plain nullable string | `null` |
 | `status` | Unstated status with `is_closed === false` | Open appointment rule | `'scheduled'` |
@@ -188,6 +192,8 @@ export interface MeetingRecordingDto {
 
 export interface MeetingItemDto {
   externalId: string;                 // Original Zoho ID (zoho_id)
+  parentType: string | null;          // Type of parent record (lead, contact, deal, etc.)
+  parentZohoId: string | null;        // Original Zoho ID of parent record
   title: string;                      // Meeting title / subject
   description: string | null;         // Plain text description or null
   status: TargetMeetingStatus;        // 'scheduled' | 'ended' | 'cancelled'
@@ -220,6 +226,8 @@ export interface MeetingsResponseDto {
   "data": [
     {
       "externalId": "164193000005186138",
+      "parentType": "lead",
+      "parentZohoId": "164193000000811047",
       "title": "Australia PR Initial Eligibility Consultation",
       "description": "Reviewed client qualifications, ACS points calculator, and English proficiency test plans.",
       "status": "ended",
@@ -252,6 +260,8 @@ export interface MeetingsResponseDto {
     },
     {
       "externalId": "164193000005186210",
+      "parentType": "contact",
+      "parentZohoId": "164193000000822091",
       "title": "Document Verification Follow-up",
       "description": null,
       "status": "cancelled",

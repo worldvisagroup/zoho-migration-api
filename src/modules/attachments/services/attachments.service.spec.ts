@@ -77,6 +77,8 @@ describe('AttachmentsService', () => {
 
     const first = result.data[0];
     expect(first.externalId).toBe('att_001');
+    expect(first.parentType).toBe('lead');
+    expect(first.parentZohoId).toBe('lead_100');
     expect(first.fileName).toBe('passport.pdf');
     expect(first.mimeType).toBe('application/pdf');
     expect(first.sizeBytes).toBe(245760);
@@ -90,6 +92,8 @@ describe('AttachmentsService', () => {
 
     const second = result.data[1];
     expect(second.externalId).toBe('att_002');
+    expect(second.parentType).toBe('contact');
+    expect(second.parentZohoId).toBe('contact_200');
     expect(second.fileName).toBe('photo.PNG');
     expect(second.mimeType).toBe('image/png');
     expect(second.sizeBytes).toBe(1024);
@@ -101,8 +105,9 @@ describe('AttachmentsService', () => {
     const mockRecords: MigratedAttachmentEntity[] = [
       {
         zoho_id: 'att_003',
-        parent_entity_type: 'deal',
-        r2_key: 'deals/123/doc_without_ext',
+        parent_entity_type: 'signed_document',
+        _zoho_parent_id: 'sig_doc_999',
+        r2_key: 'signed_docs/999/doc_without_ext',
         File_Name: 'doc_without_ext',
         Size: null,
       },
@@ -116,6 +121,8 @@ describe('AttachmentsService', () => {
     const item = result.data[0];
 
     expect(item.externalId).toBe('att_003');
+    expect(item.parentType).toBe('signed_document');
+    expect(item.parentZohoId).toBe('sig_doc_999');
     expect(item.sizeBytes).toBe(0);
     expect(item.mimeType).toBe('application/octet-stream');
   });

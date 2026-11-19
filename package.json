@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "docker:build": "docker build -t zoho-migration-api:local ."
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",

@@ -16,6 +16,7 @@ async function bootstrap(): Promise<void> {
     bufferLogs: true,
   });
 
+
   const logger = app.get(AppLoggerService);
   app.useLogger(logger);
 

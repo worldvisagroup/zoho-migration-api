@@ -14,6 +14,7 @@ import { CallsModule } from './modules/calls/calls.module.js';
 import { AttachmentsModule } from './modules/attachments/attachments.module.js';
 import { TasksModule } from './modules/tasks/tasks.module.js';
 import { MeetingsModule } from './modules/meetings/meetings.module.js';
+import { EnquiriesModule } from './modules/enquiries/enquiries.module.js';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware.js';
 
 @Module({
@@ -41,6 +42,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware.j
     AttachmentsModule,
     TasksModule,
     MeetingsModule,
+    EnquiriesModule,
   ],
   providers: [
     {

@@ -139,6 +139,8 @@ describe('TasksController (e2e)', () => {
       .useValue(mockEmptyModel)
       .overrideProvider(getModelToken('MigratedNote'))
       .useValue(mockEmptyModel)
+      .overrideProvider(getModelToken('UnifiedEntry'))
+      .useValue(mockEmptyModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

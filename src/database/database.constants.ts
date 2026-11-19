@@ -61,6 +61,8 @@ export const DB_COLLECTIONS = {
   MIGRATED_BOOKS_JOURNALS: 'migrated_books_journals',
   MIGRATED_BOOKS_PAYMENT_LINKS: 'migrated_books_payment_links',
   MIGRATED_BOOKS_BANK_TRANSACTIONS: 'migrated_books_bank_transactions',
+
+  UNIFIED_ENTRIES: 'unified_entries',
 } as const;
 
 export type DbCollection = (typeof DB_COLLECTIONS)[keyof typeof DB_COLLECTIONS];

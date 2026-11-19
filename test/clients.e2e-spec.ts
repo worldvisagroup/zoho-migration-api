@@ -160,6 +160,8 @@ describe('ClientsController (e2e)', () => {
       .useValue(mockNoteModel)
       .overrideProvider(getModelToken('MigratedMeetingRecording'))
       .useValue(mockNoteModel)
+      .overrideProvider(getModelToken('UnifiedEntry'))
+      .useValue(mockNoteModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

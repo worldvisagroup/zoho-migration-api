@@ -167,6 +167,8 @@ describe('CallsController (e2e)', () => {
       .useValue(mockEmptyModel)
       .overrideProvider(getModelToken('MigratedMeetingRecording'))
       .useValue(mockEmptyModel)
+      .overrideProvider(getModelToken('UnifiedEntry'))
+      .useValue(mockEmptyModel)
       .compile();
 
     app = moduleFixture.createNestApplication();

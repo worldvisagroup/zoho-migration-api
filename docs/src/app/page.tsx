@@ -5,6 +5,7 @@ import {
   CheckSquare,
   Database,
   FileText,
+  Inbox,
   Layers,
   PhoneCall,
   Server,
@@ -261,6 +262,29 @@ export default function HomePage() {
                 <td className="px-5 py-3.5 text-right">
                   <Link
                     href="/apis/meetings"
+                    className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-medium"
+                  >
+                    <span>View Docs</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </td>
+              </tr>
+              <tr className="hover:bg-slate-800/40 transition">
+                <td className="px-5 py-3.5 font-semibold text-white flex items-center gap-2">
+                  <Inbox className="h-4 w-4 text-sky-400" />
+                  <span>Enquiries</span>
+                </td>
+                <td className="px-5 py-3.5 font-mono text-sky-400">GET /api/v1/enquiries</td>
+                <td className="px-5 py-3.5 font-mono text-slate-400">migrated_leads, migrated_contacts</td>
+                <td className="px-5 py-3.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400 border border-emerald-500/20">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Complete & Documented
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-right">
+                  <Link
+                    href="/apis/enquiries"
                     className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-medium"
                   >
                     <span>View Docs</span>

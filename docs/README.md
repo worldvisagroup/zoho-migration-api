@@ -52,6 +52,7 @@ Each API module follows a standardized technical reference structure:
 | **Calls** | `GET /api/v1/calls` | `migrated_calls` | ✅ **Complete & Documented** (`/apis/calls`) |
 | **Meetings** | `GET /api/v1/meetings` | `migrated_events`, `migrated_meeting_recordings` | ✅ **Complete & Documented** (`/apis/meetings`) |
 | **Notes** | `GET /api/v1/notes` | `migrated_notes` | ✅ **Complete & Documented** (`/apis/notes`) |
+| **Enquiries** | `GET /api/v1/enquiries` | `migrated_leads`, `migrated_contacts` | ✅ **Complete & Documented** (`/apis/enquiries`) |
 | **Attachments** | `GET /api/v1/attachments` | `migrated_attachments` | ⏳ *Scheduled* |
 | **Invoices** | `GET /api/v1/invoices` | `migrated_books_invoices` | ⏳ *Scheduled* |
 | **Payments** | `GET /api/v1/payments` | `migrated_books_customer_payments` | ⏳ *Scheduled* |

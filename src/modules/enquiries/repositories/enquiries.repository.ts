@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model, QueryFilter } from 'mongoose';
+import type { Model, QueryFilter, SortOrder } from 'mongoose';
 import { sanitizeEmail } from '../../../common/utils/index.js';
 import type {
   MigratedAttachmentDocument,
@@ -53,7 +53,7 @@ export class EnquiriesRepository implements IEnquiriesRepository {
     private readonly eventModel: Model<MigratedEventDocument>,
     @InjectModel('MigratedAttachment')
     private readonly attachmentModel: Model<MigratedAttachmentDocument>,
-  ) {}
+  ) { }
 
   /**
    * Fetches paginated Leads or Contacts matching date filters, ordered oldest to newest by Created_Time.
@@ -61,7 +61,9 @@ export class EnquiriesRepository implements IEnquiriesRepository {
   async findEnquiries(query: QueryEnquiriesDto): Promise<PaginatedEnquiryRecords> {
     const filter: Record<string, unknown> = {};
 
-    if (query.from || query.to) {
+    if (query.updatedSince) {
+      filter['Modified_Time'] = { $gte: new Date(query.updatedSince) };
+    } else if (query.from || query.to) {
       const dateFilter: Record<string, Date> = {};
       if (query.from) {
         dateFilter['$gte'] = new Date(query.from);
@@ -72,6 +74,10 @@ export class EnquiriesRepository implements IEnquiriesRepository {
       filter['Created_Time'] = dateFilter;
     }
 
+    const sort: Record<string, SortOrder> = query.updatedSince
+      ? { Modified_Time: 1, _id: 1 }
+      : { Created_Time: 1, _id: 1 };
+
     const page = query.page ?? 1;
     const limit = query.limit ?? 200;
     const skip = (page - 1) * limit;
@@ -80,7 +86,7 @@ export class EnquiriesRepository implements IEnquiriesRepository {
       const [records, total] = await Promise.all([
         this.leadModel
           .find(filter as QueryFilter<MigratedLeadDocument>)
-          .sort({ Created_Time: 1, _id: 1 })
+          .sort(sort)
           .skip(skip)
           .limit(limit)
           .lean<MigratedLeadEntity[]>()
@@ -93,7 +99,7 @@ export class EnquiriesRepository implements IEnquiriesRepository {
     const [records, total] = await Promise.all([
       this.contactModel
         .find(filter as QueryFilter<MigratedContactDocument>)
-        .sort({ Created_Time: 1, _id: 1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean<MigratedContactEntity[]>()

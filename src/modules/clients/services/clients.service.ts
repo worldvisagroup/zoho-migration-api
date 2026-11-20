@@ -16,12 +16,12 @@ import type {
   MigratedLeadEntity,
 } from '../../../database/schema/index.js';
 import { ClientItemDto, ClientsResponseDto, type QueryClientsDto } from '../dto/index.js';
-import { ClientsRepository } from '../repositories/clients.repository.js';
 import type { ClientBatchIdentities } from '../repositories/clients.repository.interface.js';
+import { ClientsRepository } from '../repositories/clients.repository.js';
 
 @Injectable()
 export class ClientsService {
-  constructor(private readonly clientsRepository: ClientsRepository) {}
+  constructor(private readonly clientsRepository: ClientsRepository) { }
 
   /**
    * Fetches, normalizes, and transforms Zoho leads or contacts into migration client format.
@@ -30,17 +30,29 @@ export class ClientsService {
    * @returns {Promise<ClientsResponseDto>} Paginated client migration response
    */
   async getClients(query: QueryClientsDto): Promise<ClientsResponseDto> {
-    const { type, page = 1, limit = 200, from, to } = query;
+    const { type, page = 1, limit = 200, from, to, updatedSince } = query;
 
     let rawRecords: (MigratedLeadEntity | MigratedContactEntity)[];
     let total: number;
 
     if (type === 'leads') {
-      const result = await this.clientsRepository.findLeads(from, to, page, limit);
+      const result = await this.clientsRepository.findLeads(
+        from,
+        to,
+        page,
+        limit,
+        updatedSince,
+      );
       rawRecords = result.records;
       total = result.total;
     } else {
-      const result = await this.clientsRepository.findContacts(from, to, page, limit);
+      const result = await this.clientsRepository.findContacts(
+        from,
+        to,
+        page,
+        limit,
+        updatedSince,
+      );
       rawRecords = result.records;
       total = result.total;
     }

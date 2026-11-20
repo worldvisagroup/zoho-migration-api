@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
+import { validateDateFilterExclusivity } from '../../../common/utils/index.js';
 import { AttachmentsResponseDto, QueryAttachmentsDto } from '../dto/index.js';
 import { AttachmentsService } from '../services/attachments.service.js';
 
@@ -40,6 +41,7 @@ export class AttachmentsController {
     description: 'Internal server error while retrieving or transforming attachment records',
   })
   async getAttachments(@Query() query: QueryAttachmentsDto): Promise<AttachmentsResponseDto> {
+    validateDateFilterExclusivity(query);
     return this.attachmentsService.getAttachments(query);
   }
 }

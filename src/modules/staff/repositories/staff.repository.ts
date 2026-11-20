@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model, QueryFilter } from 'mongoose';
+import type { Model, QueryFilter, SortOrder } from 'mongoose';
 import type { MigratedUserDocument, MigratedUserEntity } from '../../../database/schema/index.js';
 import type { IStaffRepository, PaginatedStaffRecords } from './staff.repository.interface.js';
 
@@ -12,12 +12,18 @@ export class StaffRepository implements IStaffRepository {
   ) {}
 
   /**
-   * Builds a Mongoose filter object for created_time range.
+   * Builds a Mongoose filter object for created_time range or modified_time incremental sync.
    */
-  private buildDateFilter(from?: string, to?: string): QueryFilter<MigratedUserDocument> {
+  private buildDateFilter(
+    from?: string,
+    to?: string,
+    updatedSince?: string,
+  ): QueryFilter<MigratedUserDocument> {
     const filter: Record<string, unknown> = {};
 
-    if (from || to) {
+    if (updatedSince) {
+      filter['modified_time'] = { $gte: new Date(updatedSince) };
+    } else if (from || to) {
       const dateRange: Record<string, Date> = {};
       if (from) {
         dateRange['$gte'] = new Date(from);
@@ -32,21 +38,26 @@ export class StaffRepository implements IStaffRepository {
   }
 
   /**
-   * Fetches paginated staff records sorted in ascending order of created_time (oldest to newest).
+   * Fetches paginated staff records sorted in ascending order (oldest to newest).
+   * Sorted by modified_time when updatedSince is provided; otherwise by created_time.
    */
   async findStaff(
     from?: string,
     to?: string,
     page: number = 1,
     limit: number = 200,
+    updatedSince?: string,
   ): Promise<PaginatedStaffRecords> {
-    const filter = this.buildDateFilter(from, to);
+    const filter = this.buildDateFilter(from, to, updatedSince);
     const skip = (page - 1) * limit;
+    const sort: Record<string, SortOrder> = updatedSince
+      ? { modified_time: 1, _id: 1 }
+      : { created_time: 1, _id: 1 };
 
     const [records, total] = await Promise.all([
       this.userModel
         .find(filter)
-        .sort({ created_time: 1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean<MigratedUserEntity[]>()

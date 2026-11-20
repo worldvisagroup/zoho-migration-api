@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsISO8601, IsOptional, Min } from 'class-validator';
+import { IsIn, IsInt, IsISO8601, IsOptional, Max, Min } from 'class-validator';
 
 /**
  * Supported client record types for migration.
@@ -28,19 +28,21 @@ export class QueryClientsDto {
   page: number = 1;
 
   /**
-   * Number of records per page. Defaults to 200.
+   * Number of records per page. Defaults to 200. Max 1000.
    * @example 200
    */
   @ApiPropertyOptional({
     description: 'Number of records to return per page',
     default: 200,
     minimum: 1,
+    maximum: 1000,
     type: Number,
   })
   @IsOptional()
   @Type(() => Number)
   @IsInt({ message: 'limit must be an integer' })
-  @Min(1, { message: 'limit must be greater than or equal to 1' })
+  @Min(1, { message: 'limit must be between 1 and 1000' })
+  @Max(1000, { message: 'limit must be between 1 and 1000' })
   limit: number = 200;
 
   /**
@@ -90,4 +92,25 @@ export class QueryClientsDto {
     { message: 'to must be a valid ISO 8601 date string (e.g. 2025-12-31T23:59:59Z)' },
   )
   to?: string;
+
+  /**
+   * Optional filter for incremental synchronization: returns records modified at or after this ISO 8601 timestamp.
+   * Mutually exclusive with from and to.
+   * @example "2024-01-01T00:00:00Z"
+   */
+  @ApiPropertyOptional({
+    description:
+      'Optional filter for incremental synchronization: returns records modified at or after this ISO 8601 timestamp. Mutually exclusive with from and to.',
+    example: '2024-01-01T00:00:00Z',
+    type: String,
+  })
+  @IsOptional()
+  @IsISO8601(
+    { strict: true },
+    {
+      message:
+        'updatedSince must be a valid ISO 8601 date string (e.g. 2024-01-01T00:00:00Z)',
+    },
+  )
+  updatedSince?: string;
 }

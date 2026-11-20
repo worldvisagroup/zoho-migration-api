@@ -150,6 +150,13 @@ export default function MeetingsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-amber-300">@IsISO8601()</td>
                   <td className="px-4 py-2.5">Inclusive end date filter applied to Zoho <code className="text-slate-300">Created_Time</code>.</td>
                 </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">updatedSince</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500">—</td>
+                  <td className="px-4 py-2.5 font-mono text-amber-300">@IsISO8601({'{ strict: true }'})</td>
+                  <td className="px-4 py-2.5">Incremental sync filter on Zoho <code className="text-slate-300">Modified_Time</code> (&ge;). Mutually exclusive with <code className="text-slate-300">from</code>/<code className="text-slate-300">to</code> (returns 400 if combined).</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -157,7 +164,7 @@ export default function MeetingsApiDocPage() {
           <div className="text-xs text-slate-400 flex flex-wrap gap-4 pt-1">
             <div>
               <span className="text-slate-500">Sort Order:</span>{' '}
-              <span className="font-mono text-amber-300 font-semibold">Created_Time ASC (1), _id ASC (1)</span> — Stable chronological order
+              <span className="font-mono text-amber-300 font-semibold">Created_Time ASC (1), _id ASC (1)</span> default, or <span className="font-mono text-amber-300 font-semibold">Modified_Time ASC (1), _id ASC (1)</span> with <code className="text-slate-300 font-mono">updatedSince</code>
             </div>
             <div>
               <span className="text-slate-500">Pagination Flag:</span>{' '}
@@ -313,9 +320,9 @@ export default function MeetingsApiDocPage() {
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">modifiedAt</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">string (ISO 8601)</td>
-                  <td className="px-4 py-2.5 font-mono text-sky-300">Modified_Time, Created_Time</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">Modified_Time, Last_Activity_Time, Created_Time</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">Datetime</td>
-                  <td className="px-4 py-2.5">Primary <code className="font-mono">Modified_Time</code>, falls back to <code className="font-mono">Created_Time</code>. Never null.</td>
+                  <td className="px-4 py-2.5">Authentic Zoho <code className="font-mono">Modified_Time</code> (100% in DB), falls back to <code className="font-mono">Last_Activity_Time</code>, then <code className="font-mono">Created_Time</code>. Never null.</td>
                 </tr>
               </tbody>
             </table>

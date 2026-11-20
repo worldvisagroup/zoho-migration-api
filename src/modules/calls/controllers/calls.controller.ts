@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
+import { validateDateFilterExclusivity } from '../../../common/utils/index.js';
 import { QueryCallsDto, CallsResponseDto } from '../dto/index.js';
 import { CallsService } from '../services/calls.service.js';
 
@@ -40,6 +41,7 @@ export class CallsController {
     description: 'Internal server error while retrieving or transforming call records',
   })
   async getCalls(@Query() query: QueryCallsDto): Promise<CallsResponseDto> {
+    validateDateFilterExclusivity(query);
     return this.callsService.getCalls(query);
   }
 }

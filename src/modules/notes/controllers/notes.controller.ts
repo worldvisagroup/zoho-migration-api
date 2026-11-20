@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
+import { validateDateFilterExclusivity } from '../../../common/utils/index.js';
 import { QueryNotesDto, NotesResponseDto } from '../dto/index.js';
 import { NotesService } from '../services/notes.service.js';
 
@@ -40,6 +41,7 @@ export class NotesController {
     description: 'Internal server error while retrieving or transforming note records',
   })
   async getNotes(@Query() query: QueryNotesDto): Promise<NotesResponseDto> {
+    validateDateFilterExclusivity(query);
     return this.notesService.getNotes(query);
   }
 }

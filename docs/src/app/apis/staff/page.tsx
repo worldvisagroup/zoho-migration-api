@@ -105,6 +105,13 @@ export default function StaffApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-amber-300">ISO 8601 string</td>
                   <td className="px-4 py-2.5">Inclusive end date filter on Zoho <code className="text-slate-200">created_time</code>.</td>
                 </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">updatedSince</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">ISO 8601</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500">—</td>
+                  <td className="px-4 py-2.5 font-mono text-amber-300">ISO 8601 string</td>
+                  <td className="px-4 py-2.5">Incremental sync filter on Zoho <code className="text-slate-200">modified_time</code> (&ge;). Mutually exclusive with <code className="text-slate-200">from</code>/<code className="text-slate-200">to</code> (returns 400 if combined). Dynamic sort by <code className="text-slate-200">modified_time: 1</code>.</td>
+                </tr>
               </tbody>
             </table>
           </div>

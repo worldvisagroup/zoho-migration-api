@@ -25,8 +25,10 @@ The Enquiries API extracts unified sales and immigration prospect records from e
 | `limit` | `number` | No | `200` | `@IsInt()`, `@Min(1)`, `@Max(1000)` | Records per page (capped at 1,000). |
 | `from` | `string` | No | `undefined` | `@IsISO8601()` | Inclusive start filter on Zoho `Created_Time`. |
 | `to` | `string` | No | `undefined` | `@IsISO8601()` | Inclusive end filter on Zoho `Created_Time`. |
+| `updatedSince` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Incremental sync filter on Zoho `Modified_Time` (`>=`). Mutually exclusive with `from`/`to`. |
 
-- **Sorting Guarantee:** Ascending order by creation timestamp: `{ Created_Time: 1, _id: 1 }` (stable chronological order for incremental ingestion).
+- **Collision Prevention Strategy:** `updatedSince` is strictly mutually exclusive with `from` and `to`. Specifying both returns `400 Bad Request`.
+- **Sorting Guarantee:** Ascending order: `{ Created_Time: 1, _id: 1 }` (oldest to newest) by default, or `{ Modified_Time: 1, _id: 1 }` when `updatedSince` is supplied.
 - **Pagination Envelope:** Returns `{ data, total, page, limit, hasMore }` where `hasMore = page * limit < total`.
 - **Response Wrapper:** Decorated with `@BypassTransform()` to return the direct migration payload directly.
 

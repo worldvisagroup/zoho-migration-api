@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
+import { validateDateFilterExclusivity } from '../../../common/utils/index.js';
 import { MeetingsResponseDto, QueryMeetingsDto } from '../dto/index.js';
 import { MeetingsService } from '../services/meetings.service.js';
 
@@ -40,6 +41,7 @@ export class MeetingsController {
     description: 'Internal server error while retrieving or transforming meeting records',
   })
   async getMeetings(@Query() query: QueryMeetingsDto): Promise<MeetingsResponseDto> {
+    validateDateFilterExclusivity(query);
     return this.meetingsService.getMeetings(query);
   }
 }

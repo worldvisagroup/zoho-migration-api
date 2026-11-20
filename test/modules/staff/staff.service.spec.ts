@@ -41,7 +41,7 @@ describe('StaffService', () => {
         limit: 20,
       });
 
-      expect(mockRepo.findStaff).toHaveBeenCalledWith(undefined, undefined, 1, 20);
+      expect(mockRepo.findStaff).toHaveBeenCalledWith(undefined, undefined, 1, 20, undefined);
       expect(result.total).toBe(50);
       expect(result.page).toBe(1);
       expect(result.pageSize).toBe(20);
@@ -79,12 +79,36 @@ describe('StaffService', () => {
         '2023-12-31T23:59:59.000Z',
         2,
         10,
+        undefined,
       );
       expect(result.data).toEqual([]);
       expect(result.total).toBe(0);
       expect(result.page).toBe(2);
       expect(result.pageSize).toBe(10);
       expect(result.hasMore).toBe(false);
+    });
+
+    it('should pass updatedSince filter to repository', async () => {
+      mockRepo.findStaff.mockResolvedValue({
+        records: [],
+        total: 0,
+      });
+
+      const result = await service.getStaff({
+        page: 1,
+        limit: 200,
+        updatedSince: '2024-01-01T00:00:00.000Z',
+      });
+
+      expect(mockRepo.findStaff).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        1,
+        200,
+        '2024-01-01T00:00:00.000Z',
+      );
+      expect(result.data).toEqual([]);
+      expect(result.total).toBe(0);
     });
 
     it('should correctly handle name fallback from full_name or name', async () => {

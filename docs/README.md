@@ -46,6 +46,28 @@ curl -X GET "http://localhost:5050/api/v1/staff" \
 
 ---
 
+## Incremental Synchronization (`updatedSince`) & Filter Collision Strategy
+
+All list endpoints support delta / incremental synchronization using the `updatedSince` query parameter:
+
+- **Filter Parameter:** `updatedSince` (ISO 8601 string, e.g. `2024-01-01T00:00:00Z`).
+- **Database Target:** Zoho `Modified_Time` (`modified_time` for Staff).
+- **Sorting Behavior:**
+  - **Standard Ingestion:** When `updatedSince` is omitted, results are sorted ascending by Zoho creation time (`Created_Time: 1`, oldest first).
+  - **Incremental Sync:** When `updatedSince` is provided, results are sorted ascending by Zoho modification time (`Modified_Time: 1`), allowing consumers to stream updates chronologically without skipping modified records.
+- **Strict Mutual Exclusivity (Collision Strategy):** `from` / `to` (creation window) and `updatedSince` (modification delta) represent two distinct sync modes. Providing `updatedSince` simultaneously with `from` or `to` will immediately return **`400 Bad Request`**:
+  ```json
+  {
+    "statusCode": 400,
+    "message": "Cannot specify both 'updatedSince' (modification filter) and 'from'/'to' (creation filters) simultaneously. Use 'from'/'to' for initial backfill by creation date, or 'updatedSince' for incremental synchronization.",
+    "error": "Bad Request"
+  }
+  ```
+- **Limit & Total:** Maximum limit is enforced at `1000` (default `200`). The pagination envelope `total` strictly matches `countDocuments(filter)` under the exact active filter.
+- **Note on Tasks:** Tasks incremental sync is currently excluded pending schema activity resolution.
+
+---
+
 ## Documentation Structure
 
 Each API module follows a standardized technical reference structure:

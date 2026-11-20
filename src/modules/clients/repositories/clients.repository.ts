@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model, QueryFilter } from 'mongoose';
+import type { Model, QueryFilter, SortOrder } from 'mongoose';
 import type {
   MigratedBooksContactDocument,
   MigratedBooksInvoiceDocument,
@@ -27,15 +27,21 @@ export class ClientsRepository implements IClientsRepository {
     private readonly invoiceModel: Model<MigratedBooksInvoiceDocument>,
     @InjectModel('MigratedBooksContact')
     private readonly booksContactModel: Model<MigratedBooksContactDocument>,
-  ) {}
+  ) { }
 
   /**
-   * Builds a Mongoose filter object for Created_Time range.
+   * Builds a Mongoose filter object for Created_Time range or Modified_Time incremental sync.
    */
-  private buildDateFilter<T>(from?: string, to?: string): QueryFilter<T> {
+  private buildDateFilter<T>(
+    from?: string,
+    to?: string,
+    updatedSince?: string,
+  ): QueryFilter<T> {
     const filter: Record<string, unknown> = {};
 
-    if (from || to) {
+    if (updatedSince) {
+      filter['Modified_Time'] = { $gte: new Date(updatedSince) };
+    } else if (from || to) {
       const dateRange: Record<string, Date> = {};
       if (from) {
         dateRange['$gte'] = new Date(from);
@@ -50,21 +56,26 @@ export class ClientsRepository implements IClientsRepository {
   }
 
   /**
-   * Fetches paginated leads sorted in ascending order of Created_Time (oldest to newest).
+   * Fetches paginated leads sorted in ascending order (oldest to newest).
+   * Sorted by Modified_Time when updatedSince is provided; otherwise by Created_Time.
    */
   async findLeads(
     from?: string,
     to?: string,
     page: number = 1,
     limit: number = 200,
+    updatedSince?: string,
   ): Promise<PaginatedRecords<MigratedLeadEntity>> {
-    const filter = this.buildDateFilter<MigratedLeadDocument>(from, to);
+    const filter = this.buildDateFilter<MigratedLeadDocument>(from, to, updatedSince);
     const skip = (page - 1) * limit;
+    const sort: Record<string, SortOrder> = updatedSince
+      ? { Modified_Time: 1, _id: 1 }
+      : { Created_Time: 1, _id: 1 };
 
     const [records, total] = await Promise.all([
       this.leadModel
         .find(filter)
-        .sort({ Created_Time: 1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean<MigratedLeadEntity[]>()
@@ -76,21 +87,26 @@ export class ClientsRepository implements IClientsRepository {
   }
 
   /**
-   * Fetches paginated contacts sorted in ascending order of Created_Time (oldest to newest).
+   * Fetches paginated contacts sorted in ascending order (oldest to newest).
+   * Sorted by Modified_Time when updatedSince is provided; otherwise by Created_Time.
    */
   async findContacts(
     from?: string,
     to?: string,
     page: number = 1,
     limit: number = 200,
+    updatedSince?: string,
   ): Promise<PaginatedRecords<MigratedContactEntity>> {
-    const filter = this.buildDateFilter<MigratedContactDocument>(from, to);
+    const filter = this.buildDateFilter<MigratedContactDocument>(from, to, updatedSince);
     const skip = (page - 1) * limit;
+    const sort: Record<string, SortOrder> = updatedSince
+      ? { Modified_Time: 1, _id: 1 }
+      : { Created_Time: 1, _id: 1 };
 
     const [records, total] = await Promise.all([
       this.contactModel
         .find(filter)
-        .sort({ Created_Time: 1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean<MigratedContactEntity[]>()

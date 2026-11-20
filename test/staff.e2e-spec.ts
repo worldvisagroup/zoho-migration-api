@@ -271,5 +271,51 @@ describe('StaffController (e2e)', () => {
         ]),
       );
     });
+
+    it('should filter by updatedSince and return 200 OK', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/staff?updatedSince=2024-01-01T00:00:00Z')
+        .set('x-api-key', apiKey)
+        .expect(200);
+
+      expect(res.body.data).toBeInstanceOf(Array);
+      expect(res.body.page).toBe(1);
+      expect(res.body.pageSize).toBe(200);
+    });
+
+    it('should return 400 Bad Request when updatedSince and from are both supplied (collision)', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/staff?updatedSince=2024-01-01T00:00:00Z&from=2023-01-01T00:00:00Z')
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(res.body.message).toContain(
+        "Cannot specify both 'updatedSince' (modification filter) and 'from'/'to' (creation filters) simultaneously",
+      );
+    });
+
+    it('should return 400 Bad Request when updatedSince and to are both supplied (collision)', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/staff?updatedSince=2024-01-01T00:00:00Z&to=2024-12-31T23:59:59Z')
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(res.body.message).toContain(
+        "Cannot specify both 'updatedSince' (modification filter) and 'from'/'to' (creation filters) simultaneously",
+      );
+    });
+
+    it('should return 400 Bad Request when updatedSince is not a valid ISO 8601 string', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/staff?updatedSince=invalid-iso')
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('updatedSince must be a valid ISO 8601 date string'),
+        ]),
+      );
+    });
   });
 });

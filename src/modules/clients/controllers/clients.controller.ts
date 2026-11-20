@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
+import { validateDateFilterExclusivity } from '../../../common/utils/index.js';
 import { ClientsResponseDto, QueryClientsDto } from '../dto/index.js';
 import { ClientsService } from '../services/clients.service.js';
 
@@ -40,6 +41,7 @@ export class ClientsController {
     description: 'Internal server error while retrieving or transforming client records',
   })
   async getClients(@Query() query: QueryClientsDto): Promise<ClientsResponseDto> {
+    validateDateFilterExclusivity(query);
     return this.clientsService.getClients(query);
   }
 }

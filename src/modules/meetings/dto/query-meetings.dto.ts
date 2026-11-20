@@ -170,4 +170,25 @@ export class QueryMeetingsDto {
     { message: 'to must be a valid ISO 8601 date string (e.g. 2026-12-31T23:59:59Z)' },
   )
   to?: string;
+
+  /**
+   * Optional filter for incremental synchronization: returns records modified at or after this ISO 8601 timestamp.
+   * Mutually exclusive with from and to.
+   * @example "2024-01-01T00:00:00Z"
+   */
+  @ApiPropertyOptional({
+    description:
+      'Optional filter for incremental synchronization: returns records modified at or after this ISO 8601 timestamp. Mutually exclusive with from and to.',
+    example: '2024-01-01T00:00:00Z',
+    type: String,
+  })
+  @IsOptional()
+  @IsISO8601(
+    { strict: true },
+    {
+      message:
+        'updatedSince must be a valid ISO 8601 date string (e.g. 2024-01-01T00:00:00Z)',
+    },
+  )
+  updatedSince?: string;
 }

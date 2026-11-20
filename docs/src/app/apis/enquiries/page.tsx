@@ -133,6 +133,16 @@ export default function EnquiriesApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-amber-300">@IsISO8601()</td>
                   <td className="px-4 py-2.5">Inclusive filter matching records created at or before timestamp (<code className="text-slate-300">Created_Time &lt;= to</code>).</td>
                 </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">updatedSince</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">ISO 8601</td>
+                  <td className="px-4 py-2.5">
+                    <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400">Optional</span>
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500">—</td>
+                  <td className="px-4 py-2.5 font-mono text-amber-300">@IsISO8601({'{ strict: true }'})</td>
+                  <td className="px-4 py-2.5">Incremental sync filter matching records modified at or after timestamp (<code className="text-slate-300">Modified_Time &gt;= updatedSince</code>). Mutually exclusive with <code className="text-slate-300">from</code>/<code className="text-slate-300">to</code> (returns 400 if combined).</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -140,8 +150,8 @@ export default function EnquiriesApiDocPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
             <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3">
               <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Sorting Strategy</div>
-              <div className="mt-1 font-mono text-xs text-sky-300">&#123; Created_Time: 1, _id: 1 &#125;</div>
-              <div className="mt-1 text-[11px] text-slate-400">Ascending chronological order ensures stable, idempotent delta ingestion.</div>
+              <div className="mt-1 font-mono text-xs text-sky-300">&#123; Created_Time: 1, _id: 1 &#125; / &#123; Modified_Time: 1, _id: 1 &#125;</div>
+              <div className="mt-1 text-[11px] text-slate-400">Ascending chronological order by Created_Time (default) or Modified_Time (with updatedSince).</div>
             </div>
             <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3">
               <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Pagination Contract</div>

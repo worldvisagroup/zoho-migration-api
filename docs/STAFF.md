@@ -22,8 +22,10 @@ The Staff API extracts internal employees, counselors, and operational managers 
 | `limit` | `number` | No | `200` | `@IsInt()`, `@Min(1)`, `@Max(1000)` | Number of records per page (max 1,000). |
 | `from` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Inclusive start filter on Zoho `created_time`. |
 | `to` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Inclusive end filter on Zoho `created_time`. |
+| `updatedSince` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Incremental sync filter on Zoho `modified_time` (`>=`). Mutually exclusive with `from`/`to`. |
 
-- **Sorting Guarantee:** Ascending order by creation timestamp: `{ created_time: 1 }` (oldest to newest).
+- **Collision Prevention Strategy:** `updatedSince` is strictly mutually exclusive with `from` and `to`. Specifying both returns `400 Bad Request`.
+- **Sorting Guarantee:** Ascending order: `{ created_time: 1, _id: 1 }` (oldest to newest) by default, or `{ modified_time: 1, _id: 1 }` when `updatedSince` is supplied.
 - **Pagination Flag:** `hasMore` is computed as `page * pageSize < total`.
 - **Response Wrapper:** Uses `@BypassTransform()` to return the direct migration envelope (`data`, `total`, `page`, `pageSize`, `hasMore`).
 

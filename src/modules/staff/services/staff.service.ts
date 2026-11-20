@@ -17,13 +17,19 @@ export class StaffService {
   /**
    * Fetches, normalizes, and transforms Zoho users into standardized staff migration records.
    *
-   * @param query - Validated query parameters (page, limit, from, to)
+   * @param query - Validated query parameters (page, limit, from, to, updatedSince)
    * @returns {Promise<StaffResponseDto>} Paginated staff migration response
    */
   async getStaff(query: QueryStaffDto): Promise<StaffResponseDto> {
-    const { page = 1, limit = 200, from, to } = query;
+    const { page = 1, limit = 200, from, to, updatedSince } = query;
 
-    const { records, total } = await this.staffRepository.findStaff(from, to, page, limit);
+    const { records, total } = await this.staffRepository.findStaff(
+      from,
+      to,
+      page,
+      limit,
+      updatedSince,
+    );
 
     if (records.length === 0) {
       return new StaffResponseDto([], total, page, limit);

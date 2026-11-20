@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model, QueryFilter } from 'mongoose';
+import type { Model, QueryFilter, SortOrder } from 'mongoose';
 import { extractNames, sanitizeEmail } from '../../../common/utils/index.js';
 import type {
   MigratedContactDocument,
@@ -79,7 +79,9 @@ export class MeetingsRepository implements IMeetingsRepository {
       filter['parent_entity_type'] = query.type;
     }
 
-    if (query.from || query.to) {
+    if (query.updatedSince) {
+      filter['Modified_Time'] = { $gte: new Date(query.updatedSince) };
+    } else if (query.from || query.to) {
       const dateFilter: Record<string, Date> = {};
       if (query.from) {
         dateFilter['$gte'] = new Date(query.from);
@@ -94,18 +96,22 @@ export class MeetingsRepository implements IMeetingsRepository {
   }
 
   /**
-   * Fetches paginated meeting event records matching query filters, ordered oldest to newest by Created_Time.
+   * Fetches paginated meeting event records matching query filters, ordered oldest to newest.
+   * Sorted by Modified_Time when updatedSince is provided; otherwise by Created_Time.
    */
   async findMeetings(query: QueryMeetingsDto): Promise<PaginatedMeetingRecords> {
     const filter = this.buildFilter(query);
     const page = query.page ?? 1;
     const limit = query.limit ?? 200;
     const skip = (page - 1) * limit;
+    const sort: Record<string, SortOrder> = query.updatedSince
+      ? { Modified_Time: 1, _id: 1 }
+      : { Created_Time: 1, _id: 1 };
 
     const [records, total] = await Promise.all([
       this.eventModel
         .find(filter)
-        .sort({ Created_Time: 1, _id: 1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean<MigratedEventEntity[]>()

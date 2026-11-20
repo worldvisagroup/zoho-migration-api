@@ -120,6 +120,23 @@ describe('NotesService', () => {
       expect(note.modifiedByZohoId).toBeNull();
       expect(note.modifiedAt).toBe('2024-01-10T08:00:00.000Z');
     });
+
+    it('should forward updatedSince parameter to repository', async () => {
+      mockRepo.findNotes.mockResolvedValue({ records: [], total: 0 });
+      mockRepo.findUserEmailsByZohoIds.mockResolvedValue(new Map());
+
+      await service.getNotes({
+        page: 1,
+        limit: 200,
+        updatedSince: '2024-01-01T00:00:00.000Z',
+      });
+
+      expect(mockRepo.findNotes).toHaveBeenCalledWith({
+        page: 1,
+        limit: 200,
+        updatedSince: '2024-01-01T00:00:00.000Z',
+      });
+    });
   });
 
   describe('formatBody', () => {

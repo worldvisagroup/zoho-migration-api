@@ -200,7 +200,8 @@ export class MeetingsService {
     // Timestamps
     const scheduledAt = normalizeZohoTimestamp(record.Start_DateTime);
     const endedAt = normalizeZohoTimestamp(record.End_DateTime);
-    const modifiedAt = normalizeZohoTimestamp(record.Modified_Time, record.Created_Time);
+    const rawModified = record.Modified_Time ?? record.Last_Activity_Time ?? record.Created_Time;
+    const modifiedAt = normalizeZohoTimestamp(rawModified, record.Created_Time);
     // startedAt fallback: if ended, falls back to scheduled Start_DateTime; if scheduled/cancelled, null
     const startedAt = status === 'ended' ? scheduledAt : null;
 

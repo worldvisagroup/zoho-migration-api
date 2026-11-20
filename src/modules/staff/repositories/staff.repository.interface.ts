@@ -20,11 +20,13 @@ export interface IStaffRepository {
    * @param to - Optional ISO 8601 end date
    * @param page - 1-indexed page number
    * @param limit - Page size
+   * @param updatedSince - Optional ISO 8601 modification timestamp for incremental sync
    */
   findStaff(
     from?: string,
     to?: string,
     page?: number,
     limit?: number,
+    updatedSince?: string,
   ): Promise<PaginatedStaffRecords>;
 }

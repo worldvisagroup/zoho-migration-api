@@ -60,4 +60,19 @@ export class QueryEnquiriesDto {
   @IsOptional()
   @IsISO8601({ strict: false }, { message: 'to must be a valid ISO 8601 date string' })
   to?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Optional filter for incremental synchronization: returns records modified at or after this ISO 8601 timestamp. Mutually exclusive with from and to.',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  @IsOptional()
+  @IsISO8601(
+    { strict: true },
+    {
+      message:
+        'updatedSince must be a valid ISO 8601 date string (e.g. 2024-01-01T00:00:00Z)',
+    },
+  )
+  updatedSince?: string;
 }

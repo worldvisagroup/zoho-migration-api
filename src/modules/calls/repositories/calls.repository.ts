@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model, QueryFilter } from 'mongoose';
+import type { Model, QueryFilter, SortOrder } from 'mongoose';
 import {
   DEFAULT_FALLBACK_PHONE,
   normalizeEmail,
@@ -74,7 +74,9 @@ export class CallsRepository implements ICallsRepository {
       filter['parent_entity_type'] = query.type;
     }
 
-    if (query.from || query.to) {
+    if (query.updatedSince) {
+      filter['Modified_Time'] = { $gte: new Date(query.updatedSince) };
+    } else if (query.from || query.to) {
       const dateRange: Record<string, Date> = {};
       if (query.from) {
         dateRange['$gte'] = new Date(query.from);
@@ -89,18 +91,22 @@ export class CallsRepository implements ICallsRepository {
   }
 
   /**
-   * Fetches paginated calls sorted in ascending order of Created_Time (oldest to newest).
+   * Fetches paginated calls sorted in ascending order (oldest to newest).
+   * Sorted by Modified_Time when updatedSince is provided; otherwise by Created_Time.
    */
   async findCalls(query: QueryCallsDto): Promise<PaginatedCallRecords> {
     const filter = this.buildFilter(query);
     const page = query.page || 1;
     const limit = query.limit || 200;
     const skip = (page - 1) * limit;
+    const sort: Record<string, SortOrder> = query.updatedSince
+      ? { Modified_Time: 1, _id: 1 }
+      : { Created_Time: 1, _id: 1 };
 
     const [records, total] = await Promise.all([
       this.callModel
         .find(filter)
-        .sort({ Created_Time: 1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean<MigratedCallEntity[]>()

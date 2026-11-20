@@ -544,5 +544,54 @@ describe('EnquiriesController (e2e)', () => {
         .set('x-api-key', apiKey)
         .expect(400);
     });
+
+    it('should filter by updatedSince and return 200 OK', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/enquiries?type=leads&updatedSince=2024-01-01T00:00:00Z')
+        .set('x-api-key', apiKey)
+        .expect(200);
+
+      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.page).toBe(1);
+    });
+
+    it('should return 400 Bad Request when updatedSince and from are both supplied (collision)', async () => {
+      const response = await request(app.getHttpServer())
+        .get(
+          '/api/v1/enquiries?type=leads&updatedSince=2024-01-01T00:00:00Z&from=2023-01-01T00:00:00Z',
+        )
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(response.body.message).toContain(
+        "Cannot specify both 'updatedSince' (modification filter) and 'from'/'to' (creation filters) simultaneously",
+      );
+    });
+
+    it('should return 400 Bad Request when updatedSince and to are both supplied (collision)', async () => {
+      const response = await request(app.getHttpServer())
+        .get(
+          '/api/v1/enquiries?type=leads&updatedSince=2024-01-01T00:00:00Z&to=2024-12-31T23:59:59Z',
+        )
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(response.body.message).toContain(
+        "Cannot specify both 'updatedSince' (modification filter) and 'from'/'to' (creation filters) simultaneously",
+      );
+    });
+
+    it('should return 400 Bad Request when updatedSince is not a valid ISO 8601 string', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/enquiries?type=leads&updatedSince=invalid-iso')
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(response.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('updatedSince must be a valid ISO 8601 date string'),
+        ]),
+      );
+    });
   });
 });

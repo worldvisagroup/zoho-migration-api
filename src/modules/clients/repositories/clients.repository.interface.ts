@@ -38,33 +38,37 @@ export interface PaginatedRecords<T> {
  */
 export interface IClientsRepository {
   /**
-   * Fetches paginated leads from the migrated_leads collection, filtered by Created_Time range.
+   * Fetches paginated leads from the migrated_leads collection, filtered by Created_Time range or Modified_Time.
    *
    * @param from - Optional ISO 8601 start date
    * @param to - Optional ISO 8601 end date
    * @param page - 1-indexed page number
    * @param limit - Page size
+   * @param updatedSince - Optional ISO 8601 modification timestamp for incremental sync
    */
   findLeads(
     from?: string,
     to?: string,
     page?: number,
     limit?: number,
+    updatedSince?: string,
   ): Promise<PaginatedRecords<MigratedLeadEntity>>;
 
   /**
-   * Fetches paginated contacts from the migrated_contacts collection, filtered by Created_Time range.
+   * Fetches paginated contacts from the migrated_contacts collection, filtered by Created_Time range or Modified_Time.
    *
    * @param from - Optional ISO 8601 start date
    * @param to - Optional ISO 8601 end date
    * @param page - 1-indexed page number
    * @param limit - Page size
+   * @param updatedSince - Optional ISO 8601 modification timestamp for incremental sync
    */
   findContacts(
     from?: string,
     to?: string,
     page?: number,
     limit?: number,
+    updatedSince?: string,
   ): Promise<PaginatedRecords<MigratedContactEntity>>;
 
   /**

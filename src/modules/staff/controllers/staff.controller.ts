@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BypassTransform } from '../../../common/decorators/bypass-transform.decorator.js';
+import { validateDateFilterExclusivity } from '../../../common/utils/index.js';
 import { QueryStaffDto, StaffResponseDto } from '../dto/index.js';
 import { StaffService } from '../services/staff.service.js';
 
@@ -39,6 +40,7 @@ export class StaffController {
     description: 'Internal server error while retrieving or transforming staff records',
   })
   async getStaff(@Query() query: QueryStaffDto): Promise<StaffResponseDto> {
+    validateDateFilterExclusivity(query);
     return this.staffService.getStaff(query);
   }
 }

@@ -30,8 +30,10 @@ The Meetings API extracts consultation meetings, client appointments, and operat
 | `limit` | `number` | No | `200` | `@IsInt()`, `@Min(1)`, `@Max(1000)` | Records per page (capped at 1,000). |
 | `from` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Inclusive start filter on Zoho `Created_Time`. |
 | `to` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Inclusive end filter on Zoho `Created_Time`. |
+| `updatedSince` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Incremental sync filter on Zoho `Modified_Time` (`>=`). Mutually exclusive with `from`/`to`. |
 
-- **Sorting Guarantee:** Ascending order by creation timestamp: `{ Created_Time: 1, _id: 1 }` (stable chronological order).
+- **Collision Prevention Strategy:** `updatedSince` is strictly mutually exclusive with `from` and `to`. Specifying both returns `400 Bad Request`.
+- **Sorting Guarantee:** Ascending order: `{ Created_Time: 1, _id: 1 }` (oldest to newest) by default, or `{ Modified_Time: 1, _id: 1 }` when `updatedSince` is supplied.
 - **Pagination Flag:** `hasMore = page * pageSize < total`.
 - **Response Wrapper:** Uses `@BypassTransform()` to return the direct migration envelope (`data`, `total`, `page`, `pageSize`, `hasMore`).
 
@@ -59,7 +61,7 @@ Direct mapping from MongoDB `migrated_events`, `migrated_meeting_recordings`, an
 | `createdById` | `string \| null` | `_zoho_created_by_id` | String | Cleaned Zoho user ID of creator, or `null`. |
 | `createdByEmail` | `string \| null` | `_zoho_created_by_id` &rarr; `migrated_users.email` | Lookup | Resolved creator email address via batch lookup, or `null`. |
 | `modifiedById` | `string \| null` | `_zoho_modified_by_id` | String | Cleaned Zoho user ID of last modifier, or `null`. |
-| `modifiedAt` | `string` (ISO 8601) | `Modified_Time`, `Created_Time` | Datetime | Primary `Modified_Time`, falls back to `Created_Time`. Never null. |
+| `modifiedAt` | `string` (ISO 8601) | `Modified_Time`, `Last_Activity_Time`, `Created_Time` | Datetime | Authentic Zoho `Modified_Time` (100% populated in `migrated_events`), falls back to `Last_Activity_Time`, then `Created_Time`. Never null. |
 
 ---
 

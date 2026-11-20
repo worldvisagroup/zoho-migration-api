@@ -122,6 +122,24 @@ describe('CallsService', () => {
       expect(result.data[0]!.notes).toBeNull();
     });
 
+    it('should forward updatedSince parameter to repository', async () => {
+      mockRepo.findCalls.mockResolvedValue({ records: [], total: 0 });
+      mockRepo.batchResolveCustomerPhones.mockResolvedValue(new Map());
+      mockRepo.batchResolveUserEmails.mockResolvedValue(new Map());
+
+      await service.getCalls({
+        page: 1,
+        limit: 200,
+        updatedSince: '2024-01-01T00:00:00.000Z',
+      });
+
+      expect(mockRepo.findCalls).toHaveBeenCalledWith({
+        page: 1,
+        limit: 200,
+        updatedSince: '2024-01-01T00:00:00.000Z',
+      });
+    });
+
     it('should set hasMore to false on the final page', async () => {
       mockRepo.findCalls.mockResolvedValue({
         records: [],

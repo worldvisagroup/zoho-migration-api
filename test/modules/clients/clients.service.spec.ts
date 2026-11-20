@@ -204,5 +204,40 @@ describe('ClientsService', () => {
           });
         });
     });
+
+    it('should pass updatedSince filter to repository for leads and contacts', async () => {
+      mockRepo.findLeads.mockResolvedValue({ records: [], total: 0 });
+      mockRepo.findContacts.mockResolvedValue({ records: [], total: 0 });
+
+      await service.getClients({
+        type: 'leads',
+        page: 1,
+        limit: 200,
+        updatedSince: '2024-01-01T00:00:00.000Z',
+      });
+
+      expect(mockRepo.findLeads).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        1,
+        200,
+        '2024-01-01T00:00:00.000Z',
+      );
+
+      await service.getClients({
+        type: 'contacts',
+        page: 1,
+        limit: 200,
+        updatedSince: '2024-01-01T00:00:00.000Z',
+      });
+
+      expect(mockRepo.findContacts).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        1,
+        200,
+        '2024-01-01T00:00:00.000Z',
+      );
+    });
   });
 });

@@ -81,18 +81,20 @@ export class ClientItemDto {
   lastName: string;
 
   @ApiProperty({
-    description: 'Normalized lowercase email address with fallback to notprovided@gmail.com',
+    description: 'Normalized lowercase email address, or null if missing/unparseable',
     example: 'jane.doe@example.com',
     type: String,
+    nullable: true,
   })
-  email: string;
+  email: string | null;
 
   @ApiProperty({
-    description: 'International E.164 formatted phone number with fallback to +919999999999',
+    description: 'International E.164 formatted phone number, or null if missing/unparseable',
     example: '+919876543210',
     type: String,
+    nullable: true,
   })
-  phone: string;
+  phone: string | null;
 
   @ApiProperty({
     description: 'Date of birth in UTC ISO 8601 format',
@@ -134,8 +136,8 @@ export class ClientItemDto {
     externalId: string;
     firstName: string;
     lastName: string;
-    email: string;
-    phone: string;
+    email: string | null;
+    phone: string | null;
     dob: string | null;
     maritalStatus: StandardMaritalStatus | null;
     address: ClientAddress;

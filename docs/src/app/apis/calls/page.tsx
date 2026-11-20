@@ -237,10 +237,10 @@ export default function CallsApiDocPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">customerPhone</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Parent Entity &rarr; Phone, Mobile, Country_Code</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
-                  <td className="px-4 py-2.5">Resolved in parallel across Lead, Contact, Deal, Visa Application, or Spouse Assessment. Normalized to international E.164. Fallback: <code className="text-amber-300 font-mono">+919999999999</code>.</td>
+                  <td className="px-4 py-2.5">Resolved in parallel across Lead, Contact, Deal, Visa Application, or Spouse Assessment. Normalized to international E.164. Null if missing/unparseable.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">agentEmail</td>
@@ -380,7 +380,7 @@ export default function CallsApiDocPage() {
                 <li>Executes parallel batch queries using <code className="font-mono text-sky-300">Promise.all()</code>.</li>
                 <li>Cascades Deal/Visa App lookups to linked Contact (<code className="font-mono text-slate-200">_zoho_contact_id</code>) if needed.</li>
                 <li>Normalizes to international E.164 via <code className="font-mono text-sky-300">libphonenumber-js</code>.</li>
-                <li>Falls back to <code className="font-mono text-amber-300">+919999999999</code> if unresolvable.</li>
+                <li>Falls back to <code className="font-mono text-slate-200">null</code> if unresolvable.</li>
               </ul>
             </div>
 
@@ -555,8 +555,8 @@ export default function CallsApiDocPage() {
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">customerPhone</td>
                   <td className="px-4 py-2.5">Missing parent entity, empty phone, or invalid syntax</td>
-                  <td className="px-4 py-2.5">Deterministic fallback phone number</td>
-                  <td className="px-4 py-2.5 font-mono text-amber-300 font-bold">&quot;+919999999999&quot;</td>
+                  <td className="px-4 py-2.5">Null assignment</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400 font-bold">null</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">agentEmail</td>
@@ -662,7 +662,7 @@ export default function CallsApiDocPage() {
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
               <span className="font-semibold text-white">Polymorphic Parent Entity Cascade</span>
               <p className="text-slate-300 leading-relaxed">
-                Calls attach to 5 different entity types. The engine resolves customer phone numbers by checking Lead &rarr; Contact &rarr; Deal (with Contact fallback) &rarr; Visa Application (with Contact fallback) &rarr; Spouse Assessment, defaulting to <code className="font-mono text-amber-300">+919999999999</code> to prevent downstream dialer crashes.
+                Calls attach to 5 different entity types. The engine resolves customer phone numbers by checking Lead &rarr; Contact &rarr; Deal (with Contact fallback) &rarr; Visa Application (with Contact fallback) &rarr; Spouse Assessment, cleanly resolving to <code className="font-mono text-slate-200">null</code> if missing or unresolvable.
               </p>
             </div>
 
@@ -704,7 +704,7 @@ export interface CallItemDto {
   parentZohoId: string | null;        // Original Zoho ID of parent record
   direction: CallDirection;           // 'inbound' | 'outbound'
   status: CallStatus;                 // 'answered' | 'missed' | 'cancelled' | 'busy'
-  customerPhone: string;              // Normalized international phone (+91XXXXXXXXXX)
+  customerPhone: string | null;       // Normalized international phone or null
   agentEmail: string | null;          // Assigned staff email address or null
   startedAt: string;                  // Call start timestamp in UTC ISO 8601
   durationSeconds: number;            // Duration in seconds (integer >= 0)

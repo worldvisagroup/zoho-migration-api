@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  DEFAULT_FALLBACK_PHONE,
   normalizeZohoTimestamp,
   resolveParentEntity,
 } from '../../../common/utils/index.js';
@@ -137,13 +136,13 @@ export class CallsService {
    */
   private transformRecordToCall(
     call: MigratedCallEntity,
-    phoneMap: Map<string, string>,
+    phoneMap: Map<string, string | null>,
     emailMap: Map<string, string>,
   ): CallItemDto {
     const direction = this.resolveDirection(call.Call_Type);
     const status = this.resolveStatus(call);
 
-    const customerPhone = phoneMap.get(call.zoho_id) || DEFAULT_FALLBACK_PHONE;
+    const customerPhone = phoneMap.get(call.zoho_id) ?? null;
 
     const agentEmail =
       call._zoho_owner_id && emailMap.has(call._zoho_owner_id)

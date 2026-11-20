@@ -108,10 +108,10 @@ describe('Staff Role & Phone Utilities (staff-role.util)', () => {
       expect(normalizeIndianPhone(null, '9876543210')).toBe('+919876543210');
     });
 
-    it('should fallback to +919999999999 if missing or invalid', () => {
-      expect(normalizeIndianPhone(null, null)).toBe('+919999999999');
-      expect(normalizeIndianPhone('', '')).toBe('+919999999999');
-      expect(normalizeIndianPhone('123', '456')).toBe('+919999999999');
+    it('should fallback to null if missing or invalid', () => {
+      expect(normalizeIndianPhone(null, null)).toBeNull();
+      expect(normalizeIndianPhone('', '')).toBeNull();
+      expect(normalizeIndianPhone('123', '456')).toBeNull();
     });
   });
 });

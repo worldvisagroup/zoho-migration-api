@@ -50,7 +50,7 @@ Direct mapping from MongoDB `migrated_calls` and related collections to [`CallIt
 | `parentZohoId` | `string \| null` | `_zoho_*_id` | String | Original Zoho ID of the linked parent record (`_zoho_lead_id`, `_zoho_contact_id`, etc.), or `null`. |
 | `direction` | `CallDirection` | `Call_Type` | Picklist | Mapped to `'inbound'` or `'outbound'`. Missed calls map to `'inbound'`. Defaults to `'outbound'`. |
 | `status` | `CallStatus` | `Call_Duration_in_seconds`, `Outgoing_Call_Status`, `Call_Result` | Number, Picklists | Evaluates talk time first (`> 0` &rarr; `'answered'`), then checks cancelled and busy indicators, defaulting to `'missed'`. |
-| `customerPhone` | `string` | Polymorphic parent record &rarr; `Phone`, `Mobile`, `Country_Code` | String | Resolved in parallel across Lead, Contact, Deal, Visa Application, or Spouse Assessment. Normalized to international E.164. Fallback: `+919999999999`. |
+| `customerPhone` | `string \| null` | Polymorphic parent record &rarr; `Phone`, `Mobile`, `Country_Code` | String | Resolved in parallel across Lead, Contact, Deal, Visa Application, or Spouse Assessment. Normalized to international E.164. Null if missing/unparseable. |
 | `agentEmail` | `string \| null` | `_zoho_owner_id` &rarr; `migrated_users.email` | Lookup | Resolved agent email address via single-pass batch lookup, or `null`. |
 | `startedAt` | `string` (ISO 8601) | `Call_Start_Time` | Datetime | Normalized to UTC ISO 8601 string. Fallback: `1970-01-01T00:00:00.000Z`. |
 | `durationSeconds` | `number` | `Call_Duration_in_seconds` | Integer | Parsed integer seconds &ge; 0 (`Math.max(0, Math.floor(val))`). Defaults to `0` if null or NaN. |
@@ -94,7 +94,7 @@ To prevent N+1 queries across polymorphic parent records:
    - `MigratedSpouseSkillAssessmentModel.find({ zoho_id: { $in: spouseIds } })`
 3. Normalizes Lead and Contact phone numbers using `normalizePhoneNumber(Phone, Mobile, Country_Code)`.
 4. **Deal & Visa App Indirect Resolution:** Deals and Visa Applications frequently inherit the customer's phone from their linked Contact (`_zoho_contact_id`). If the Deal has its own `Phone`, it is prioritized; otherwise, the linked Contact's phone is used. Any missing contact IDs are batch-loaded in an auxiliary pass.
-5. Maps each call to its resolved phone number in memory. If no phone could be found or the record has no linked entity, it falls back to `DEFAULT_FALLBACK_PHONE` (`+919999999999`).
+5. Maps each call to its resolved phone number in memory. If no phone could be found or the record has no linked entity, it resolves to `null`.
 
 ### 4. Single-Pass Staff Email Batching (`batchResolveUserEmails`)
 To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
@@ -166,7 +166,7 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
 | `parentZohoId` | Missing ID in matched `_zoho_*_id` | Null fallback | `null` |
 | `direction` | Missing, empty, or unmapped `Call_Type` | Standard telecalling direction assumption | `'outbound'` |
 | `status` | Missing duration, status, and result | Unanswered assumption | `'missed'` |
-| `customerPhone` | Missing entity, empty phone, or invalid syntax | Fallback phone assignment | `"+919999999999"` |
+| `customerPhone` | Missing entity, empty phone, or invalid syntax | Null assignment | `null` |
 | `agentEmail` | Owner ID missing or not found in `migrated_users` | Unassigned lookup | `null` |
 | `startedAt` | Missing or invalid `Call_Start_Time` | Unix Epoch UTC | `"1970-01-01T00:00:00.000Z"` |
 | `durationSeconds` | Missing or invalid `Call_Duration_in_seconds` | Zero duration integer | `0` |
@@ -192,7 +192,7 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
    - **Deal:** Deal `Phone` &rarr; linked Contact (`_zoho_contact_id`) `Phone`
    - **Visa Application:** Linked Contact (`_zoho_contact_id`) `Phone`
    - **Spouse Assessment:** Spouse `Phone`
-   - **Fallback:** `+919999999999` prevents downstream telephony/SMS pipelines from breaking on null values.
+   - **Fallback:** Unresolvable or missing phone numbers cleanly resolve to `null`.
 4. **PhoneBridge Recording URLs:** PhoneBridge voice recordings are stored as direct HTTP/HTTPS URLs in `Voice_Recording__s`. MIME type and file size in bytes are omitted by Zoho PhoneBridge; the DTO provides empty strings (`""`) to fulfill strict contract requirements without fabricating metadata.
 5. **Scheduled Follow-up Timestamps:** The Zoho custom field `When_To_Make_The_Call` is normalized to ISO 8601 as `followUpAt`. This allows downstream calendar and dialer services to automatically schedule agent reminders.
 
@@ -218,7 +218,7 @@ export interface CallItemDto {
   parentZohoId: string | null;
   direction: CallDirection;
   status: CallStatus;
-  customerPhone: string;
+  customerPhone: string | null;
   agentEmail: string | null;
   startedAt: string;
   durationSeconds: number;

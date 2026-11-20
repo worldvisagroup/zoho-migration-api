@@ -42,8 +42,8 @@ Direct mapping from MongoDB `migrated_leads` / `migrated_contacts` and related c
 | Target Field                 | Target Type                 | Zoho Source Field                                                          | Source Type      | Transformation Summary                                                                                                |
 | :--------------------------- | :-------------------------- | :------------------------------------------------------------------------- | :--------------- | :-------------------------------------------------------------------------------------------------------------------- |
 | `externalId`                 | `string`                    | `zoho_id`                                                                  | String           | Direct 1:1 copy of Zoho Lead or Contact unique identifier.                                                            |
-| `client.email`               | `string`                    | `Email`, `Secondary_Email`                                                 | String           | Normalized lowercase email address. Falls back to `'notprovided@gmail.com'` if invalid/missing.                       |
-| `client.phone`               | `string`                    | `Phone`, `Mobile`, `Country_Code`                                          | String           | E.164 formatted international phone number. Falls back to `'+919999999999'` if invalid/missing.                       |
+| `client.email`               | `string \| null`            | `Email`, `Secondary_Email`                                                 | String           | Normalized lowercase email address. Null if missing/unparseable.                       |
+| `client.phone`               | `string \| null`            | `Phone`, `Mobile`, `Country_Code`                                          | String           | E.164 formatted international phone number. Null if missing/unparseable.               |
 | `ownerEmail`                 | `string \| null`            | `_zoho_owner_id` or `Owner.id` &rarr; `migrated_users.email`               | Lookup           | Resolved email address of assigned Zoho CRM staff owner, or `Owner.email`, or `null`.                                 |
 | `interestedService`          | `InterestedService \| null` | Multiple fields (see Section 3)                                            | String / Cascade | Normalized to one of 29 standard snake_case enums via prioritized cascade, or `null`.                                 |
 | `destinationCountry`         | `string \| null`            | Multiple fields (see Section 3)                                            | String / Cascade | Sanitized target country via prioritized cascade across CRM, Visa Apps, and unified entries, or `null`.               |
@@ -81,14 +81,12 @@ Direct mapping from MongoDB `migrated_leads` / `migrated_contacts` and related c
 
 ## 3. Field Transformation Logic
 
-### 1. Client Contact Normalization & Default Safeguards
+### 1. Client Contact Normalization
 
-Client identity must always be structured and non-null in target systems:
+Client identity is extracted and normalized to standard formats or null:
 
-- **Email Sanitization:** Cleans `record.Email`, falling back to `record.Secondary_Email`. Strips trailing whitespace, converts to lowercase, and validates email syntax. If missing or invalid, assigns the permanent placeholder:
-  `"notprovided@gmail.com"`
-- **Phone Sanitization:** Combines `Country_Code` with `Phone` or `Mobile`. Cleans non-numeric characters and formats into standard E.164. If missing, invalid, or consisting of dummy repeated digits, assigns the permanent placeholder:
-  `"+919999999999"`
+- **Email Sanitization:** Cleans `record.Email`, falling back to `record.Secondary_Email`. Strips trailing whitespace, converts to lowercase, and validates email syntax. If missing or invalid, returns `null`.
+- **Phone Sanitization:** Combines `Country_Code` with `Phone` or `Mobile`. Cleans non-numeric characters and formats into standard E.164. If missing, invalid, or unparseable, returns `null`.
 
 ### 2. Service Resolution Cascade (`resolveInterestedServiceCascade`)
 
@@ -228,8 +226,8 @@ For each page of 200 records, the service issues parallel batched indexed querie
 | Target Field         | Condition                                    | Resolution Path                                    | Final Fallback Value         |
 | :------------------- | :------------------------------------------- | :------------------------------------------------- | :--------------------------- |
 | `externalId`         | Missing or null `zoho_id`                    | Direct string assignment                           | `""`                         |
-| `client.email`       | Missing, invalid syntax, or empty            | Secondary_Email &rarr; default safeguard           | `"notprovided@gmail.com"`    |
-| `client.phone`       | Missing, non-numeric, or dummy digits        | Mobile / Phone &rarr; default safeguard            | `"+919999999999"`            |
+| `client.email`       | Missing, invalid syntax, or empty            | Null assignment                                    | `null`                       |
+| `client.phone`       | Missing, non-numeric, or dummy digits        | Null assignment                                    | `null`                       |
 | `ownerEmail`         | Owner ID missing or not in `migrated_users`  | Checks `Owner.email` object field                  | `null`                       |
 | `interestedService`  | All candidates missing, unmapped, or invalid | Cascade through CRM, Visa Apps, Unified            | `null`                       |
 | `destinationCountry` | All candidates missing, unmapped, or invalid | Cascade through CRM, Visa Apps, Unified            | `null`                       |
@@ -316,8 +314,8 @@ export type InterestedService =
   | 'skill_assessment';
 
 export interface EnquiryClientDto {
-  email: string; // Normalized email (fallback: notprovided@gmail.com)
-  phone: string; // E.164 phone (fallback: +919999999999)
+  email: string | null; // Normalized email or null
+  phone: string | null; // E.164 phone or null
 }
 
 export interface EnquiryAttributionDto {

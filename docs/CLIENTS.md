@@ -43,8 +43,8 @@ Direct mapping from MongoDB `migrated_leads` and `migrated_contacts` to `ClientI
 | `externalId` | `string` | `zoho_id` | `zoho_id` | Direct 1:1 copy of Zoho unique string ID. |
 | `firstName` | `string` | `First_Name`, `Full_Name` | `First_Name`, `Full_Name` | Title-Cased via `extractNames()`. Falls back to tokenizing `Full_Name`. |
 | `lastName` | `string` | `Last_Name`, `Full_Name` | `Last_Name`, `Full_Name` | Title-Cased via `extractNames()`. Captures final token. Mononyms map to `lastName`. |
-| `email` | `string` | `Email`, `Secondary_Email` | `Email`, `Secondary_Email` | Lowercased, whitespace stripped. Defaults to `notprovided@gmail.com`. |
-| `phone` | `string` | `Phone`, `Mobile`, `Country_Code` | `Phone`, `Mobile`, `Country_Code` | Parsed to international E.164 with country detection. Fallback: `+919999999999`. |
+| `email` | `string \| null` | `Email`, `Secondary_Email` | `Email`, `Secondary_Email` | Lowercased, whitespace stripped. Null if missing or invalid. |
+| `phone` | `string \| null` | `Phone`, `Mobile`, `Country_Code` | `Phone`, `Mobile`, `Country_Code` | Parsed to international E.164 with country detection. Null if missing or unparseable. |
 | `dob` | `string \| null` | `Dob` | `DOB` | Parsed to UTC midnight ISO string (`YYYY-MM-DDTHH:mm:ss.000Z`) to prevent timezone shifts. |
 | `maritalStatus` | `StandardMaritalStatus \| null` | `marital_status` | `marital_status` | Normalized to `single`, `married`, `divorced`, `widowed`, or `null`. |
 | `address` | `ClientAddressDto` | `Street`, `City`, `State`, etc. | `Mailing_Street`, `Mailing_City`, etc. | **Priority 1:** Zoho Books invoice billing address.<br>**Priority 2:** CRM record address fields. |
@@ -65,13 +65,13 @@ Direct mapping from MongoDB `migrated_leads` and `migrated_contacts` to `ClientI
 - Evaluates primary `Email`, falling back to `Secondary_Email`.
 - Lowercases string and strips all internal and trailing whitespace.
 - Rejects strings without `@` or literals like `"null"`.
-- **Client Fallback:** If missing or invalid, defaults to `notprovided@gmail.com`.
+- **Fallback:** If missing or invalid, returns `null`.
 
 ### 3. International Phone Formatting (`normalizePhoneNumber`)
 - Evaluates primary `Phone`, falling back to `Mobile`.
 - Extracts ISO country code and calling code from `Country_Code` text (e.g. *"+91 - India"* &rarr; `IN`, *"+1 - USA"* &rarr; `US`).
 - Formats valid numbers into strict international E.164 (e.g. `+919876543210`, `+12025550143`).
-- **Fallback:** Unparseable or empty numbers default to `+919999999999`.
+- **Fallback:** Unparseable or empty numbers return `null`.
 
 ### 4. Timezone-Neutral Date of Birth & Marital Status
 - **DOB Normalization:** Reads `Dob` (Leads) or `DOB` (Contacts). Parses `YYYY-MM-DD` explicitly as UTC midnight (`00:00:00.000Z`) to prevent timezone shifts across continents.
@@ -115,9 +115,9 @@ Direct mapping from MongoDB `migrated_leads` and `migrated_contacts` to `ClientI
 | `firstName` | Missing `First_Name` | Extracts earlier tokens from `Full_Name` | Parsed token or `""` |
 | `lastName` | Missing `Last_Name` | Extracts final token from `Full_Name` | Parsed token or `""` |
 | `email` | Missing primary `Email` | Falls back to `Secondary_Email` | Cleaned secondary email |
-| `email` | Both emails missing or invalid | Client placeholder default | `"notprovided@gmail.com"` |
+| `email` | Both emails missing or invalid | Null assignment | `null` |
 | `phone` | Missing `Phone` | Falls back to `Mobile` | Normalized E.164 mobile |
-| `phone` | Both `Phone` and `Mobile` missing/invalid | Standard placeholder | `"+919999999999"` |
+| `phone` | Both `Phone` and `Mobile` missing/invalid | Null assignment | `null` |
 | `dob` | Missing or invalid date string | Validation fails | `null` |
 | `maritalStatus` | Missing or unrecognized string | Validation fails | `null` |
 | `address` | No Books invoices found for client | Falls back to CRM record address fields | Sanitized CRM address |
@@ -130,7 +130,7 @@ Direct mapping from MongoDB `migrated_leads` and `migrated_contacts` to `ClientI
 
 1. **Leads vs Contacts Field Casing:** Zoho CRM uses inconsistent field casing across modules: Leads use `Dob` and `Street`, whereas Contacts use `DOB` and `Mailing_Street` (falling back to `Street`). The service dynamically branches extraction based on `type`.
 2. **Books Invoice Address Precedence:** Billing addresses on paid tax invoices represent legally verified client residences. The API prioritizes Zoho Books invoice addresses over legacy CRM contact addresses whenever usable invoice data exists.
-3. **Client vs Staff Email Fallbacks:** While Staff API defaults missing emails to `notprovided@worldvisa.in`, Clients API intentionally defaults to `notprovided@gmail.com` to distinguish customer placeholders from internal employees.
+3. **Nullable Customer Email & Phone:** When email or phone number is missing, unparseable, or invalid in Zoho records, the API explicitly returns `null` rather than dummy placeholder values.
 4. **DOB Timezone Shift Prevention:** Date-only strings (`YYYY-MM-DD`) are parsed explicitly as UTC midnight. Parsing with local date constructors would shift birth dates back by one day for users located west of UTC (e.g. US/Canada).
 
 ---
@@ -153,8 +153,8 @@ export interface ClientItemDto {
   externalId: string;        // Original Zoho ID (zoho_id)
   firstName: string;         // Title-Cased first name
   lastName: string;          // Title-Cased last name
-  email: string;             // Lowercased email or 'notprovided@gmail.com'
-  phone: string;             // International E.164 phone or '+919999999999'
+  email: string | null;      // Lowercased email or null
+  phone: string | null;      // International E.164 phone or null
   dob: string | null;        // UTC ISO 8601 string or null
   maritalStatus: StandardMaritalStatus | null; // Standardized marital status
   address: ClientAddressDto; // Resolved invoice or CRM address

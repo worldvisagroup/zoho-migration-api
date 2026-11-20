@@ -200,17 +200,17 @@ export default function EnquiriesApiDocPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">client.email</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
                   <td className="px-4 py-2.5 font-mono text-slate-300">Email, Secondary_Email</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
-                  <td className="px-4 py-2.5">Normalized lowercase email address. Falls back to <code className="text-amber-300 font-mono">&apos;notprovided@gmail.com&apos;</code>.</td>
+                  <td className="px-4 py-2.5">Normalized lowercase email address. Null if missing or unparseable.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">client.phone</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
                   <td className="px-4 py-2.5 font-mono text-slate-300">Phone, Mobile, Country_Code</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
-                  <td className="px-4 py-2.5">E.164 formatted international phone number. Falls back to <code className="text-amber-300 font-mono">&apos;+919999999999&apos;</code>.</td>
+                  <td className="px-4 py-2.5">E.164 formatted international phone number. Null if missing or unparseable.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">ownerEmail</td>
@@ -377,14 +377,14 @@ export default function EnquiriesApiDocPage() {
             <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-2">
               <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-sky-400"></span>
-                1. Client Contact Normalization &amp; Default Safeguards
+                1. Client Contact Normalization
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Client identity must always be non-null and correctly formatted in the target system:
+                Client identity is normalized to standard format or null:
               </p>
               <ul className="list-disc list-inside text-xs text-slate-300 space-y-1 pl-1">
-                <li><strong className="text-white">Email Sanitization:</strong> Inspects <code className="text-slate-200">Email</code> first, falling back to <code className="text-slate-200">Secondary_Email</code>. Trims whitespace, validates RFC syntax, and converts to lowercase. If missing or invalid, assigns the permanent fallback <code className="text-amber-300 font-mono">&apos;notprovided@gmail.com&apos;</code>.</li>
-                <li><strong className="text-white">Phone Sanitization:</strong> Combines <code className="text-slate-200">Country_Code</code> with <code className="text-slate-200">Phone</code> or <code className="text-slate-200">Mobile</code>, strips non-numeric punctuation, and formats into E.164. If missing, invalid, or composed of dummy repeated digits, assigns the permanent fallback <code className="text-amber-300 font-mono">&apos;+919999999999&apos;</code>.</li>
+                <li><strong className="text-white">Email Sanitization:</strong> Inspects <code className="text-slate-200">Email</code> first, falling back to <code className="text-slate-200">Secondary_Email</code>. Trims whitespace, validates RFC syntax, and converts to lowercase. If missing or invalid, returns <code className="text-slate-200 font-mono">null</code>.</li>
+                <li><strong className="text-white">Phone Sanitization:</strong> Combines <code className="text-slate-200">Country_Code</code> with <code className="text-slate-200">Phone</code> or <code className="text-slate-200">Mobile</code>, strips non-numeric punctuation, and formats into E.164. If missing, invalid, or unparseable, returns <code className="text-slate-200 font-mono">null</code>.</li>
               </ul>
             </div>
 
@@ -769,14 +769,14 @@ export default function EnquiriesApiDocPage() {
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">client.email</td>
                   <td className="px-4 py-2.5">Missing, invalid RFC syntax, or empty</td>
-                  <td className="px-4 py-2.5">Secondary_Email &rarr; default safeguard</td>
-                  <td className="px-4 py-2.5 font-mono text-amber-300">&quot;notprovided@gmail.com&quot;</td>
+                  <td className="px-4 py-2.5">Null assignment</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">null</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">client.phone</td>
                   <td className="px-4 py-2.5">Missing, non-numeric, or dummy digits</td>
-                  <td className="px-4 py-2.5">Mobile / Phone &rarr; default safeguard</td>
-                  <td className="px-4 py-2.5 font-mono text-amber-300">&quot;+919999999999&quot;</td>
+                  <td className="px-4 py-2.5">Null assignment</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">null</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">ownerEmail</td>
@@ -1046,8 +1046,8 @@ export type InterestedService =
   | 'skill_assessment';
 
 export interface EnquiryClientDto {
-  email: string;                       // Normalized email (fallback: notprovided@gmail.com)
-  phone: string;                       // E.164 phone (fallback: +919999999999)
+  email: string | null;                // Normalized email or null
+  phone: string | null;                // E.164 phone or null
 }
 
 export interface EnquiryAttributionDto {

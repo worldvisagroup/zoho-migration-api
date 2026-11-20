@@ -117,6 +117,7 @@ describe('CallsService', () => {
       mockRepo.batchResolveUserEmails.mockResolvedValue(new Map());
 
       const result = await service.getCalls({ page: 1, limit: 10 });
+      expect(result.data[0]!.customerPhone).toBeNull();
       expect(result.data[0]!.recording).toBeNull();
       expect(result.data[0]!.followUpAt).toBeNull();
       expect(result.data[0]!.notes).toBeNull();

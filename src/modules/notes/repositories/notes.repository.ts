@@ -111,7 +111,10 @@ export class NotesRepository implements INotesRepository {
 
     for (const user of users) {
       if (user.zoho_id) {
-        emailMap.set(user.zoho_id, normalizeEmail(user.email));
+        const email = normalizeEmail(user.email);
+        if (email) {
+          emailMap.set(user.zoho_id, email);
+        }
       }
     }
 

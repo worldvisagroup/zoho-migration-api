@@ -276,7 +276,7 @@ describe('EnquiriesService', () => {
       const mockLead: MigratedLeadEntity = {
         zoho_id: 'lead_300',
         Email: 'multi@example.com',
-        Phone: '9999999999',
+        Phone: '9888888888',
         Created_Time: createdTime,
       };
 
@@ -284,7 +284,7 @@ describe('EnquiriesService', () => {
         entryId: 'entry_far',
         fullName: 'Multi Submission',
         email: 'multi@example.com',
-        phone: '+919999999999',
+        phone: '+919888888888',
         consent: true,
         destinationCountry: 'United Kingdom',
         zohoMetadata: { addedTime: new Date('2024-02-01T12:00:00.000Z') }, // 1 month prior
@@ -294,7 +294,7 @@ describe('EnquiriesService', () => {
         entryId: 'entry_close',
         fullName: 'Multi Submission',
         email: 'multi@example.com',
-        phone: '+919999999999',
+        phone: '+919888888888',
         consent: true,
         destinationCountry: 'Australia',
         zohoMetadata: { addedTime: new Date('2024-03-01T12:02:00.000Z') }, // 2 minutes later
@@ -317,7 +317,7 @@ describe('EnquiriesService', () => {
       expect(enquiry.destinationCountry).toBe('Australia');
     });
 
-    it('should use DEFAULT_FALLBACK_PHONE when phone is missing or unparseable', async () => {
+    it('should return null when phone is missing or unparseable', async () => {
       const mockLead: MigratedLeadEntity = {
         zoho_id: 'lead_no_phone',
         Email: 'nophone@example.com',
@@ -337,7 +337,31 @@ describe('EnquiriesService', () => {
       mockRepository.batchFindAttachments.mockResolvedValue(new Map());
 
       const result = await service.getEnquiries({ type: EnquiryType.LEADS });
-      expect(result.data[0].client.phone).toBe('+919999999999');
+      expect(result.data[0].client.phone).toBeNull();
+    });
+
+    it('should return null when email is missing or unparseable', async () => {
+      const mockLead: MigratedLeadEntity = {
+        zoho_id: 'lead_no_email',
+        Email: null,
+        Phone: '9876543210',
+        Country_Code: 'IN',
+        Created_Time: new Date('2024-01-01T00:00:00.000Z'),
+      };
+
+      mockRepository.findEnquiries.mockResolvedValue({ records: [mockLead], total: 1 });
+      mockRepository.batchResolveUsers.mockResolvedValue(new Map());
+      mockRepository.batchFindVisaApplications.mockResolvedValue(new Map());
+      mockRepository.batchFindUnifiedEntries.mockResolvedValue([]);
+      mockRepository.batchFindNotes.mockResolvedValue(new Map());
+      mockRepository.batchFindCalls.mockResolvedValue(new Map());
+      mockRepository.batchFindTasks.mockResolvedValue(new Map());
+      mockRepository.batchFindMeetings.mockResolvedValue(new Map());
+      mockRepository.batchFindAttachments.mockResolvedValue(new Map());
+
+      const result = await service.getEnquiries({ type: EnquiryType.LEADS });
+      expect(result.data[0].client.email).toBeNull();
+      expect(result.data[0].client.phone).toBe('+919876543210');
     });
   });
 });

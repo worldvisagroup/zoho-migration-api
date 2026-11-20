@@ -212,17 +212,17 @@ export default function ClientsApiDocPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">email</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Email, Secondary_Email</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Email, Secondary_Email</td>
-                  <td className="px-4 py-2.5">Lowercased, whitespace stripped. Defaults to <code className="text-amber-300 font-mono">notprovided@gmail.com</code>.</td>
+                  <td className="px-4 py-2.5">Lowercased, whitespace stripped. Null if missing or invalid.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">phone</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Phone, Mobile, Country_Code</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Phone, Mobile, Country_Code</td>
-                  <td className="px-4 py-2.5">Parsed to international E.164 with country detection. Fallback: <code className="text-amber-300 font-mono">+919999999999</code>.</td>
+                  <td className="px-4 py-2.5">Parsed to international E.164 with country detection. Null if missing or unparseable.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">dob</td>
@@ -302,8 +302,7 @@ export default function ClientsApiDocPage() {
                 <li>Lowercases string and strips all internal and trailing whitespace.</li>
                 <li>Rejects strings without <code className="font-mono">@</code> or literals like <code className="font-mono">&quot;null&quot;</code>.</li>
                 <li>
-                  <strong>Client Fallback:</strong> If missing or invalid, defaults to{' '}
-                  <code className="text-amber-300 font-mono">notprovided@gmail.com</code>.
+                  <strong>Fallback:</strong> If missing or invalid, returns <code className="text-slate-200 font-mono">null</code>.
                 </li>
               </ul>
             </div>
@@ -318,7 +317,7 @@ export default function ClientsApiDocPage() {
                 <li>Evaluates primary <code className="font-mono">Phone</code>, falling back to <code className="font-mono">Mobile</code>.</li>
                 <li>Extracts ISO country and calling code from <code className="font-mono">Country_Code</code> text (e.g. <em>&quot;+91 - India&quot;</em> &rarr; <code className="font-mono">IN</code>, <em>&quot;+1 - USA&quot;</em> &rarr; <code className="font-mono">US</code>).</li>
                 <li>Formats valid numbers into strict international E.164 (e.g. <code className="font-mono text-slate-200">+919876543210</code>, <code className="font-mono text-slate-200">+12025550143</code>).</li>
-                <li><strong>Fallback:</strong> Unparseable or empty numbers default to <code className="text-amber-300 font-mono">+919999999999</code>.</li>
+                <li><strong>Fallback:</strong> Unparseable or empty numbers return <code className="text-slate-200 font-mono">null</code>.</li>
               </ul>
             </div>
 
@@ -505,8 +504,8 @@ export default function ClientsApiDocPage() {
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">email</td>
                   <td className="px-4 py-2.5">Both emails missing or invalid</td>
-                  <td className="px-4 py-2.5">Client placeholder default</td>
-                  <td className="px-4 py-2.5 font-mono text-amber-300 font-bold">&quot;notprovided@gmail.com&quot;</td>
+                  <td className="px-4 py-2.5">Null assignment</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400 font-bold">null</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">phone</td>
@@ -517,8 +516,8 @@ export default function ClientsApiDocPage() {
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">phone</td>
                   <td className="px-4 py-2.5">Both <code className="font-mono">Phone</code> and <code className="font-mono">Mobile</code> missing/invalid</td>
-                  <td className="px-4 py-2.5">Standard placeholder</td>
-                  <td className="px-4 py-2.5 font-mono text-amber-300 font-bold">&quot;+919999999999&quot;</td>
+                  <td className="px-4 py-2.5">Null assignment</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400 font-bold">null</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">dob</td>
@@ -580,9 +579,9 @@ export default function ClientsApiDocPage() {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
-              <span className="font-semibold text-white">Client vs Staff Email Fallbacks</span>
+              <span className="font-semibold text-white">Nullable Customer Email &amp; Phone</span>
               <p className="text-slate-300 leading-relaxed">
-                While Staff API defaults missing emails to <code className="font-mono text-amber-300">notprovided@worldvisa.in</code>, Clients API intentionally defaults to <code className="font-mono text-amber-300">notprovided@gmail.com</code> to distinguish customer placeholders from internal employees.
+                When email or phone number is missing, unparseable, or invalid in Zoho records, the API explicitly returns <code className="font-mono text-slate-200">null</code> rather than dummy placeholder values.
               </p>
             </div>
 
@@ -623,8 +622,8 @@ export interface ClientItemDto {
   externalId: string;        // Original Zoho ID (zoho_id)
   firstName: string;         // Title-Cased first name
   lastName: string;          // Title-Cased last name
-  email: string;             // Lowercased email or 'notprovided@gmail.com'
-  phone: string;             // International E.164 phone or '+919999999999'
+  email: string | null;      // Lowercased email or null
+  phone: string | null;      // International E.164 phone or null
   dob: string | null;        // UTC ISO 8601 string or null
   maritalStatus: StandardMaritalStatus | null; // Standardized marital status
   address: ClientAddressDto; // Resolved invoice or CRM address

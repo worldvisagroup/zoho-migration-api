@@ -115,7 +115,10 @@ export class AttachmentsRepository implements IAttachmentsRepository {
     const userEmailMap = new Map<string, string>();
     for (const u of users) {
       if (u.zoho_id) {
-        userEmailMap.set(u.zoho_id, normalizeEmail(u.email));
+        const email = normalizeEmail(u.email);
+        if (email) {
+          userEmailMap.set(u.zoho_id, email);
+        }
       }
     }
     return userEmailMap;

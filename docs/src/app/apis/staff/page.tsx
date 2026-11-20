@@ -151,10 +151,10 @@ export default function StaffApiDocPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">email</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">email</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
-                  <td className="px-4 py-2.5">Trimmed, lowercased, whitespace stripped. Defaults to <code className="text-amber-300 font-mono">notprovided@worldvisa.in</code>.</td>
+                  <td className="px-4 py-2.5">Trimmed, lowercased, whitespace stripped. Null if missing or invalid.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">firstName</td>
@@ -172,10 +172,10 @@ export default function StaffApiDocPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">phone</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">phone, mobile</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">String</td>
-                  <td className="px-4 py-2.5">Checks phone, falls back to mobile. Formatted to <code className="text-slate-200 font-mono">+91XXXXXXXXXX</code>. Fallback: <code className="text-amber-300 font-mono">+919999999999</code>.</td>
+                  <td className="px-4 py-2.5">Checks phone, falls back to mobile. Formatted to <code className="text-slate-200 font-mono">+91XXXXXXXXXX</code>. Null if missing or invalid.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">department</td>
@@ -251,8 +251,7 @@ export default function StaffApiDocPage() {
                 <li>Lowercases and strips all internal and trailing whitespace.</li>
                 <li>Rejects invalid formats, strings without <code className="font-mono">@</code>, or literals like <code className="font-mono">&quot;null&quot;</code>.</li>
                 <li>
-                  <strong>Corporate Fallback:</strong> If missing or invalid, defaults to{' '}
-                  <code className="text-amber-300 font-mono">notprovided@worldvisa.in</code>.
+                  <strong>Fallback:</strong> If missing or invalid, returns <code className="text-slate-200 font-mono">null</code>.
                 </li>
               </ul>
             </div>
@@ -269,7 +268,7 @@ export default function StaffApiDocPage() {
                 <li><strong>10 digits:</strong> Prepends <code className="font-mono text-slate-200">+91</code> (e.g. <code className="font-mono text-slate-200">+919800000000</code>).</li>
                 <li><strong>12 digits (starts with 91):</strong> Prepends <code className="font-mono text-slate-200">+</code>.</li>
                 <li><strong>11 digits (starts with 0):</strong> Removes leading 0 and prepends <code className="font-mono text-slate-200">+91</code>.</li>
-                <li><strong>Fallback:</strong> Irregular/missing numbers default to <code className="text-amber-300 font-mono">+919999999999</code>.</li>
+                <li><strong>Fallback:</strong> Irregular/missing numbers return <code className="text-slate-200 font-mono">null</code>.</li>
               </ul>
             </div>
 
@@ -482,8 +481,8 @@ export default function StaffApiDocPage() {
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">email</td>
                   <td className="px-4 py-2.5">Missing or invalid email</td>
-                  <td className="px-4 py-2.5">Corporate staff default</td>
-                  <td className="px-4 py-2.5 font-mono text-amber-300 font-bold">&quot;notprovided@worldvisa.in&quot;</td>
+                  <td className="px-4 py-2.5">Null assignment</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400 font-bold">null</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">phone</td>
@@ -494,8 +493,8 @@ export default function StaffApiDocPage() {
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">phone</td>
                   <td className="px-4 py-2.5">Missing/invalid <code className="font-mono">phone</code> &amp; <code className="font-mono">mobile</code></td>
-                  <td className="px-4 py-2.5">Standard placeholder</td>
-                  <td className="px-4 py-2.5 font-mono text-amber-300 font-bold">&quot;+919999999999&quot;</td>
+                  <td className="px-4 py-2.5">Null assignment</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400 font-bold">null</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">role &amp; department</td>
@@ -544,9 +543,9 @@ export default function StaffApiDocPage() {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
-              <span className="font-semibold text-white">Corporate Email Default</span>
+              <span className="font-semibold text-white">Nullable Email &amp; Phone</span>
               <p className="text-slate-300 leading-relaxed">
-                Staff API defaults missing emails to <code className="font-mono text-amber-300">notprovided@worldvisa.in</code> (instead of <code className="font-mono">@gmail.com</code> used for leads), distinguishing internal employees from external clients.
+                When email or phone number is missing or invalid in Zoho, the API explicitly returns <code className="font-mono text-slate-200">null</code> rather than dummy placeholder values.
               </p>
             </div>
 
@@ -582,10 +581,10 @@ export default function StaffApiDocPage() {
               title="StaffItemDto & StaffResponseDto"
               code={`export interface StaffItemDto {
   externalId: string;        // Original Zoho ID (zoho_id)
-  email: string;             // Lowercased email or 'notprovided@worldvisa.in'
+  email: string | null;      // Lowercased email or null
   firstName: string;         // Title-Cased first name
   lastName: string;          // Title-Cased last name
-  phone: string;             // +91XXXXXXXXXX or '+919999999999'
+  phone: string | null;      // +91XXXXXXXXXX or null
   department: 'sales' | 'processing' | 'finance' | 'marketing';
   role:
     | 'director' | 'branch_manager' | 'sales_manager' | 'sales_executive'
@@ -628,10 +627,10 @@ export interface StaffResponseDto {
     },
     {
       "externalId": "164193000099887766",
-      "email": "notprovided@worldvisa.in",
+      "email": null,
       "firstName": "",
       "lastName": "Sumanth",
-      "phone": "+919999999999",
+      "phone": null,
       "department": "sales",
       "role": "sales_executive",
       "isActive": false,

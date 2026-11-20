@@ -7,6 +7,7 @@ import {
   normalizeMaritalStatus,
   normalizePhoneNumber,
   normalizeZohoTimestamp,
+  sanitizeEmail,
   selectBestInvoice,
   type RecordAddressInput,
 } from '../../../common/utils/index.js';
@@ -91,8 +92,8 @@ export class ClientsService {
         internalIds.push(String(record._id));
       }
       if (record.Email) {
-        const cleanEmail = record.Email.toLowerCase().replace(/\s+/g, '').trim();
-        if (cleanEmail && cleanEmail !== 'notprovided@gmail.com' && cleanEmail.includes('@')) {
+        const cleanEmail = sanitizeEmail(record.Email);
+        if (cleanEmail) {
           emails.push(cleanEmail);
         }
       }
@@ -122,7 +123,7 @@ export class ClientsService {
     if (record.zoho_id && invoiceMap.has(record.zoho_id)) {
       candidateInvoices.push(...invoiceMap.get(record.zoho_id)!);
     }
-    if (email && email !== 'notprovided@gmail.com' && invoiceMap.has(email)) {
+    if (email && invoiceMap.has(email)) {
       candidateInvoices.push(...invoiceMap.get(email)!);
     }
 

@@ -73,9 +73,9 @@ describe('Reusable Migration Utilities', () => {
       expect(res).toBe('secondary@example.com');
     });
 
-    it('should fallback to default notprovided@gmail.com when both are missing', () => {
+    it('should fallback to null when both are missing', () => {
       const res = normalizeEmail(null, undefined);
-      expect(res).toBe('notprovided@gmail.com');
+      expect(res).toBeNull();
     });
   });
 
@@ -110,9 +110,9 @@ describe('Reusable Migration Utilities', () => {
       expect(res).toBe('+919060443444');
     });
 
-    it('should fallback to default +919999999999 if neither is usable', () => {
+    it('should fallback to null if neither is usable', () => {
       const res = normalizePhoneNumber('', null, null);
-      expect(res).toBe('+919999999999');
+      expect(res).toBeNull();
     });
 
     it('should extract country info correctly from various Country_Code formats', () => {

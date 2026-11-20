@@ -13,11 +13,12 @@ export class StaffItemDto {
   externalId: string;
 
   @ApiProperty({
-    description: 'Normalized lowercase email address of the staff member',
+    description: 'Normalized lowercase email address of the staff member, or null if missing/unparseable',
     example: 'asha@example.com',
     type: String,
+    nullable: true,
   })
-  email: string;
+  email: string | null;
 
   @ApiProperty({
     description: 'Normalized, Title-Cased first name',
@@ -34,11 +35,13 @@ export class StaffItemDto {
   lastName: string;
 
   @ApiProperty({
-    description: 'Normalized Indian phone number in international format (+91XXXXXXXXXX)',
+    description:
+      'Normalized Indian phone number in international format (+91XXXXXXXXXX), or null if missing/unparseable',
     example: '+919800000000',
     type: String,
+    nullable: true,
   })
-  phone: string;
+  phone: string | null;
 
   @ApiProperty({
     description: 'Staff department derived from role_name',
@@ -91,10 +94,10 @@ export class StaffItemDto {
 
   constructor(data: {
     externalId: string;
-    email: string;
+    email: string | null;
     firstName: string;
     lastName: string;
-    phone: string;
+    phone: string | null;
     department: StaffDepartment;
     role: StaffRole;
     isActive: boolean;

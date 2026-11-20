@@ -40,11 +40,6 @@ export const DEFAULT_STAFF_ROLE: StaffRole = 'sales_executive';
 export const DEFAULT_STAFF_DEPARTMENT: StaffDepartment = 'sales';
 
 /**
- * Default fallback Indian phone number when phone is missing or invalid.
- */
-export const DEFAULT_FALLBACK_STAFF_PHONE = '+919999999999';
-
-/**
  * Derives both role and department from the source Zoho `role_name` field.
  *
  * Direct mappings:
@@ -180,16 +175,19 @@ export function resolveStaffRoleAndDepartment(roleNameRaw?: string | null): Reso
  * 2. Strips all non-digit characters.
  * 3. If phone starts with 91 and has 12 digits (e.g. 918431429371), extracts the 10-digit number.
  * 4. If phone has 10 digits (e.g. 8431429371), prepends +91.
- * 5. If missing, null, or invalid, returns +919999999999.
+ * 5. If missing, null, or invalid, returns null.
  *
  * @param phoneRaw - Raw phone field from Zoho migrated_users
  * @param mobileRaw - Raw mobile field from Zoho migrated_users
- * @returns {string} Normalized Indian phone number (+91XXXXXXXXXX)
+ * @returns {string | null} Normalized Indian phone number (+91XXXXXXXXXX) or null
  */
-export function normalizeIndianPhone(phoneRaw?: string | null, mobileRaw?: string | null): string {
+export function normalizeIndianPhone(
+  phoneRaw?: string | null,
+  mobileRaw?: string | null,
+): string | null {
   const candidate = (phoneRaw && phoneRaw.trim()) || (mobileRaw && mobileRaw.trim()) || '';
   if (!candidate) {
-    return DEFAULT_FALLBACK_STAFF_PHONE;
+    return null;
   }
 
   // Remove all non-digit characters
@@ -210,5 +208,5 @@ export function normalizeIndianPhone(phoneRaw?: string | null, mobileRaw?: strin
     return `+91${digits.slice(1)}`;
   }
 
-  return DEFAULT_FALLBACK_STAFF_PHONE;
+  return null;
 }

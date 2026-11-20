@@ -1,9 +1,4 @@
 /**
- * Default fallback email address when no valid email is found in Zoho records.
- */
-export const DEFAULT_FALLBACK_EMAIL = 'notprovided@gmail.com';
-
-/**
  * Validates and sanitizes a raw email candidate string.
  * - Converts to lowercase.
  * - Trims and removes all internal whitespace characters.
@@ -30,18 +25,18 @@ export function sanitizeEmail(candidate?: string | null): string {
  * Normalizes an email address according to Zoho migration requirements:
  * 1. Checks primary `Email`.
  * 2. If missing or invalid, falls back to `Secondary_Email`.
- * 3. Defaults to `notprovided@gmail.com` if neither field contains a usable value.
+ * 3. Defaults to null if neither field contains a usable value.
  *
  * @param emailRaw - Primary Email from Zoho record
  * @param secondaryEmailRaw - Secondary_Email from Zoho record
- * @param defaultEmail - Optional override for fallback (defaults to DEFAULT_FALLBACK_EMAIL)
- * @returns {string} Sanitized, normalized email address
+ * @param defaultEmail - Optional override for fallback (defaults to null)
+ * @returns {string | null} Sanitized, normalized email address or null
  */
 export function normalizeEmail(
   emailRaw?: string | null,
   secondaryEmailRaw?: string | null,
-  defaultEmail: string = DEFAULT_FALLBACK_EMAIL,
-): string {
+  defaultEmail: string | null = null,
+): string | null {
   const primary = sanitizeEmail(emailRaw);
   if (primary) {
     return primary;

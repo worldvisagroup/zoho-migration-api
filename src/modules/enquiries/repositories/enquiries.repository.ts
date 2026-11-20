@@ -211,11 +211,11 @@ export class EnquiriesRepository implements IEnquiriesRepository {
   async batchFindUnifiedEntries(emails: string[], phones: string[]): Promise<UnifiedEntry[]> {
     const cleanEmails = [
       ...new Set(
-        emails.filter(e => e && e !== 'notprovided@gmail.com').map(e => e.toLowerCase().trim()),
+        emails.filter(Boolean).map(e => e.toLowerCase().trim()),
       ),
     ];
     const cleanPhones = [
-      ...new Set(phones.filter(p => p && p !== '+919999999999').map(p => p.trim())),
+      ...new Set(phones.filter(Boolean).map(p => p.trim())),
     ];
 
     const conditions: Record<string, unknown>[] = [];

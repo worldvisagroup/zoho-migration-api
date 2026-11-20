@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  DEFAULT_FALLBACK_PHONE,
   normalizeEmail,
   normalizePhoneNumber,
   normalizeZohoTimestamp,
@@ -90,12 +89,12 @@ export class EnquiriesService {
       if (mId) userIdsSet.add(mId);
 
       const email = normalizeEmail(r.Email, r.Secondary_Email);
-      if (email && email !== 'notprovided@gmail.com') {
+      if (email) {
         clientEmails.push(email);
       }
 
       const phone = normalizePhoneNumber(r.Phone, r.Mobile, r.Country_Code);
-      if (phone && phone !== DEFAULT_FALLBACK_PHONE) {
+      if (phone) {
         clientPhones.push(phone);
       }
     }
@@ -192,16 +191,16 @@ export class EnquiriesService {
    */
   private selectBestUnifiedEntry(
     unifiedEntries: UnifiedEntry[],
-    cleanEmail: string,
-    cleanPhone: string,
+    cleanEmail: string | null,
+    cleanPhone: string | null,
     recordCreatedTime?: Date | string | null,
   ): UnifiedEntry | null {
     const candidates = unifiedEntries.filter(u => {
       const uEmail = u.email ? u.email.toLowerCase().trim() : '';
       const uPhone = u.phone ? u.phone.trim() : '';
       return (
-        (cleanEmail && cleanEmail !== 'notprovided@gmail.com' && uEmail === cleanEmail) ||
-        (cleanPhone && cleanPhone !== DEFAULT_FALLBACK_PHONE && uPhone === cleanPhone)
+        (Boolean(cleanEmail) && uEmail === cleanEmail) ||
+        (Boolean(cleanPhone) && uPhone === cleanPhone)
       );
     });
 
@@ -344,7 +343,7 @@ export class EnquiriesService {
     // Matching Visa Application
     const matchedVisaApp =
       (record.zoho_id ? visaAppMap.get(record.zoho_id) : null) ||
-      (email && email !== 'notprovided@gmail.com' ? visaAppMap.get(email) : null) ||
+      (email ? visaAppMap.get(email) : null) ||
       null;
 
     // Matching Unified Entry
@@ -521,7 +520,7 @@ export class EnquiriesService {
           }),
         );
       }
-      if (email && email !== 'notprovided@gmail.com' && email !== hostEmail) {
+      if (email && email !== hostEmail) {
         participants.push(
           new MeetingParticipantDto({
             email,

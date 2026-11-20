@@ -17,12 +17,12 @@ export interface ICallsRepository {
 
   /**
    * Batch resolves customer phone numbers for the provided calls in a single pass.
-   * Maps call zoho_id to the resolved normalized customer phone number.
+   * Maps call zoho_id to the resolved normalized customer phone number (or null if missing/unparseable).
    *
    * @param calls - Array of call entities in the current page
-   * @returns {Promise<Map<string, string>>} Map of call zoho_id -> normalized customer phone
+   * @returns {Promise<Map<string, string | null>>} Map of call zoho_id -> normalized customer phone or null
    */
-  batchResolveCustomerPhones(calls: MigratedCallEntity[]): Promise<Map<string, string>>;
+  batchResolveCustomerPhones(calls: MigratedCallEntity[]): Promise<Map<string, string | null>>;
 
   /**
    * Batch resolves staff email addresses by unique Zoho user IDs.

@@ -151,7 +151,7 @@ describe('StaffService', () => {
       expect(staff2.isActive).toBe(false);
     });
 
-    it('should fall back to mobile when phone is missing, and to default placeholder when both missing', async () => {
+    it('should fall back to mobile when phone is missing, and to null when both missing', async () => {
       const mockUserWithMobile: MigratedUserEntity = {
         zoho_id: 'user_mobile',
         first_name: 'Ravi',
@@ -181,9 +181,30 @@ describe('StaffService', () => {
       expect(result.data[0]!.role).toBe('processing_executive');
       expect(result.data[0]!.department).toBe('processing');
 
-      expect(result.data[1]!.phone).toBe('+919999999999');
+      expect(result.data[1]!.phone).toBeNull();
       expect(result.data[1]!.role).toBe('branch_manager');
       expect(result.data[1]!.department).toBe('sales');
+    });
+
+    it('should return null when email is missing or unparseable', async () => {
+      const mockUserNoEmail: MigratedUserEntity = {
+        zoho_id: 'user_no_email',
+        first_name: 'No',
+        last_name: 'Email',
+        email: null,
+        phone: '9800000000',
+        role_name: 'Sales Executive',
+        status: 'active',
+      };
+
+      mockRepo.findStaff.mockResolvedValue({
+        records: [mockUserNoEmail],
+        total: 1,
+      });
+
+      const result = await service.getStaff({ page: 1, limit: 10 });
+      expect(result.data[0]!.email).toBeNull();
+      expect(result.data[0]!.phone).toBe('+919800000000');
     });
 
     it('should fallback to sales_executive and sales for unknown or empty roles', async () => {

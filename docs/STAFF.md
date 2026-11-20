@@ -38,10 +38,10 @@ Direct mapping between MongoDB `migrated_users` and target `StaffItemDto`:
 | Target Field | Target Type | Zoho Source Field | Source Type | Transformation Summary |
 | :--- | :--- | :--- | :--- | :--- |
 | `externalId` | `string` | `zoho_id` | String | Direct 1:1 copy of Zoho unique ID. |
-| `email` | `string` | `email` | String | Trimmed, lowercased, whitespace stripped. Defaults to `notprovided@worldvisa.in`. |
+| `email` | `string \| null` | `email` | String | Trimmed, lowercased, whitespace stripped. Null if missing or invalid. |
 | `firstName` | `string` | `first_name`, `full_name`, `name` | String | Extracted, capitalized to Title Case. Falls back to tokenizing `full_name` or `name`. |
 | `lastName` | `string` | `last_name`, `full_name`, `name` | String | Extracted, capitalized to Title Case. Captures last token of full name. Mononyms map here. |
-| `phone` | `string` | `phone`, `mobile` | String | Checks phone, falls back to mobile. Formatted to `+91XXXXXXXXXX`. Fallback: `+919999999999`. |
+| `phone` | `string \| null` | `phone`, `mobile` | String | Checks phone, falls back to mobile. Formatted to `+91XXXXXXXXXX`. Null if missing or invalid. |
 | `department` | `StaffDepartment` | `role_name` | String | Classified into `sales`, `processing`, `finance`, or `marketing`. Default: `sales`. |
 | `role` | `StaffRole` | `role_name` | String | Mapped into 13 hierarchical roles. Default: `sales_executive`. |
 | `isActive` | `boolean` | `status` | String | True only if `status === 'active'`. Other statuses (`deleted`, `inactive`, `disabled`, `pending`) map to `false`. |
@@ -61,7 +61,7 @@ Direct mapping between MongoDB `migrated_users` and target `StaffItemDto`:
 ### 2. Email Sanitization (`sanitizeEmail`)
 - Lowercases and strips all internal and trailing whitespace.
 - Rejects invalid formats, strings without `@`, or literals like `"null"`.
-- **Corporate Fallback:** If missing or invalid, defaults to `notprovided@worldvisa.in`.
+- **Fallback:** If missing or invalid, returns `null`.
 
 ### 3. Indian Phone Formatting (+91) (`normalizeIndianPhone`)
 - Checks primary `phone`, falls back to `mobile`.
@@ -69,7 +69,7 @@ Direct mapping between MongoDB `migrated_users` and target `StaffItemDto`:
 - **10 digits:** Prepends `+91` (e.g. `9800000000` &rarr; `+919800000000`).
 - **12 digits (starts with 91):** Prepends `+` (e.g. `919800000000` &rarr; `+919800000000`).
 - **11 digits (starts with 0):** Removes leading 0 and prepends `+91` (e.g. `09800000000` &rarr; `+919800000000`).
-- **Fallback:** Irregular/missing numbers default to `+919999999999`.
+- **Fallback:** Irregular/missing numbers return `null`.
 
 ### 4. Role & Department Resolution (`resolveStaffRoleAndDepartment`)
 - **Tier 1:** Exact match on titles (e.g. *CEO* &rarr; `director`, *Sales Executive* &rarr; `sales_executive`, *Operation Manager* &rarr; `processing_manager`).
@@ -117,9 +117,9 @@ Direct mapping between MongoDB `migrated_users` and target `StaffItemDto`:
 | :--- | :--- | :--- | :--- |
 | `firstName` | Missing `first_name` | Extracts earlier tokens from `full_name` / `name` | Parsed token or `""` |
 | `lastName` | Missing `last_name` | Extracts final token from `full_name` / `name` | Parsed token or `""` |
-| `email` | Missing or invalid email | Corporate staff default | `"notprovided@worldvisa.in"` |
+| `email` | Missing or invalid email | Null assignment | `null` |
 | `phone` | Missing `phone` | Falls back to `mobile` | Normalized `mobile` |
-| `phone` | Missing/invalid `phone` & `mobile` | Standard placeholder | `"+919999999999"` |
+| `phone` | Missing/invalid `phone` & `mobile` | Null assignment | `null` |
 | `role` & `department` | Missing or unknown `role_name` | Organizational baseline default | `role: "sales_executive", dept: "sales"` |
 | `isActive` | Status not explicitly `'active'` | Strict boolean evaluation | `false` |
 | `createdAt` | Missing/invalid `created_time` | Unix Epoch UTC | `"1970-01-01T00:00:00.000Z"` |
@@ -130,7 +130,7 @@ Direct mapping between MongoDB `migrated_users` and target `StaffItemDto`:
 ## 6. Key Edge Cases
 
 1. **Mononyms & Single Names:** When a user has only a single name in Zoho (e.g. *"Asha"*), it is mapped to `lastName` with `firstName = ""`, ensuring compliance with destination databases where `lastName` is required.
-2. **Corporate Email Default:** Staff API defaults missing emails to `notprovided@worldvisa.in` (instead of `@gmail.com` used for leads), distinguishing internal employees from external clients.
+2. **Nullable Email & Phone:** When email or phone number is missing or invalid in Zoho, the API explicitly returns `null` rather than dummy placeholder values.
 3. **All-Caps / Inconsistent Casing:** Names entered in ALL CAPS (e.g. *"MOHAMMED IRFAN"*) or lowercase are cleanly formatted to Title Case (*"Mohammed Irfan"*).
 4. **Flat Migration Envelope:** Uses `@BypassTransform()` to emit the direct migration payload (`data, total, page, pageSize, hasMore`) rather than standard API status envelopes.
 
@@ -142,10 +142,10 @@ Direct mapping between MongoDB `migrated_users` and target `StaffItemDto`:
 ```typescript
 export interface StaffItemDto {
   externalId: string;        // Original Zoho ID (zoho_id)
-  email: string;             // Lowercased email or 'notprovided@worldvisa.in'
+  email: string | null;      // Lowercased email or null
   firstName: string;         // Title-Cased first name
   lastName: string;          // Title-Cased last name
-  phone: string;             // +91XXXXXXXXXX or '+919999999999'
+  phone: string | null;      // +91XXXXXXXXXX or null
   department: 'sales' | 'processing' | 'finance' | 'marketing';
   role:
     | 'director' | 'branch_manager' | 'sales_manager' | 'sales_executive'
@@ -184,10 +184,10 @@ export interface StaffResponseDto {
     },
     {
       "externalId": "164193000099887766",
-      "email": "notprovided@worldvisa.in",
+      "email": null,
       "firstName": "",
       "lastName": "Sumanth",
-      "phone": "+919999999999",
+      "phone": null,
       "department": "sales",
       "role": "sales_executive",
       "isActive": false,

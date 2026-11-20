@@ -9,18 +9,22 @@ import type { EnquirySource } from '../utils/enquiry-source.util.js';
 
 export class EnquiryClientDto {
   @ApiProperty({
-    description: 'Client normalized email address (fallback: notprovided@gmail.com)',
+    description: 'Client normalized email address, or null if missing/unparseable',
     example: 'jane@example.com',
+    type: String,
+    nullable: true,
   })
-  email: string;
+  email: string | null;
 
   @ApiProperty({
-    description: 'Client normalized international phone number (fallback: +919999999999)',
+    description: 'Client normalized international phone number, or null if missing/unparseable',
     example: '+919876543210',
+    type: String,
+    nullable: true,
   })
-  phone: string;
+  phone: string | null;
 
-  constructor(data: { email: string; phone: string }) {
+  constructor(data: { email: string | null; phone: string | null }) {
     this.email = data.email;
     this.phone = data.phone;
   }

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model, QueryFilter, SortOrder } from 'mongoose';
 import {
-  DEFAULT_FALLBACK_PHONE,
   normalizeEmail,
   normalizePhoneNumber,
 } from '../../../common/utils/index.js';
@@ -121,8 +120,8 @@ export class CallsRepository implements ICallsRepository {
    * Batch resolves customer phone numbers for all calls in the current page in a single round.
    * Ensures zero N+1 database queries.
    */
-  async batchResolveCustomerPhones(calls: MigratedCallEntity[]): Promise<Map<string, string>> {
-    const callPhoneMap = new Map<string, string>();
+  async batchResolveCustomerPhones(calls: MigratedCallEntity[]): Promise<Map<string, string | null>> {
+    const callPhoneMap = new Map<string, string | null>();
     if (calls.length === 0) {
       return callPhoneMap;
     }
@@ -187,7 +186,7 @@ export class CallsRepository implements ICallsRepository {
     ]);
 
     // Build Lead phone map
-    const leadPhoneMap = new Map<string, string>();
+    const leadPhoneMap = new Map<string, string | null>();
     for (const lead of leads) {
       if (lead.zoho_id) {
         leadPhoneMap.set(
@@ -198,7 +197,7 @@ export class CallsRepository implements ICallsRepository {
     }
 
     // Build Contact phone map
-    const contactPhoneMap = new Map<string, string>();
+    const contactPhoneMap = new Map<string, string | null>();
     for (const contact of contacts) {
       if (contact.zoho_id) {
         contactPhoneMap.set(
@@ -239,40 +238,38 @@ export class CallsRepository implements ICallsRepository {
     }
 
     // Build Deal phone map
-    const dealPhoneMap = new Map<string, string>();
+    const dealPhoneMap = new Map<string, string | null>();
     for (const deal of deals) {
       if (deal.zoho_id) {
         const phone = deal.Phone
           ? normalizePhoneNumber(deal.Phone)
-          : (deal._zoho_contact_id && contactPhoneMap.get(deal._zoho_contact_id)) ||
-          DEFAULT_FALLBACK_PHONE;
+          : (deal._zoho_contact_id && contactPhoneMap.get(deal._zoho_contact_id)) || null;
         dealPhoneMap.set(deal.zoho_id, phone);
       }
     }
 
     // Build Visa Application phone map
-    const visaAppPhoneMap = new Map<string, string>();
+    const visaAppPhoneMap = new Map<string, string | null>();
     for (const visaApp of visaApps) {
       if (visaApp.zoho_id) {
         const phone =
-          (visaApp._zoho_contact_id && contactPhoneMap.get(visaApp._zoho_contact_id)) ||
-          DEFAULT_FALLBACK_PHONE;
+          (visaApp._zoho_contact_id && contactPhoneMap.get(visaApp._zoho_contact_id)) || null;
         visaAppPhoneMap.set(visaApp.zoho_id, phone);
       }
     }
 
     // Build Spouse Assessment phone map
-    const spousePhoneMap = new Map<string, string>();
+    const spousePhoneMap = new Map<string, string | null>();
     for (const spouse of spouseAssessments) {
       if (spouse.zoho_id) {
-        const phone = spouse.Phone ? normalizePhoneNumber(spouse.Phone) : DEFAULT_FALLBACK_PHONE;
+        const phone = spouse.Phone ? normalizePhoneNumber(spouse.Phone) : null;
         spousePhoneMap.set(spouse.zoho_id, phone);
       }
     }
 
     // Map each call to its resolved customer phone
     for (const call of calls) {
-      let resolvedPhone: string | undefined;
+      let resolvedPhone: string | null | undefined;
 
       if (call._zoho_lead_id) {
         resolvedPhone = leadPhoneMap.get(call._zoho_lead_id);
@@ -286,7 +283,7 @@ export class CallsRepository implements ICallsRepository {
         resolvedPhone = spousePhoneMap.get(call._zoho_spouse_skill_assessment_id);
       }
 
-      callPhoneMap.set(call.zoho_id, resolvedPhone || DEFAULT_FALLBACK_PHONE);
+      callPhoneMap.set(call.zoho_id, resolvedPhone ?? null);
     }
 
     return callPhoneMap;
@@ -310,7 +307,10 @@ export class CallsRepository implements ICallsRepository {
 
     for (const user of users) {
       if (user.zoho_id) {
-        emailMap.set(user.zoho_id, normalizeEmail(user.email));
+        const email = normalizeEmail(user.email);
+        if (email) {
+          emailMap.set(user.zoho_id, email);
+        }
       }
     }
 

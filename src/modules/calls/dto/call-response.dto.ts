@@ -87,11 +87,13 @@ export class CallItemDto {
   status: CallStatus;
 
   @ApiProperty({
-    description: 'Normalized customer phone number in international format (+91XXXXXXXXXX)',
+    description:
+      'Normalized customer phone number in international format (+91XXXXXXXXXX), or null if unlinked/unparseable',
     example: '+919876543210',
     type: String,
+    nullable: true,
   })
-  customerPhone: string;
+  customerPhone: string | null;
 
   @ApiPropertyOptional({
     description: 'Normalized email of the agent / owner handling the call (null if not found)',
@@ -191,7 +193,7 @@ export class CallItemDto {
     parentZohoId?: string | null;
     direction: CallDirection;
     status: CallStatus;
-    customerPhone: string;
+    customerPhone: string | null;
     agentEmail: string | null;
     startedAt: string;
     durationSeconds: number;

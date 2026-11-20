@@ -5,11 +5,6 @@ import {
 } from 'libphonenumber-js';
 
 /**
- * Default fallback phone number when no usable number is provided in Zoho records.
- */
-export const DEFAULT_FALLBACK_PHONE = '+919999999999';
-
-/**
  * Parsed representation of country information extracted from Country_Code field.
  */
 export interface ExtractedCountryInfo {
@@ -661,20 +656,20 @@ export function sanitizeAndParsePhoneNumber(
  * 2. If missing or invalid, falls back to `Mobile`.
  * 3. Extracts country info from `Country_Code`.
  * 4. Normalizes to consistent international E.164 format.
- * 5. Falls back to `+919999999999` only when a usable number cannot be determined.
+ * 5. Returns null if a usable number cannot be determined.
  *
  * @param phoneRaw - Primary Phone from Zoho record
  * @param mobileRaw - Mobile from Zoho record
  * @param countryCodeRaw - Country_Code from Zoho record
- * @param defaultPhone - Optional override for fallback (defaults to DEFAULT_FALLBACK_PHONE)
- * @returns {string} Normalized international phone number
+ * @param defaultPhone - Optional override for fallback (defaults to null)
+ * @returns {string | null} Normalized international phone number or null
  */
 export function normalizePhoneNumber(
   phoneRaw?: string | null,
   mobileRaw?: string | null,
   countryCodeRaw?: string | null,
-  defaultPhone: string = DEFAULT_FALLBACK_PHONE,
-): string {
+  defaultPhone: string | null = null,
+): string | null {
   const countryInfo = extractCountryCodeInfo(countryCodeRaw);
 
   if (typeof phoneRaw === 'string') {

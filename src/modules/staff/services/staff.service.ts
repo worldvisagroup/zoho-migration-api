@@ -53,9 +53,7 @@ export class StaffService {
     const names = extractNames(user.first_name, user.last_name, user.full_name || user.name);
 
     // 2. Email normalization
-    const cleanEmail =
-      sanitizeEmail(user.email) ||
-      (user.email ? user.email.trim().toLowerCase() : 'notprovided@worldvisa.in');
+    const cleanEmail = sanitizeEmail(user.email) || null;
 
     // 3. Indian phone normalization with +91 prefix
     const phone = normalizeIndianPhone(user.phone, user.mobile);

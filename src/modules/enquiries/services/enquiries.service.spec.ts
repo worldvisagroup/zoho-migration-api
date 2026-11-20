@@ -200,6 +200,8 @@ describe('EnquiriesService', () => {
       expect(enquiry.notes.length).toBe(1);
       expect(enquiry.notes[0].parentType).toBe('lead');
       expect(enquiry.notes[0].parentZohoId).toBe('lead_100');
+      expect(enquiry.notes[0].title).toBe('First call summary');
+      expect(enquiry.notes[0].content).toBe('Client interested in 189 visa');
       expect(enquiry.calls.length).toBe(1);
       expect(enquiry.calls[0].parentType).toBe('lead');
       expect(enquiry.calls[0].parentZohoId).toBe('lead_100');

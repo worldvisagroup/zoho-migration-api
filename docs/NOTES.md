@@ -14,7 +14,7 @@
 ## 1. API Overview
 
 ### Purpose
-The Notes API extracts CRM consultation notes, internal agent remarks, and client logs from `migrated_notes`. It formats the note body by combining title and content (`Note_Title:- Note_Content`), resolves creator and modifier email addresses via single-pass batch lookup against `migrated_users` to avoid N+1 queries, supports filtering by related parent entity (`lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document`), and provides paginated results ordered oldest to newest by `Created_Time`.
+The Notes API extracts CRM consultation notes, internal agent remarks, and client logs from `migrated_notes`. It extracts note title and raw content (`Note_Title` and `Note_Content`), resolves creator and modifier email addresses via single-pass batch lookup against `migrated_users` to avoid N+1 queries, supports filtering by related parent entity (`lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document`), and provides paginated results ordered oldest to newest by `Created_Time`.
 
 ### Supported Query Parameters
 
@@ -48,7 +48,8 @@ Direct mapping from MongoDB `migrated_notes` and `migrated_users` to [`NoteItemD
 | `externalId` | `string` | `zoho_id` | String | Direct 1:1 copy of Zoho note unique identifier. |
 | `parentType` | `string \| null` | `parent_entity_type` | String | Standardized parent entity type (`lead`, `contact`, `deal`, `visa_application`, `spouse_skill_assessment`, `task`, `event`, `signed_document`), or `null`. |
 | `parentZohoId` | `string \| null` | `_zoho_*_id` | String | Original Zoho ID of the linked parent record (`_zoho_lead_id`, `_zoho_contact_id`, etc.), or `null`. |
-| `body` | `string` | `Note_Title`, `Note_Content` | Text, Text | Combined into `"${title}:- ${content}"`. Gracefully handles notes with title-only, content-only, or empty strings. |
+| `title` | `string \| null` | `Note_Title` | Text | Trimmed note title from Zoho `Note_Title`, or `null` if empty. |
+| `content` | `string \| null` | `Note_Content` | Text | Raw text content from Zoho `Note_Content`, or `null` if empty. |
 | `createdByEmail` | `string \| null` | `_zoho_created_by_id` &rarr; `migrated_users.email` | Lookup | Resolved creator email address via single-pass batch lookup, or `null`. |
 | `createdByZohoId` | `string \| null` | `_zoho_created_by_id` | String | Cleaned Zoho user ID of the creator, or `null`. |
 | `createdAt` | `string` (ISO 8601) | `Created_Time` | Datetime | Normalized to UTC ISO 8601 string. Fallback: `1970-01-01T00:00:00.000Z`. |
@@ -60,14 +61,11 @@ Direct mapping from MongoDB `migrated_notes` and `migrated_users` to [`NoteItemD
 
 ## 3. Field Transformation Logic
 
-### 1. Note Body Formatting (`formatBody`)
-In Zoho CRM, notes store a summary in `Note_Title` and the body in `Note_Content`. To present a consolidated, readable representation in the target application:
-- Safely trims both `Note_Title` and `Note_Content`.
-- **Both Present:** Joins them using the standard delimiter: `"${title}:- ${content}"`.
-  *Example:* `Note_Title: "Document Verification"`, `Note_Content: "Verified ACS assessment letter."` &rarr; `"Document Verification:- Verified ACS assessment letter."`
-- **Title Only:** If `Note_Content` is missing or whitespace-only, returns just the trimmed title without trailing separators.
-- **Content Only:** If `Note_Title` is missing or whitespace-only, returns just the trimmed content without leading separators.
-- **Both Missing:** If both fields are empty or whitespace-only, returns empty string `""`.
+### 1. Note Title & Content Extraction
+Notes in Zoho CRM maintain two distinct text attributes: `Note_Title` (the brief headline or subject) and `Note_Content` (the raw note narrative or body):
+- **`title`:** Extracted from `Note_Title`. If present and non-empty after trimming, returns the trimmed string; otherwise returns `null`.
+- **`content`:** Extracted from `Note_Content`. If present and non-empty after trimming, returns the raw trimmed content string; otherwise returns `null`.
+- **Preservation of Raw Content:** Keeps the title and content clean and independent, preventing artificial delimiters like `":- "` from cluttering downstream systems.
 
 ### 2. Single-Pass Staff Email Batching (`findUserEmailsByZohoIds`)
 To resolve staff email addresses for note creators and editors without triggering N+1 database queries:
@@ -113,9 +111,8 @@ The Notes API supports querying across 8 polymorphic parent record types:
 | `externalId` | Missing or null `zoho_id` | Empty string assignment | `""` |
 | `parentType` | Missing or unrecognized `parent_entity_type` | Unresolved entity | `null` |
 | `parentZohoId` | Missing ID in matched `_zoho_*_id` | Null fallback | `null` |
-| `body` | Missing both `Note_Title` and `Note_Content` | Empty string assignment | `""` |
-| `body` | Missing `Note_Content` but title present | Output title only | `title` |
-| `body` | Missing `Note_Title` but content present | Output content only | `content` |
+| `title` | Missing, empty, or whitespace `Note_Title` | Null fallback | `null` |
+| `content` | Missing, empty, or whitespace `Note_Content` | Null fallback | `null` |
 | `createdByEmail` | Creator ID missing or not found in `migrated_users` | Lookup miss | `null` |
 | `createdByZohoId` | Missing or null `_zoho_created_by_id` | Cleaned nullable string | `null` |
 | `createdAt` | Missing or invalid `Created_Time` | Unix Epoch UTC | `"1970-01-01T00:00:00.000Z"` |
@@ -127,11 +124,10 @@ The Notes API supports querying across 8 polymorphic parent record types:
 
 ## 6. Key Edge Cases
 
-1. **Title-Only and Content-Only Notes:** Users in Zoho CRM frequently enter quick comments with no title, or set a title without body text. The `formatBody` helper avoids creating ugly artifacts like `":- Content"` or `"Title:- "` by conditionally omitting the delimiter when either side is empty.
-2. **Double Separator Prevention:** If a user already typed a separator in the title (e.g. `"Follow Up -"`) or content, the standard `":- "` separator is still applied cleanly between trimmed parts.
-3. **`modifiedAt` Never-Null Guarantee:** Target schemas often enforce non-null modification timestamps. When Zoho notes have not been modified since creation, `Modified_Time` is often null in the database. The transformation engine automatically cascades to `Created_Time`.
-4. **Polymorphic Filtering Across Modules:** A single `migrated_notes` collection stores remarks for Leads, Contacts, Deals, and Visa Applications. The API enables selective filtering via `zohoLeadId`, `zohoContactId`, `zohoDealId`, `visaApplicationId`, or `spouseSkillAssessmentId`, as well as broad filtering by `type`.
-5. **Staff Deletion Resiliency:** If a staff member who logged a note has been deactivated or was not exported into `migrated_users`, the batch resolver gracefully yields `null` for `createdByEmail` while retaining the raw `createdByZohoId` for audit traceability.
+1. **Independent Title and Content Fields:** Users in Zoho CRM frequently enter quick comments without a title (e.g. phone call logs), or provide a subject header with no extended body. The API preserves these as separate fields: `title` will be `null` when `Note_Title` is missing/empty, and `content` will be `null` when `Note_Content` is missing/empty, without conflating or fabricating artificial combined delimiters.
+2. **`modifiedAt` Never-Null Guarantee:** Target schemas often enforce non-null modification timestamps. When Zoho notes have not been modified since creation, `Modified_Time` is often null in the database. The transformation engine automatically cascades to `Created_Time`.
+3. **Polymorphic Filtering Across Modules:** A single `migrated_notes` collection stores remarks for Leads, Contacts, Deals, and Visa Applications. The API enables selective filtering via `zohoLeadId`, `zohoContactId`, `zohoDealId`, `visaApplicationId`, or `spouseSkillAssessmentId`, as well as broad filtering by `type`.
+4. **Staff Deletion Resiliency:** If a staff member who logged a note has been deactivated or was not exported into `migrated_users`, the batch resolver gracefully yields `null` for `createdByEmail` while retaining the raw `createdByZohoId` for audit traceability.
 
 ---
 
@@ -144,7 +140,8 @@ export interface NoteItemDto {
   externalId: string;                 // Original Zoho ID (zoho_id)
   parentType: string | null;          // Type of parent record (lead, contact, deal, etc.)
   parentZohoId: string | null;        // Original Zoho ID of parent record
-  body: string;                       // Combined "Note_Title:- Note_Content"
+  title: string | null;               // Note title from Zoho Note_Title, or null
+  content: string | null;             // Raw text content from Zoho Note_Content, or null
   createdByEmail: string | null;      // Creator staff email or null
   createdByZohoId: string | null;     // Creator Zoho user ID or null
   createdAt: string;                  // Zoho Created_Time in UTC ISO 8601
@@ -171,7 +168,8 @@ export interface NotesResponseDto {
       "externalId": "164193000020539649",
       "parentType": "lead",
       "parentZohoId": "164193000000811047",
-      "body": "Initial Assessment:- Client scored 8 bands in IELTS and has 5 years of experience as a Software Engineer. Eligible for subclass 189 visa.",
+      "title": "Initial Assessment",
+      "content": "Client scored 8 bands in IELTS and has 5 years of experience as a Software Engineer. Eligible for subclass 189 visa.",
       "createdByEmail": "asha.sharma@worldvisa.in",
       "createdByZohoId": "164193000000028001",
       "createdAt": "2024-03-02T10:00:00.000Z",
@@ -183,7 +181,8 @@ export interface NotesResponseDto {
       "externalId": "164193000020539702",
       "parentType": "contact",
       "parentZohoId": "164193000000822091",
-      "body": "Client requested call back after 6 PM due to office hours.",
+      "title": null,
+      "content": "Client requested call back after 6 PM due to office hours.",
       "createdByEmail": "rahul.patel@worldvisa.in",
       "createdByZohoId": "164193000000028005",
       "createdAt": "2024-03-03T07:15:20.000Z",
@@ -195,7 +194,8 @@ export interface NotesResponseDto {
       "externalId": "164193000020539810",
       "parentType": "spouse_skill_assessment",
       "parentZohoId": "164193000000933015",
-      "body": "Spouse Assessment Review:- Need marriage certificate and spouse degree transcripts before submission.",
+      "title": "Spouse Assessment Review",
+      "content": "Need marriage certificate and spouse degree transcripts before submission.",
       "createdByEmail": "priya.nair@worldvisa.in",
       "createdByZohoId": "164193000000028012",
       "createdAt": "2024-03-04T11:45:00.000Z",

@@ -37,12 +37,21 @@ export class NoteItemDto {
   })
   parentZohoId: string | null;
 
-  @ApiProperty({
-    description: 'Combined note title and content in "Note_Title:- Note_Content" format',
-    example: 'Client Call:- Client wants to start in January.',
+  @ApiPropertyOptional({
+    description: 'Title of the note from Zoho Note_Title, or null if empty',
+    example: 'Client Call',
     type: String,
+    nullable: true,
   })
-  body: string;
+  title: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Raw text content of the note from Zoho Note_Content, or null if empty',
+    example: 'Client wants to start in January.',
+    type: String,
+    nullable: true,
+  })
+  content: string | null;
 
   @ApiPropertyOptional({
     description: 'Normalized lowercase email of the staff member who created the note',
@@ -94,7 +103,8 @@ export class NoteItemDto {
     externalId: string;
     parentType?: string | null;
     parentZohoId?: string | null;
-    body: string;
+    title: string | null;
+    content: string | null;
     createdByEmail: string | null;
     createdByZohoId: string | null;
     createdAt: string;
@@ -105,7 +115,8 @@ export class NoteItemDto {
     this.externalId = data.externalId;
     this.parentType = data.parentType ?? null;
     this.parentZohoId = data.parentZohoId ?? null;
-    this.body = data.body;
+    this.title = data.title ?? null;
+    this.content = data.content ?? null;
     this.createdByEmail = data.createdByEmail;
     this.createdByZohoId = data.createdByZohoId;
     this.createdAt = data.createdAt;

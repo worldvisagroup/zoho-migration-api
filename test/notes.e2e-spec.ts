@@ -199,7 +199,7 @@ describe('NotesController (e2e)', () => {
         .expect(401);
     });
 
-    it('should return 200 with transformed notes, formatted body, and pagination defaults', async () => {
+    it('should return 200 with transformed notes, title and content, and pagination defaults', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/notes')
         .set('x-api-key', apiKey)
@@ -215,9 +215,8 @@ describe('NotesController (e2e)', () => {
       expect(record.externalId).toBe('note_001');
       expect(record.parentType).toBe('contact');
       expect(record.parentZohoId).toBe('contact_001');
-      expect(record.body).toBe(
-        'Consultation Discussion:- Client plans to apply for subclass 189 visa.',
-      );
+      expect(record.title).toBe('Consultation Discussion');
+      expect(record.content).toBe('Client plans to apply for subclass 189 visa.');
       expect(record.createdByEmail).toBe('counselor@worldvisa.in');
       expect(record.createdByZohoId).toBe('user_001');
       expect(record.modifiedByEmail).toBe('counselor@worldvisa.in');

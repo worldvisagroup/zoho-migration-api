@@ -63,7 +63,7 @@ export default function NotesApiDocPage() {
           </div>
 
           <p className="text-xs text-slate-300 leading-relaxed">
-            The Notes API extracts CRM consultation notes, internal agent remarks, and client logs from <code className="text-sky-300 font-mono">migrated_notes</code>. It formats the note body by combining title and content (<code className="font-mono text-slate-200">Note_Title:- Note_Content</code>), resolves creator and modifier email addresses via single-pass batch lookup against <code className="text-sky-300 font-mono">migrated_users</code> to avoid N+1 queries, supports filtering by related parent entity (<code className="font-mono text-slate-200">lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document</code>), and provides paginated results ordered oldest to newest by <code className="font-mono text-slate-200">Created_Time</code>.
+            The Notes API extracts CRM consultation notes, internal agent remarks, and client logs from <code className="text-sky-300 font-mono">migrated_notes</code>. It extracts note title and raw content (<code className="font-mono text-slate-200">Note_Title</code> and <code className="font-mono text-slate-200">Note_Content</code>), resolves creator and modifier email addresses via single-pass batch lookup against <code className="text-sky-300 font-mono">migrated_users</code> to avoid N+1 queries, supports filtering by related parent entity (<code className="font-mono text-slate-200">lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document</code>), and provides paginated results ordered oldest to newest by <code className="font-mono text-slate-200">Created_Time</code>.
           </p>
 
           <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#0c1322]">
@@ -222,11 +222,18 @@ export default function NotesApiDocPage() {
                   <td className="px-4 py-2.5">Original Zoho ID of the linked parent record (<code className="font-mono text-slate-200">_zoho_lead_id, _zoho_contact_id</code>, etc.), or <code className="text-slate-400 font-mono">null</code>.</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">body</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">string</td>
-                  <td className="px-4 py-2.5 font-mono text-sky-300">Note_Title, Note_Content</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400">Text, Text</td>
-                  <td className="px-4 py-2.5">Combined into <code className="font-mono text-slate-200">&quot;{`\${title}:- \${content}`}&quot;</code>. Handles title-only, content-only, or empty gracefully.</td>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">title</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">Note_Title</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">Text</td>
+                  <td className="px-4 py-2.5">Trimmed note title from Zoho <code className="font-mono text-slate-200">Note_Title</code>, or <code className="text-slate-400 font-mono">null</code> if empty.</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">content</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">Note_Content</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">Text</td>
+                  <td className="px-4 py-2.5">Raw text content from Zoho <code className="font-mono text-slate-200">Note_Content</code>, or <code className="text-slate-400 font-mono">null</code> if empty.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">createdByEmail</td>
@@ -285,17 +292,16 @@ export default function NotesApiDocPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            {/* Body Formatting */}
+            {/* Title & Content Extraction */}
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-2">
-              <span className="font-semibold text-white text-sm block">1. Note Body Combination</span>
+              <span className="font-semibold text-white text-sm block">1. Note Title &amp; Content Extraction</span>
               <p className="text-slate-300 leading-relaxed">
-                Uses <code className="font-mono text-sky-300">formatBody(title, content)</code>:
+                Preserves note headline and narrative as distinct fields:
               </p>
               <ul className="list-disc list-inside space-y-1 text-slate-400">
-                <li><strong className="text-emerald-400">Both Present:</strong> Trims both strings and joins them as <code className="font-mono text-slate-200">&quot;{`\${title}:- \${content}`}&quot;</code>.</li>
-                <li><strong className="text-sky-400">Title Only:</strong> Returns the trimmed title without trailing separators.</li>
-                <li><strong className="text-sky-400">Content Only:</strong> Returns the trimmed content without leading separators.</li>
-                <li><strong>Fallback:</strong> Empty string <code className="font-mono text-slate-200">&quot;&quot;</code> if both are missing or whitespace.</li>
+                <li><strong className="text-emerald-400">title:</strong> Trimmed string from <code className="font-mono text-slate-300">Note_Title</code>, or <code className="font-mono text-slate-400">null</code> if missing/empty.</li>
+                <li><strong className="text-emerald-400">content:</strong> Raw trimmed text from <code className="font-mono text-slate-300">Note_Content</code>, or <code className="font-mono text-slate-400">null</code> if missing/empty.</li>
+                <li><strong>Clean Independence:</strong> Avoids artificial combined strings or formatting delimiters.</li>
               </ul>
             </div>
 
@@ -430,22 +436,16 @@ export default function NotesApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">body</td>
-                  <td className="px-4 py-2.5">Missing both <code className="font-mono">Note_Title</code> and <code className="font-mono">Note_Content</code></td>
-                  <td className="px-4 py-2.5">Empty string assignment</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-300">&quot;&quot;</td>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">title</td>
+                  <td className="px-4 py-2.5">Missing, empty, or whitespace <code className="font-mono">Note_Title</code></td>
+                  <td className="px-4 py-2.5">Null fallback</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">body</td>
-                  <td className="px-4 py-2.5">Missing <code className="font-mono">Note_Content</code> but title present</td>
-                  <td className="px-4 py-2.5">Output title only without delimiter</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-200">title</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">body</td>
-                  <td className="px-4 py-2.5">Missing <code className="font-mono">Note_Title</code> but content present</td>
-                  <td className="px-4 py-2.5">Output content only without delimiter</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-200">content</td>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">content</td>
+                  <td className="px-4 py-2.5">Missing, empty, or whitespace <code className="font-mono">Note_Content</code></td>
+                  <td className="px-4 py-2.5">Null fallback</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">createdByEmail</td>
@@ -499,9 +499,9 @@ export default function NotesApiDocPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
-              <span className="font-semibold text-white">Title-Only and Content-Only Notes</span>
+              <span className="font-semibold text-white">Independent Title and Content Fields</span>
               <p className="text-slate-300 leading-relaxed">
-                Users in Zoho CRM frequently enter quick comments without adding a title, or set a title without body text. The <code className="font-mono text-sky-300">formatBody</code> helper avoids creating ugly formatting artifacts like <code className="font-mono text-slate-400">&quot;:- Content&quot;</code> or <code className="font-mono text-slate-400">&quot;Title:- &quot;</code> by conditionally omitting the delimiter when either side is empty.
+                Users in Zoho CRM frequently enter quick comments without adding a title, or set a title without body text. The API preserves these as separate fields: <code className="font-mono text-slate-300">title</code> will be <code className="font-mono text-slate-400">null</code> when <code className="font-mono text-slate-300">Note_Title</code> is empty, and <code className="font-mono text-slate-300">content</code> will be <code className="font-mono text-slate-400">null</code> when <code className="font-mono text-slate-300">Note_Content</code> is empty.
               </p>
             </div>
 
@@ -546,7 +546,8 @@ export default function NotesApiDocPage() {
   externalId: string;                 // Original Zoho ID (zoho_id)
   parentType: string | null;          // Type of parent record (lead, contact, deal, etc.)
   parentZohoId: string | null;        // Original Zoho ID of parent record
-  body: string;                       // Combined "Note_Title:- Note_Content"
+  title: string | null;               // Note title from Zoho Note_Title, or null
+  content: string | null;             // Raw text content from Zoho Note_Content, or null
   createdByEmail: string | null;      // Creator staff email or null
   createdByZohoId: string | null;     // Creator Zoho user ID or null
   createdAt: string;                  // Zoho Created_Time in UTC ISO 8601
@@ -576,7 +577,8 @@ export interface NotesResponseDto {
       "externalId": "164193000020539649",
       "parentType": "lead",
       "parentZohoId": "164193000000811047",
-      "body": "Initial Assessment:- Client scored 8 bands in IELTS and has 5 years of experience as a Software Engineer. Eligible for subclass 189 visa.",
+      "title": "Initial Assessment",
+      "content": "Client scored 8 bands in IELTS and has 5 years of experience as a Software Engineer. Eligible for subclass 189 visa.",
       "createdByEmail": "asha.sharma@worldvisa.in",
       "createdByZohoId": "164193000000028001",
       "createdAt": "2024-03-02T10:00:00.000Z",
@@ -588,7 +590,8 @@ export interface NotesResponseDto {
       "externalId": "164193000020539702",
       "parentType": "contact",
       "parentZohoId": "164193000000822091",
-      "body": "Client requested call back after 6 PM due to office hours.",
+      "title": null,
+      "content": "Client requested call back after 6 PM due to office hours.",
       "createdByEmail": "rahul.patel@worldvisa.in",
       "createdByZohoId": "164193000000028005",
       "createdAt": "2024-03-03T07:15:20.000Z",
@@ -600,7 +603,8 @@ export interface NotesResponseDto {
       "externalId": "164193000020539810",
       "parentType": "spouse_skill_assessment",
       "parentZohoId": "164193000000933015",
-      "body": "Spouse Assessment Review:- Need marriage certificate and spouse degree transcripts before submission.",
+      "title": "Spouse Assessment Review",
+      "content": "Need marriage certificate and spouse degree transcripts before submission.",
       "createdByEmail": "priya.nair@worldvisa.in",
       "createdByZohoId": "164193000000028012",
       "createdAt": "2024-03-04T11:45:00.000Z",

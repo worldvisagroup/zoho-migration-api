@@ -24,7 +24,7 @@ export class NotesController {
   @ApiOperation({
     summary: 'Retrieve migrated notes for database migration',
     description:
-      'Fetches note records from the Zoho migrated_notes collection, safely formats note body (Note_Title:- Note_Content), resolves creator and modifier email addresses via batch lookup against migrated_users to avoid N+1 queries, supports filtering by related parent entity (lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document), and provides paginated results ordered oldest to newest by Created_Time.',
+      'Fetches note records from the Zoho migrated_notes collection, returns note title and raw content (title and content), resolves creator and modifier email addresses via batch lookup against migrated_users to avoid N+1 queries, supports filtering by related parent entity (lead, contact, deal, visa_application, spouse_skill_assessment, task, event, signed_document), and provides paginated results ordered oldest to newest by Created_Time.',
   })
   @ApiOkResponse({
     description: 'Paginated migration notes in standardized format',

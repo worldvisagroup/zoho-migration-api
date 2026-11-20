@@ -70,13 +70,55 @@ describe('NotesService', () => {
       expect(note.externalId).toBe('note_101');
       expect(note.parentType).toBe('lead');
       expect(note.parentZohoId).toBe('lead_001');
-      expect(note.body).toBe('Initial Assessment:- Client has 8 bands in IELTS.');
+      expect(note.title).toBe('Initial Assessment');
+      expect(note.content).toBe('Client has 8 bands in IELTS.');
       expect(note.createdByEmail).toBe('creator@worldvisa.in');
       expect(note.createdByZohoId).toBe('user_1');
       expect(note.modifiedByEmail).toBe('modifier@worldvisa.in');
       expect(note.modifiedByZohoId).toBe('user_2');
       expect(note.createdAt).toBe('2024-03-02T10:00:00.000Z');
       expect(note.modifiedAt).toBe('2024-03-05T12:00:00.000Z');
+    });
+
+    it('should correctly handle title-only, content-only, and empty note titles/contents', async () => {
+      const mockNotes: MigratedNoteEntity[] = [
+        {
+          zoho_id: 'note_title_only',
+          Note_Title: '  Title Only  ',
+          Note_Content: '   ',
+          Created_Time: new Date('2024-01-01T00:00:00.000Z'),
+        },
+        {
+          zoho_id: 'note_content_only',
+          Note_Title: null,
+          Note_Content: '  Raw content only  ',
+          Created_Time: new Date('2024-01-02T00:00:00.000Z'),
+        },
+        {
+          zoho_id: 'note_both_empty',
+          Note_Title: '   ',
+          Note_Content: '',
+          Created_Time: new Date('2024-01-03T00:00:00.000Z'),
+        },
+      ];
+
+      mockRepo.findNotes.mockResolvedValue({
+        records: mockNotes,
+        total: 3,
+      });
+      mockRepo.findUserEmailsByZohoIds.mockResolvedValue(new Map());
+
+      const result = await service.getNotes({ page: 1, limit: 10 });
+      expect(result.data).toHaveLength(3);
+
+      expect(result.data[0]!.title).toBe('Title Only');
+      expect(result.data[0]!.content).toBeNull();
+
+      expect(result.data[1]!.title).toBeNull();
+      expect(result.data[1]!.content).toBe('Raw content only');
+
+      expect(result.data[2]!.title).toBeNull();
+      expect(result.data[2]!.content).toBeNull();
     });
 
     it('should set hasMore to false on the final page', async () => {
@@ -136,34 +178,6 @@ describe('NotesService', () => {
         limit: 200,
         updatedSince: '2024-01-01T00:00:00.000Z',
       });
-    });
-  });
-
-  describe('formatBody', () => {
-    it('should format combined title and content with whitespace trimmed', () => {
-      expect(service.formatBody('  Follow Up  ', '  Called client no response  ')).toBe(
-        'Follow Up:- Called client no response',
-      );
-    });
-
-    it('should return title only when content is missing or empty', () => {
-      expect(service.formatBody('Important Note', null)).toBe('Important Note');
-      expect(service.formatBody('Important Note', '   ')).toBe('Important Note');
-    });
-
-    it('should return content only when title is missing or empty', () => {
-      expect(service.formatBody(null, 'Client wants to start in January.')).toBe(
-        'Client wants to start in January.',
-      );
-      expect(service.formatBody('   ', 'Client wants to start in January.')).toBe(
-        'Client wants to start in January.',
-      );
-    });
-
-    it('should return empty string when both title and content are missing or whitespace', () => {
-      expect(service.formatBody(null, null)).toBe('');
-      expect(service.formatBody('', '')).toBe('');
-      expect(service.formatBody('   ', '   ')).toBe('');
     });
   });
 });

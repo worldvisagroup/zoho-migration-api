@@ -397,9 +397,8 @@ export class EnquiriesService {
     // Related Activity Lists
     const rawNotes = (record.zoho_id ? notesMap.get(record.zoho_id) : null) || [];
     const notes: NoteItemDto[] = rawNotes.map(n => {
-      const title = n.Note_Title?.trim() || '';
-      const content = n.Note_Content?.trim() || '';
-      const body = title && content ? `${title}:- ${content}` : title || content;
+      const title = n.Note_Title?.trim() || null;
+      const content = n.Note_Content?.trim() || null;
       const cId = n._zoho_created_by_id?.trim() || null;
       const mId = n._zoho_modified_by_id?.trim() || null;
       const { parentType, parentZohoId } = resolveParentEntity(n);
@@ -407,7 +406,8 @@ export class EnquiriesService {
         externalId: n.zoho_id || '',
         parentType,
         parentZohoId,
-        body,
+        title,
+        content,
         createdByZohoId: cId,
         createdByEmail: cId ? (userMap.get(cId)?.email ?? null) : null,
         createdAt: normalizeZohoTimestamp(n.Created_Time),

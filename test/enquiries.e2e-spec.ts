@@ -436,7 +436,8 @@ describe('EnquiriesController (e2e)', () => {
       expect(lead1.notes.length).toBe(1);
       expect(lead1.notes[0].parentType).toBe('lead');
       expect(lead1.notes[0].parentZohoId).toBe('lead_001');
-      expect(lead1.notes[0].body).toBe('Initial Review:- Client wants Australia 189 visa');
+      expect(lead1.notes[0].title).toBe('Initial Review');
+      expect(lead1.notes[0].content).toBe('Client wants Australia 189 visa');
       expect(lead1.calls.length).toBe(1);
       expect(lead1.calls[0].parentType).toBe('lead');
       expect(lead1.calls[0].parentZohoId).toBe('lead_001');

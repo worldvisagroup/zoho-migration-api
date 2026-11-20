@@ -44,33 +44,15 @@ export class NotesService {
   }
 
   /**
-   * Combines Note_Title and Note_Content into "Note_Title:- Note_Content".
-   * Safely handles missing, empty, or whitespace-only inputs.
-   */
-  formatBody(titleRaw?: string | null, contentRaw?: string | null): string {
-    const title = titleRaw ? titleRaw.trim() : '';
-    const content = contentRaw ? contentRaw.trim() : '';
-
-    if (title && content) {
-      return `${title}:- ${content}`;
-    }
-    if (title) {
-      return title;
-    }
-    if (content) {
-      return content;
-    }
-    return '';
-  }
-
-  /**
    * Transforms a single MigratedNoteEntity into a NoteItemDto.
    */
   private transformRecordToNote(
     record: MigratedNoteEntity,
     emailMap: Map<string, string>,
   ): NoteItemDto {
-    const body = this.formatBody(record.Note_Title, record.Note_Content);
+    const title = record.Note_Title && record.Note_Title.trim() ? record.Note_Title.trim() : null;
+    const content =
+      record.Note_Content && record.Note_Content.trim() ? record.Note_Content.trim() : null;
 
     const createdByZohoId = record._zoho_created_by_id?.trim() || null;
     const createdByEmail = createdByZohoId ? (emailMap.get(createdByZohoId) ?? null) : null;
@@ -86,7 +68,8 @@ export class NotesService {
       externalId: record.zoho_id || '',
       parentType,
       parentZohoId,
-      body,
+      title,
+      content,
       createdByEmail,
       createdByZohoId,
       createdAt,

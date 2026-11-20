@@ -24,7 +24,7 @@ export class CallsController {
   @ApiOperation({
     summary: 'Retrieve migrated calls for database migration',
     description:
-      'Fetches call logs from the Zoho migrated_calls collection, maps direction (inbound, outbound) and status (answered, missed, cancelled, busy), resolves customer phone numbers across parent entities (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses, provides PhoneBridge voice recording URLs, and returns paginated results ordered oldest to newest by Created_Time.',
+      'Fetches call logs from the Zoho migrated_calls collection, maps direction (inbound, outbound) and status (answered, missed, cancelled, busy), resolves customer phone numbers across parent entities (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses, provides PhoneBridge voice recording metadata (with null fields as Zoho audio URLs cannot be accessed outside the CRM), and returns paginated results ordered oldest to newest by Created_Time.',
   })
   @ApiOkResponse({
     description: 'Paginated migration calls in standardized format',

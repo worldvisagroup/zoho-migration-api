@@ -16,7 +16,7 @@ import { CallsRepository } from '../repositories/calls.repository.js';
 
 @Injectable()
 export class CallsService {
-  constructor(private readonly callsRepository: CallsRepository) {}
+  constructor(private readonly callsRepository: CallsRepository) { }
 
   /**
    * Fetches, normalizes, and transforms calls into standardized migration records.
@@ -116,18 +116,14 @@ export class CallsService {
 
   /**
    * Resolves recording information.
-   * If Voice_Recording__s exists: returns { url, mimeType: '', sizeBytes: '' }.
-   * If absent: returns null.
+   * Always returns { url: null, mimeType: null, sizeBytes: null } because Zoho CRM PhoneBridge
+   * audio URLs cannot be accessed or streamed outside the authenticated CRM domain.
    */
-  resolveRecording(recordingUrlRaw?: string | null): CallRecordingDto | null {
-    if (!recordingUrlRaw || !recordingUrlRaw.trim()) {
-      return null;
-    }
-
+  resolveRecording(_recordingUrlRaw?: string | null): CallRecordingDto {
     return new CallRecordingDto({
-      url: recordingUrlRaw.trim(),
-      mimeType: '',
-      sizeBytes: '',
+      url: null,
+      mimeType: null,
+      sizeBytes: null,
     });
   }
 

@@ -89,9 +89,9 @@ describe('CallsService', () => {
       expect(call.notes).toBe('Discussed documents.');
       expect(call.followUpAt).toBe('2024-03-10T15:00:00.000Z');
       expect(call.recording).toEqual({
-        url: 'https://files.example.com/call_101.mp3',
-        mimeType: '',
-        sizeBytes: '',
+        url: null,
+        mimeType: null,
+        sizeBytes: null,
       });
       expect(call.createdByEmail).toBe('creator@worldvisa.in');
       expect(call.createdByZohoId).toBe('user_creator');
@@ -101,7 +101,7 @@ describe('CallsService', () => {
       expect(call.modifiedAt).toBe('2024-03-05T12:00:00.000Z');
     });
 
-    it('should set recording to null when Voice_Recording__s is empty or missing', async () => {
+    it('should set recording to null fields even when Voice_Recording__s is empty or missing', async () => {
       const mockCall: MigratedCallEntity = {
         zoho_id: 'call_102',
         Call_Type: 'Outbound',
@@ -118,7 +118,11 @@ describe('CallsService', () => {
 
       const result = await service.getCalls({ page: 1, limit: 10 });
       expect(result.data[0]!.customerPhone).toBeNull();
-      expect(result.data[0]!.recording).toBeNull();
+      expect(result.data[0]!.recording).toEqual({
+        url: null,
+        mimeType: null,
+        sizeBytes: null,
+      });
       expect(result.data[0]!.followUpAt).toBeNull();
       expect(result.data[0]!.notes).toBeNull();
     });
@@ -254,19 +258,27 @@ describe('CallsService', () => {
   });
 
   describe('resolveRecording', () => {
-    it('should return recording object with url and empty strings for mimeType and sizeBytes', () => {
-      const rec = service.resolveRecording('  https://audio.example.com/rec.mp3  ');
-      expect(rec).toEqual({
-        url: 'https://audio.example.com/rec.mp3',
-        mimeType: '',
-        sizeBytes: '',
+    it('should always return recording object with null url, mimeType, and sizeBytes regardless of input', () => {
+      expect(service.resolveRecording('  https://audio.example.com/rec.mp3  ')).toEqual({
+        url: null,
+        mimeType: null,
+        sizeBytes: null,
       });
-    });
-
-    it('should return null when url is empty or null', () => {
-      expect(service.resolveRecording(null)).toBeNull();
-      expect(service.resolveRecording('')).toBeNull();
-      expect(service.resolveRecording('   ')).toBeNull();
+      expect(service.resolveRecording(null)).toEqual({
+        url: null,
+        mimeType: null,
+        sizeBytes: null,
+      });
+      expect(service.resolveRecording('')).toEqual({
+        url: null,
+        mimeType: null,
+        sizeBytes: null,
+      });
+      expect(service.resolveRecording('   ')).toEqual({
+        url: null,
+        mimeType: null,
+        sizeBytes: null,
+      });
     });
   });
 });

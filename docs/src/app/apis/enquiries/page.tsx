@@ -1170,9 +1170,9 @@ export interface EnquiriesResponseDto {
           "notes": "Discussed assessment process and documentation requirements.",
           "followUpAt": "2024-03-06T10:00:00.000Z",
           "recording": {
-            "url": "https://storage.worldvisa.in/recordings/call_654321.mp3",
-            "mimeType": "audio/mpeg",
-            "sizeBytes": 3840000
+            "url": null,
+            "mimeType": null,
+            "sizeBytes": null
           },
           "createdByEmail": "asha@worldvisa.in",
           "createdByZohoId": "164193000000028001",

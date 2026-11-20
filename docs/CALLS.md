@@ -14,7 +14,7 @@
 ## 1. API Overview
 
 ### Purpose
-The Calls API extracts call activity logs and telephony history from `migrated_calls` (migrated from the Zoho CRM Calls module and Zoho PhoneBridge integration). It normalizes telephony direction (`inbound`, `outbound`) and call outcomes (`answered`, `missed`, `cancelled`, `busy`), dynamically resolves customer phone numbers across 5 polymorphic parent record types (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses from `migrated_users`, extracts PhoneBridge voice recording URLs, and returns paginated results sorted chronologically.
+The Calls API extracts call activity logs and telephony history from `migrated_calls` (migrated from the Zoho CRM Calls module and Zoho PhoneBridge integration). It normalizes telephony direction (`inbound`, `outbound`) and call outcomes (`answered`, `missed`, `cancelled`, `busy`), dynamically resolves customer phone numbers across 5 polymorphic parent record types (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses from `migrated_users`, formats PhoneBridge voice recording metadata (returning null fields as Zoho audio URLs cannot be accessed outside the CRM), and returns paginated results sorted chronologically.
 
 ### Supported Query Parameters
 
@@ -56,7 +56,7 @@ Direct mapping from MongoDB `migrated_calls` and related collections to [`CallIt
 | `durationSeconds` | `number` | `Call_Duration_in_seconds` | Integer | Parsed integer seconds &ge; 0 (`Math.max(0, Math.floor(val))`). Defaults to `0` if null or NaN. |
 | `notes` | `string \| null` | `Description` | Textarea | Trimmed plain text notes. Returns `null` if empty or missing. |
 | `followUpAt` | `string \| null` | `When_To_Make_The_Call` | Datetime | Scheduled follow-up call timestamp normalized to UTC ISO 8601, or `null`. |
-| `recording` | `CallRecordingDto \| null` | `Voice_Recording__s` | Website URL | Parsed into `{ url, mimeType: '', sizeBytes: '' }` if URL present; otherwise `null`. |
+| `recording` | `CallRecordingDto \| null` | `Voice_Recording__s` | Website URL | Standardized recording object returning `{ url: null, mimeType: null, sizeBytes: null }` because Zoho PhoneBridge URLs cannot be accessed outside the CRM. |
 | `createdByZohoId` | `string \| null` | `_zoho_created_by_id` | String | Cleaned Zoho user ID of the creator, or `null`. |
 | `createdByEmail` | `string \| null` | `_zoho_created_by_id` &rarr; `migrated_users.email` | Lookup | Resolved creator email address via batch lookup, or `null`. |
 | `modifiedByZohoId` | `string \| null` | `_zoho_modified_by_id` | String | Cleaned Zoho user ID of the modifier, or `null`. |
@@ -103,8 +103,8 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
 - Sanitizes and lowercases emails via `normalizeEmail(user.email)` in memory.
 
 ### 5. Recording Metadata (`resolveRecording`)
-- If `Voice_Recording__s` contains a non-empty string, it is trimmed and wrapped into `CallRecordingDto` (`{ url, mimeType: '', sizeBytes: '' }`).
-- If empty, null, or whitespace-only, `recording` is strictly `null`.
+- Standardizes voice recording information into `CallRecordingDto` returning `{ url: null, mimeType: null, sizeBytes: null }`.
+- Zoho PhoneBridge voice recordings stored in `Voice_Recording__s` are internal CRM endpoints that require active CRM authentication cookies and cannot be streamed or downloaded outside the CRM. To maintain schema consistency without exposing broken or inaccessible URLs, `url`, `mimeType`, and `sizeBytes` are all safely returned as `null`.
 
 ### 6. Duration Sanitization & Timestamp Normalization
 - `Call_Duration_in_seconds` is floored and clamped to non-negative integers: `Math.max(0, Math.floor(val))`.
@@ -172,7 +172,7 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
 | `durationSeconds` | Missing or invalid `Call_Duration_in_seconds` | Zero duration integer | `0` |
 | `notes` | Missing or whitespace-only `Description` | Plain nullable string | `null` |
 | `followUpAt` | Missing or invalid `When_To_Make_The_Call` | Nullable ISO timestamp | `null` |
-| `recording` | Missing or whitespace `Voice_Recording__s` | Nullable object | `null` |
+| `recording` | Any condition (Zoho recording URL present, empty, or unstated) | Standardized null metadata object | `{ url: null, mimeType: null, sizeBytes: null }` |
 | `createdByEmail` | Creator ID missing or not in `migrated_users` | Unassigned lookup | `null` |
 | `createdByZohoId` | Missing or null `_zoho_created_by_id` | Cleaned nullable string | `null` |
 | `createdAt` | Missing or invalid `Created_Time` | Unix Epoch UTC | `"1970-01-01T00:00:00.000Z"` |
@@ -193,7 +193,7 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
    - **Visa Application:** Linked Contact (`_zoho_contact_id`) `Phone`
    - **Spouse Assessment:** Spouse `Phone`
    - **Fallback:** Unresolvable or missing phone numbers cleanly resolve to `null`.
-4. **PhoneBridge Recording URLs:** PhoneBridge voice recordings are stored as direct HTTP/HTTPS URLs in `Voice_Recording__s`. MIME type and file size in bytes are omitted by Zoho PhoneBridge; the DTO provides empty strings (`""`) to fulfill strict contract requirements without fabricating metadata.
+4. **PhoneBridge Recording Inaccessibility:** Zoho PhoneBridge voice recordings (`Voice_Recording__s`) cannot be accessed, streamed, or downloaded outside the authenticated Zoho CRM domain. Therefore, the recording object always safely returns `{ url: null, mimeType: null, sizeBytes: null }`.
 5. **Scheduled Follow-up Timestamps:** The Zoho custom field `When_To_Make_The_Call` is normalized to ISO 8601 as `followUpAt`. This allows downstream calendar and dialer services to automatically schedule agent reminders.
 
 ---
@@ -207,9 +207,9 @@ export type CallDirection = 'inbound' | 'outbound';
 export type CallStatus = 'answered' | 'missed' | 'cancelled' | 'busy';
 
 export interface CallRecordingDto {
-  url: string;
-  mimeType: string;
-  sizeBytes: string;
+  url: string | null;
+  mimeType: string | null;
+  sizeBytes: string | null;
 }
 
 export interface CallItemDto {
@@ -260,9 +260,9 @@ export interface CallsResponseDto {
       "notes": "Discussed subclass 189 points calculation and ACS skill assessment requirements.",
       "followUpAt": "2024-03-10T09:30:00.000Z",
       "recording": {
-        "url": "https://phonebridge.zoho.com/recordings/call_164193000020539001.mp3",
-        "mimeType": "",
-        "sizeBytes": ""
+        "url": null,
+        "mimeType": null,
+        "sizeBytes": null
       },
       "createdByEmail": "asha.sharma@worldvisa.in",
       "createdByZohoId": "164193000000028001",
@@ -283,7 +283,11 @@ export interface CallsResponseDto {
       "durationSeconds": 0,
       "notes": null,
       "followUpAt": null,
-      "recording": null,
+      "recording": {
+        "url": null,
+        "mimeType": null,
+        "sizeBytes": null
+      },
       "createdByEmail": null,
       "createdByZohoId": null,
       "createdAt": "2024-03-03T04:22:15.000Z",
@@ -303,7 +307,11 @@ export interface CallsResponseDto {
       "durationSeconds": 0,
       "notes": "Number was unreachable. Will retry tomorrow morning.",
       "followUpAt": "2024-03-05T05:30:00.000Z",
-      "recording": null,
+      "recording": {
+        "url": null,
+        "mimeType": null,
+        "sizeBytes": null
+      },
       "createdByEmail": "rahul.patel@worldvisa.in",
       "createdByZohoId": "164193000000028005",
       "createdAt": "2024-03-04T11:00:00.000Z",

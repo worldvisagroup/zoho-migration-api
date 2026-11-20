@@ -63,7 +63,7 @@ export default function CallsApiDocPage() {
           </div>
 
           <p className="text-xs text-slate-300 leading-relaxed">
-            The Calls API extracts call activity logs and telephony history from <code className="text-sky-300 font-mono">migrated_calls</code> (migrated from the Zoho CRM Calls module and Zoho PhoneBridge integration). It normalizes telephony direction (<code className="font-mono text-slate-200">inbound</code>, <code className="font-mono text-slate-200">outbound</code>) and call outcomes (<code className="font-mono text-slate-200">answered</code>, <code className="font-mono text-slate-200">missed</code>, <code className="font-mono text-slate-200">cancelled</code>, <code className="font-mono text-slate-200">busy</code>), dynamically resolves customer phone numbers across 5 polymorphic parent record types (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses from <code className="text-sky-300 font-mono">migrated_users</code>, extracts PhoneBridge voice recording URLs, and returns paginated results sorted chronologically.
+            The Calls API extracts call activity logs and telephony history from <code className="text-sky-300 font-mono">migrated_calls</code> (migrated from the Zoho CRM Calls module and Zoho PhoneBridge integration). It normalizes telephony direction (<code className="font-mono text-slate-200">inbound</code>, <code className="font-mono text-slate-200">outbound</code>) and call outcomes (<code className="font-mono text-slate-200">answered</code>, <code className="font-mono text-slate-200">missed</code>, <code className="font-mono text-slate-200">cancelled</code>, <code className="font-mono text-slate-200">busy</code>), dynamically resolves customer phone numbers across 5 polymorphic parent record types (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses from <code className="text-sky-300 font-mono">migrated_users</code>, formats PhoneBridge voice recording metadata (returning null fields as Zoho audio URLs cannot be accessed outside the CRM), and returns paginated results sorted chronologically.
           </p>
 
           <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#0c1322]">
@@ -282,7 +282,7 @@ export default function CallsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-slate-400">CallRecordingDto | null</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Voice_Recording__s</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">Website URL</td>
-                  <td className="px-4 py-2.5">Parsed into <code className="font-mono text-slate-200">{`{ url, mimeType: '', sizeBytes: '' }`}</code> if URL present; otherwise <code className="text-slate-400 font-mono">null</code>.</td>
+                  <td className="px-4 py-2.5">Always returns <code className="font-mono text-slate-200">{`{ url: null, mimeType: null, sizeBytes: null }`}</code> because Zoho PhoneBridge URLs cannot be accessed outside the CRM.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">createdByZohoId</td>
@@ -590,9 +590,9 @@ export default function CallsApiDocPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">recording</td>
-                  <td className="px-4 py-2.5">Missing or whitespace <code className="font-mono">Voice_Recording__s</code></td>
-                  <td className="px-4 py-2.5">Nullable recording metadata object</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
+                  <td className="px-4 py-2.5">Any condition (Zoho recording URL present, empty, or unstated)</td>
+                  <td className="px-4 py-2.5">Standardized null metadata object</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-300">{`{ url: null, mimeType: null, sizeBytes: null }`}</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">createdByEmail</td>
@@ -667,9 +667,9 @@ export default function CallsApiDocPage() {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
-              <span className="font-semibold text-white">PhoneBridge Voice Recording URLs</span>
+              <span className="font-semibold text-white">PhoneBridge Recording Inaccessibility</span>
               <p className="text-slate-300 leading-relaxed">
-                PhoneBridge stores audio URLs directly in <code className="font-mono text-sky-300">Voice_Recording__s</code>. Since MIME types and byte sizes are not emitted by Zoho CRM, the DTO returns empty strings (<code className="font-mono text-slate-300">&quot;&quot;</code>) to fulfill contract requirements without fabricating artificial metadata.
+                Zoho PhoneBridge voice recordings (<code className="font-mono text-sky-300">Voice_Recording__s</code>) cannot be accessed, streamed, or downloaded outside the authenticated Zoho CRM domain. Therefore, the recording object always safely returns <code className="font-mono text-slate-200">{`{ url: null, mimeType: null, sizeBytes: null }`}</code>.
               </p>
             </div>
           </div>
@@ -693,9 +693,9 @@ export default function CallsApiDocPage() {
 export type CallStatus = 'answered' | 'missed' | 'cancelled' | 'busy';
 
 export interface CallRecordingDto {
-  url: string;        // Audio recording URL from Zoho PhoneBridge
-  mimeType: string;   // MIME type (empty string if unstated)
-  sizeBytes: string;  // Size in bytes (empty string if unstated)
+  url: string | null;        // Audio recording URL, or null if unstated/inaccessible
+  mimeType: string | null;   // MIME type, or null if unstated
+  sizeBytes: string | null;  // Size in bytes, or null if unstated
 }
 
 export interface CallItemDto {
@@ -749,9 +749,9 @@ export interface CallsResponseDto {
       "notes": "Discussed subclass 189 points calculation and ACS skill assessment requirements.",
       "followUpAt": "2024-03-10T09:30:00.000Z",
       "recording": {
-        "url": "https://phonebridge.zoho.com/recordings/call_164193000020539001.mp3",
-        "mimeType": "",
-        "sizeBytes": ""
+        "url": null,
+        "mimeType": null,
+        "sizeBytes": null
       },
       "createdByEmail": "asha.sharma@worldvisa.in",
       "createdByZohoId": "164193000000028001",
@@ -772,7 +772,11 @@ export interface CallsResponseDto {
       "durationSeconds": 0,
       "notes": null,
       "followUpAt": null,
-      "recording": null,
+      "recording": {
+        "url": null,
+        "mimeType": null,
+        "sizeBytes": null
+      },
       "createdByEmail": null,
       "createdByZohoId": null,
       "createdAt": "2024-03-03T04:22:15.000Z",
@@ -792,7 +796,11 @@ export interface CallsResponseDto {
       "durationSeconds": 0,
       "notes": "Number was unreachable. Will retry tomorrow morning.",
       "followUpAt": "2024-03-05T05:30:00.000Z",
-      "recording": null,
+      "recording": {
+        "url": null,
+        "mimeType": null,
+        "sizeBytes": null
+      },
       "createdByEmail": "rahul.patel@worldvisa.in",
       "createdByZohoId": "164193000000028005",
       "createdAt": "2024-03-04T11:00:00.000Z",

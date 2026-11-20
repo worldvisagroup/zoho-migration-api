@@ -226,9 +226,9 @@ describe('CallsController (e2e)', () => {
       expect(record.notes).toBe('Discussed documents.');
       expect(record.followUpAt).toBe('2024-03-10T15:00:00.000Z');
       expect(record.recording).toEqual({
-        url: 'https://files.example.com/call_001.mp3',
-        mimeType: '',
-        sizeBytes: '',
+        url: null,
+        mimeType: null,
+        sizeBytes: null,
       });
       expect(record.createdByEmail).toBe('agent@worldvisa.in');
       expect(record.createdByZohoId).toBe('user_001');

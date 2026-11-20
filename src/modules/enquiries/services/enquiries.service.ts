@@ -443,9 +443,11 @@ export class EnquiriesService {
       const oId = c._zoho_owner_id?.trim() || null;
       const { parentType, parentZohoId } = resolveParentEntity(c);
 
-      const recording = c.Voice_Recording__s?.trim()
-        ? new CallRecordingDto({ url: c.Voice_Recording__s.trim(), mimeType: '', sizeBytes: '' })
-        : null;
+      const recording = new CallRecordingDto({
+        url: null,
+        mimeType: null,
+        sizeBytes: null,
+      });
 
       return new CallItemDto({
         externalId: c.zoho_id || '',

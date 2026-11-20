@@ -8,30 +8,38 @@ export type CallStatus = 'answered' | 'missed' | 'cancelled' | 'busy';
  */
 export class CallRecordingDto {
   @ApiProperty({
-    description: 'Audio recording URL from Zoho PhoneBridge',
-    example: 'https://files.example.com/call_1.mp3',
+    description:
+      'Audio recording URL (null because Zoho PhoneBridge URLs cannot be accessed outside CRM)',
+    example: null,
     type: String,
+    nullable: true,
   })
-  url: string;
+  url: string | null;
 
   @ApiProperty({
-    description: 'MIME type of recording (empty string if unstated)',
-    example: '',
+    description: 'MIME type of recording (null if unstated)',
+    example: null,
     type: String,
+    nullable: true,
   })
-  mimeType: string;
+  mimeType: string | null;
 
   @ApiProperty({
-    description: 'Size of recording in bytes (empty string if unstated)',
-    example: '',
+    description: 'Size of recording in bytes (null if unstated)',
+    example: null,
     type: String,
+    nullable: true,
   })
-  sizeBytes: string;
+  sizeBytes: string | null;
 
-  constructor(data: { url: string; mimeType?: string; sizeBytes?: string }) {
-    this.url = data.url;
-    this.mimeType = data.mimeType ?? '';
-    this.sizeBytes = data.sizeBytes ?? '';
+  constructor(data?: {
+    url?: string | null;
+    mimeType?: string | null;
+    sizeBytes?: string | null;
+  }) {
+    this.url = data?.url ?? null;
+    this.mimeType = data?.mimeType ?? null;
+    this.sizeBytes = data?.sizeBytes ?? null;
   }
 }
 
@@ -133,8 +141,9 @@ export class CallItemDto {
   })
   followUpAt: string | null;
 
-  @ApiPropertyOptional({
-    description: 'Voice recording information or null if no recording is available',
+  @ApiProperty({
+    description:
+      'Voice recording metadata (always { url: null, mimeType: null, sizeBytes: null } as Zoho URLs cannot be accessed outside CRM)',
     type: CallRecordingDto,
     nullable: true,
   })

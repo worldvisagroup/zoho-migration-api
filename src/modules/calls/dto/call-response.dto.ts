@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export type CallDirection = 'inbound' | 'outbound';
-export type CallStatus = 'answered' | 'missed' | 'cancelled' | 'busy';
+export type CallStatus = 'answered' | 'overdue' | 'scheduled' | 'cancelled';
 
 /**
  * Audio recording metadata for phone call.
@@ -89,7 +89,7 @@ export class CallItemDto {
 
   @ApiProperty({
     description: 'Call status outcome',
-    enum: ['answered', 'missed', 'cancelled', 'busy'],
+    enum: ['answered', 'overdue', 'scheduled', 'cancelled'],
     example: 'answered',
   })
   status: CallStatus;

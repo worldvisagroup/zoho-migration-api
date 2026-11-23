@@ -155,7 +155,7 @@ Maps raw Zoho `Lead_Source` picklist values into 9 standardized source enums:
 For each page of 200 records, the service issues parallel batched indexed queries across all 6 child collections:
 
 - `migrated_notes`: Filtered by `_zoho_lead_id` or `_zoho_contact_id`, formatted with title and content.
-- `migrated_calls`: Direction (`inbound`/`outbound`), duration, status (`answered`, `missed`, `busy`, `cancelled`), and voice recording links.
+- `migrated_calls`: Direction (`inbound`/`outbound`), duration, status (`answered`, `overdue`, `scheduled`, `cancelled`), and voice recording links.
 - `migrated_tasks`: Status (`open`, `in_progress`, `completed`, `cancelled`), priority, and due dates.
 - `migrated_events`: Scheduled time, ended time, status (`scheduled`, `ended`, `cancelled`), and deduplicated participants.
 - `migrated_attachments`: Batch signs fresh presigned Cloudflare R2 download URLs on the fly for all attachments containing an `r2_key`.

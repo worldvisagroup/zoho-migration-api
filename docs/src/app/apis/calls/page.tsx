@@ -63,7 +63,7 @@ export default function CallsApiDocPage() {
           </div>
 
           <p className="text-xs text-slate-300 leading-relaxed">
-            The Calls API extracts call activity logs and telephony history from <code className="text-sky-300 font-mono">migrated_calls</code> (migrated from the Zoho CRM Calls module and Zoho PhoneBridge integration). It normalizes telephony direction (<code className="font-mono text-slate-200">inbound</code>, <code className="font-mono text-slate-200">outbound</code>) and call outcomes (<code className="font-mono text-slate-200">answered</code>, <code className="font-mono text-slate-200">missed</code>, <code className="font-mono text-slate-200">cancelled</code>, <code className="font-mono text-slate-200">busy</code>), dynamically resolves customer phone numbers across 5 polymorphic parent record types (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses from <code className="text-sky-300 font-mono">migrated_users</code>, formats PhoneBridge voice recording metadata (returning null fields as Zoho audio URLs cannot be accessed outside the CRM), and returns paginated results sorted chronologically.
+            The Calls API extracts call activity logs and telephony history from <code className="text-sky-300 font-mono">migrated_calls</code> (migrated from the Zoho CRM Calls module and Zoho PhoneBridge integration). It normalizes telephony direction (<code className="font-mono text-slate-200">inbound</code>, <code className="font-mono text-slate-200">outbound</code>) and call outcomes (<code className="font-mono text-slate-200">answered</code>, <code className="font-mono text-slate-200">overdue</code>, <code className="font-mono text-slate-200">scheduled</code>, <code className="font-mono text-slate-200">cancelled</code>), dynamically resolves customer phone numbers across 5 polymorphic parent record types (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses from <code className="text-sky-300 font-mono">migrated_users</code>, formats PhoneBridge voice recording metadata (returning null fields as Zoho audio URLs cannot be accessed outside the CRM), and returns paginated results sorted chronologically.
           </p>
 
           <div className="overflow-x-auto rounded-xl border border-slate-800 bg-[#0c1322]">
@@ -233,7 +233,7 @@ export default function CallsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-slate-400">CallStatus</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Call_Duration_in_seconds, Outgoing_Call_Status, Call_Result</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">Number, Picklists</td>
-                  <td className="px-4 py-2.5">Evaluates talk time first (<code className="text-emerald-400 font-mono">&gt; 0</code> &rarr; <code className="text-emerald-400 font-mono">&apos;answered&apos;</code>), then checks cancelled and busy indicators, defaulting to <code className="text-amber-300 font-mono">&apos;missed&apos;</code>.</td>
+                  <td className="px-4 py-2.5">Evaluates talk time first (<code className="text-emerald-400 font-mono">&gt; 0</code> &rarr; <code className="text-emerald-400 font-mono">&apos;answered&apos;</code>), completed status &rarr; <code className="text-emerald-400 font-mono">&apos;answered&apos;</code>, overdue status &rarr; <code className="text-amber-400 font-mono">&apos;overdue&apos;</code>, cancelled status &rarr; <code className="text-rose-400 font-mono">&apos;cancelled&apos;</code>, and evaluates scheduled or unstated status against start time (&gt; now &rarr; <code className="text-sky-400 font-mono">&apos;scheduled&apos;</code>, else &rarr; <code className="text-amber-400 font-mono">&apos;overdue&apos;</code>).</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">customerPhone</td>
@@ -359,13 +359,14 @@ export default function CallsApiDocPage() {
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-2">
               <span className="font-semibold text-white text-sm block">2. Deterministic Status Ladder</span>
               <p className="text-slate-300 leading-relaxed">
-                Uses <code className="font-mono text-purple-300">resolveStatus(call)</code>:
+                Uses <code className="font-mono text-purple-300">resolveCallStatus(durationSecondsRaw, outgoingStatusRaw, callStartTimeRaw, now)</code>:
               </p>
               <ul className="list-disc list-inside space-y-1 text-slate-400">
                 <li><strong className="text-emerald-400">Talk Time Check:</strong> If <code className="font-mono text-slate-200">Call_Duration_in_seconds &gt; 0</code>, call connected &rarr; <code className="font-mono text-emerald-400">&apos;answered&apos;</code>.</li>
-                <li><strong className="text-rose-400">Cancelled Check:</strong> <code className="font-mono text-slate-200">Outgoing_Call_Status === &apos;Cancelled&apos;</code> or result contains <code className="font-mono text-slate-200">&quot;cancelled&quot;</code> &rarr; <code className="font-mono text-rose-400">&apos;cancelled&apos;</code>.</li>
-                <li><strong className="text-amber-400">Busy Check:</strong> Result contains <code className="font-mono text-slate-200">&quot;busy&quot;</code>, <code className="font-mono text-slate-200">&quot;reachable&quot;</code>, or <code className="font-mono text-slate-200">&quot;no response/busy&quot;</code> &rarr; <code className="font-mono text-amber-400">&apos;busy&apos;</code>.</li>
-                <li><strong className="text-slate-300">Missed Check:</strong> All other outcomes (<code className="font-mono text-slate-200">&apos;Ringing Not Answering&apos;</code>, <code className="font-mono text-slate-200">&apos;RNR-3&apos;</code>, null) &rarr; <code className="font-mono text-slate-400">&apos;missed&apos;</code>.</li>
+                <li><strong className="text-emerald-400">Completed Picklist:</strong> When duration is 0 or null and <code className="font-mono text-slate-200">Outgoing_Call_Status === &apos;Completed&apos;</code> &rarr; <code className="font-mono text-emerald-400">&apos;answered&apos;</code>.</li>
+                <li><strong className="text-amber-400">Overdue Picklist:</strong> When <code className="font-mono text-slate-200">Outgoing_Call_Status === &apos;Overdue&apos;</code> &rarr; <code className="font-mono text-amber-400">&apos;overdue&apos;</code>.</li>
+                <li><strong className="text-rose-400">Cancelled Picklist:</strong> When <code className="font-mono text-slate-200">Outgoing_Call_Status === &apos;Cancelled&apos;</code> / <code className="font-mono text-slate-200">&apos;Canceled&apos;</code> &rarr; <code className="font-mono text-rose-400">&apos;cancelled&apos;</code>.</li>
+                <li><strong className="text-sky-400">Scheduled / Unstated:</strong> If <code className="font-mono text-slate-200">&apos;Scheduled&apos;</code> or null/empty: if <code className="font-mono text-slate-200">Call_Start_Time &gt; now</code> &rarr; <code className="font-mono text-sky-400">&apos;scheduled&apos;</code>, else &rarr; <code className="font-mono text-amber-400">&apos;overdue&apos;</code>.</li>
               </ul>
             </div>
 
@@ -455,30 +456,59 @@ export default function CallsApiDocPage() {
                   <thead className="border-b border-slate-800 bg-slate-900/70 font-semibold text-slate-300">
                     <tr>
                       <th className="px-3 py-2">Duration</th>
-                      <th className="px-3 py-2">Outgoing Status / Result</th>
+                      <th className="px-3 py-2">Outgoing Status</th>
+                      <th className="px-3 py-2">Start Time</th>
                       <th className="px-3 py-2">Mapped Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/80 text-slate-300">
                     <tr>
                       <td className="px-3 py-2 font-mono text-emerald-400">&gt; 0 sec</td>
-                      <td className="px-3 py-2 font-mono text-slate-400">Any status / result</td>
+                      <td className="px-3 py-2 font-mono text-slate-400">Any</td>
+                      <td className="px-3 py-2 font-mono text-slate-400">Any</td>
                       <td className="px-3 py-2 font-mono text-emerald-400 font-bold">&apos;answered&apos;</td>
                     </tr>
                     <tr>
                       <td className="px-3 py-2 font-mono text-slate-400">&lt;= 0 / null</td>
-                      <td className="px-3 py-2 font-mono text-rose-300">&apos;Cancelled&apos;</td>
+                      <td className="px-3 py-2 font-mono text-emerald-300">&apos;Completed&apos;</td>
+                      <td className="px-3 py-2 font-mono text-slate-400">Any</td>
+                      <td className="px-3 py-2 font-mono text-emerald-400 font-bold">&apos;answered&apos;</td>
+                    </tr>
+                    <tr>
+                      <td className="px-3 py-2 font-mono text-slate-400">&lt;= 0 / null</td>
+                      <td className="px-3 py-2 font-mono text-amber-300">&apos;Overdue&apos;</td>
+                      <td className="px-3 py-2 font-mono text-slate-400">Any</td>
+                      <td className="px-3 py-2 font-mono text-amber-400 font-bold">&apos;overdue&apos;</td>
+                    </tr>
+                    <tr>
+                      <td className="px-3 py-2 font-mono text-slate-400">&lt;= 0 / null</td>
+                      <td className="px-3 py-2 font-mono text-rose-300">&apos;Cancelled&apos; / &apos;Canceled&apos;</td>
+                      <td className="px-3 py-2 font-mono text-slate-400">Any</td>
                       <td className="px-3 py-2 font-mono text-rose-400 font-bold">&apos;cancelled&apos;</td>
                     </tr>
                     <tr>
                       <td className="px-3 py-2 font-mono text-slate-400">&lt;= 0 / null</td>
-                      <td className="px-3 py-2 font-mono text-amber-300">&apos;No response/Busy&apos;, &apos;Number Not Reachable&apos;</td>
-                      <td className="px-3 py-2 font-mono text-amber-400 font-bold">&apos;busy&apos;</td>
+                      <td className="px-3 py-2 font-mono text-sky-300">&apos;Scheduled&apos;</td>
+                      <td className="px-3 py-2 font-mono text-sky-300">&gt; now</td>
+                      <td className="px-3 py-2 font-mono text-sky-400 font-bold">&apos;scheduled&apos;</td>
                     </tr>
                     <tr>
                       <td className="px-3 py-2 font-mono text-slate-400">&lt;= 0 / null</td>
-                      <td className="px-3 py-2 font-mono text-slate-400">&apos;Ringing Not Answering&apos;, &apos;RNR-3&apos;, null</td>
-                      <td className="px-3 py-2 font-mono text-slate-400 font-bold">&apos;missed&apos;</td>
+                      <td className="px-3 py-2 font-mono text-sky-300">&apos;Scheduled&apos;</td>
+                      <td className="px-3 py-2 font-mono text-slate-400">&lt;= now / missing</td>
+                      <td className="px-3 py-2 font-mono text-amber-400 font-bold">&apos;overdue&apos;</td>
+                    </tr>
+                    <tr>
+                      <td className="px-3 py-2 font-mono text-slate-400">&lt;= 0 / null</td>
+                      <td className="px-3 py-2 font-mono text-slate-500">null / unstated</td>
+                      <td className="px-3 py-2 font-mono text-sky-300">&gt; now</td>
+                      <td className="px-3 py-2 font-mono text-sky-400 font-bold">&apos;scheduled&apos;</td>
+                    </tr>
+                    <tr>
+                      <td className="px-3 py-2 font-mono text-slate-400">&lt;= 0 / null</td>
+                      <td className="px-3 py-2 font-mono text-slate-500">null / unstated</td>
+                      <td className="px-3 py-2 font-mono text-slate-400">&lt;= now / missing</td>
+                      <td className="px-3 py-2 font-mono text-amber-400 font-bold">&apos;overdue&apos;</td>
                     </tr>
                   </tbody>
                 </table>
@@ -548,9 +578,9 @@ export default function CallsApiDocPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">status</td>
-                  <td className="px-4 py-2.5">Missing duration, status, and result</td>
-                  <td className="px-4 py-2.5">Unanswered assumption</td>
-                  <td className="px-4 py-2.5 font-mono text-slate-400 font-bold">&quot;missed&quot;</td>
+                  <td className="px-4 py-2.5">Missing duration and unstated status (past or missing date)</td>
+                  <td className="px-4 py-2.5">Overdue assumption</td>
+                  <td className="px-4 py-2.5 font-mono text-amber-400 font-bold">&quot;overdue&quot;</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">customerPhone</td>
@@ -646,16 +676,23 @@ export default function CallsApiDocPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
-              <span className="font-semibold text-white">Missed Calls Classified as Inbound</span>
+              <span className="font-semibold text-white">Completed Calls with Zero Duration</span>
               <p className="text-slate-300 leading-relaxed">
-                In Zoho CRM PhoneBridge, a call logged with <code className="font-mono text-sky-300">Call_Type: &quot;Missed&quot;</code> indicates an incoming customer call that rang until timeout without agent pickup. The engine properly normalizes direction to <code className="font-mono text-emerald-400">&apos;inbound&apos;</code> and status to <code className="font-mono text-slate-400">&apos;missed&apos;</code>.
+                In Zoho CRM PhoneBridge and agent call logging, completed calls frequently have duration recorded as 0 or null (over 565k records). When <code className="font-mono text-sky-300">Outgoing_Call_Status</code> is &quot;Completed&quot;, the engine treats the call as <code className="font-mono text-emerald-400">&apos;answered&apos;</code>.
               </p>
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
               <span className="font-semibold text-white">Talk Time Overrules Status Picklists</span>
               <p className="text-slate-300 leading-relaxed">
-                Human agents often leave call status or result dropdowns set to <em>&quot;Busy&quot;</em> or <em>&quot;Ringing Not Answering&quot;</em>, yet PhoneBridge recorded actual talk time (<code className="font-mono text-emerald-400">Call_Duration_in_seconds &gt; 0</code>). The engine treats duration &gt; 0 as authoritative ground truth, overriding negative picklists to <code className="font-mono text-emerald-400">&apos;answered&apos;</code>.
+                Human agents often leave call status set to <em>&quot;Scheduled&quot;</em> or empty, yet PhoneBridge recorded actual talk time (<code className="font-mono text-emerald-400">Call_Duration_in_seconds &gt; 0</code>). The engine treats duration &gt; 0 as authoritative ground truth, classifying it as <code className="font-mono text-emerald-400">&apos;answered&apos;</code>.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
+              <span className="font-semibold text-white">Scheduled vs. Overdue Dynamic Resolution</span>
+              <p className="text-slate-300 leading-relaxed">
+                Calls marked &quot;Scheduled&quot; or having no explicit status (<code className="font-mono text-slate-400">null</code>/empty) are resolved dynamically against current time: if <code className="font-mono text-sky-300">Call_Start_Time</code> is strictly in the future (<code className="font-mono text-emerald-400">&gt; now</code>), it resolves to <code className="font-mono text-sky-400">&apos;scheduled&apos;</code>; if past (<code className="font-mono text-amber-400">&lt;= now</code>) or missing, it resolves to <code className="font-mono text-amber-400">&apos;overdue&apos;</code>.
               </p>
             </div>
 
@@ -690,7 +727,7 @@ export default function CallsApiDocPage() {
               language="typescript"
               title="CallItemDto & CallsResponseDto"
               code={`export type CallDirection = 'inbound' | 'outbound';
-export type CallStatus = 'answered' | 'missed' | 'cancelled' | 'busy';
+export type CallStatus = 'answered' | 'overdue' | 'scheduled' | 'cancelled';
 
 export interface CallRecordingDto {
   url: string | null;        // Audio recording URL, or null if unstated/inaccessible
@@ -703,7 +740,7 @@ export interface CallItemDto {
   parentType: string | null;          // Type of parent record (lead, contact, deal, etc.)
   parentZohoId: string | null;        // Original Zoho ID of parent record
   direction: CallDirection;           // 'inbound' | 'outbound'
-  status: CallStatus;                 // 'answered' | 'missed' | 'cancelled' | 'busy'
+  status: CallStatus;                 // 'answered' | 'overdue' | 'scheduled' | 'cancelled'
   customerPhone: string | null;       // Normalized international phone or null
   agentEmail: string | null;          // Assigned staff email address or null
   startedAt: string;                  // Call start timestamp in UTC ISO 8601
@@ -765,7 +802,7 @@ export interface CallsResponseDto {
       "parentType": "contact",
       "parentZohoId": "164193000000822091",
       "direction": "inbound",
-      "status": "missed",
+      "status": "overdue",
       "customerPhone": "+919123456789",
       "agentEmail": null,
       "startedAt": "2024-03-03T04:22:15.000Z",
@@ -789,7 +826,7 @@ export interface CallsResponseDto {
       "parentType": "deal",
       "parentZohoId": "164193000000899014",
       "direction": "outbound",
-      "status": "busy",
+      "status": "overdue",
       "customerPhone": "+919988776655",
       "agentEmail": "rahul.patel@worldvisa.in",
       "startedAt": "2024-03-04T11:00:00.000Z",

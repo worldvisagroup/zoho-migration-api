@@ -187,73 +187,112 @@ describe('CallsService', () => {
   });
 
   describe('resolveStatus', () => {
+    const futureDate = new Date(Date.now() + 86400000);
+    const pastDate = new Date(Date.now() - 86400000);
+
     it('should resolve answered when duration is greater than 0', () => {
       expect(
         service.resolveStatus({
           zoho_id: '1',
-          is_closed: true,
           Call_Duration_in_seconds: 60,
+          Outgoing_Call_Status: 'Overdue',
         }),
       ).toBe('answered');
+    });
+
+    it('should resolve answered when Outgoing_Call_Status is Completed even if duration is 0 or null', () => {
+      expect(
+        service.resolveStatus({
+          zoho_id: '1',
+          Call_Duration_in_seconds: 0,
+          Outgoing_Call_Status: 'Completed',
+        }),
+      ).toBe('answered');
+
+      expect(
+        service.resolveStatus({
+          zoho_id: '1',
+          Call_Duration_in_seconds: undefined,
+          Outgoing_Call_Status: 'completed',
+        }),
+      ).toBe('answered');
+    });
+
+    it('should resolve overdue when Outgoing_Call_Status is Overdue', () => {
+      expect(
+        service.resolveStatus({
+          zoho_id: '1',
+          Call_Duration_in_seconds: 0,
+          Outgoing_Call_Status: 'Overdue',
+        }),
+      ).toBe('overdue');
     });
 
     it('should resolve cancelled when Outgoing_Call_Status is Cancelled', () => {
       expect(
         service.resolveStatus({
           zoho_id: '1',
-          is_closed: true,
           Call_Duration_in_seconds: 0,
           Outgoing_Call_Status: 'Cancelled',
         }),
       ).toBe('cancelled');
     });
 
-    it('should resolve busy when Call_Result indicates busy or unreachable', () => {
+    it('should resolve scheduled for Scheduled status when Call_Start_Time is in the future', () => {
       expect(
         service.resolveStatus({
           zoho_id: '1',
-          is_closed: true,
           Call_Duration_in_seconds: 0,
-          Call_Result: 'No response/Busy',
+          Outgoing_Call_Status: 'Scheduled',
+          Call_Start_Time: futureDate,
         }),
-      ).toBe('busy');
-
-      expect(
-        service.resolveStatus({
-          zoho_id: '1',
-          is_closed: true,
-          Call_Duration_in_seconds: 0,
-          Call_Result: 'Number Not Reachable',
-        }),
-      ).toBe('busy');
+      ).toBe('scheduled');
     });
 
-    it('should resolve missed when duration is 0 and no busy/cancelled indicator', () => {
+    it('should resolve overdue for Scheduled status when Call_Start_Time is in the past or missing', () => {
       expect(
         service.resolveStatus({
           zoho_id: '1',
-          is_closed: true,
           Call_Duration_in_seconds: 0,
-          Call_Type: 'Missed',
+          Outgoing_Call_Status: 'Scheduled',
+          Call_Start_Time: pastDate,
         }),
-      ).toBe('missed');
+      ).toBe('overdue');
 
       expect(
         service.resolveStatus({
           zoho_id: '1',
-          is_closed: true,
           Call_Duration_in_seconds: 0,
-          Call_Result: 'Ringing Not Answering',
+          Outgoing_Call_Status: 'Scheduled',
         }),
-      ).toBe('missed');
+      ).toBe('overdue');
+    });
+
+    it('should resolve scheduled for null status when Call_Start_Time is in the future', () => {
+      expect(
+        service.resolveStatus({
+          zoho_id: '1',
+          Call_Duration_in_seconds: 0,
+          Call_Start_Time: futureDate,
+        }),
+      ).toBe('scheduled');
+    });
+
+    it('should resolve overdue for null status when Call_Start_Time is in the past or missing', () => {
+      expect(
+        service.resolveStatus({
+          zoho_id: '1',
+          Call_Duration_in_seconds: 0,
+          Call_Start_Time: pastDate,
+        }),
+      ).toBe('overdue');
 
       expect(
         service.resolveStatus({
           zoho_id: '1',
-          is_closed: true,
           Call_Duration_in_seconds: 0,
         }),
-      ).toBe('missed');
+      ).toBe('overdue');
     });
   });
 

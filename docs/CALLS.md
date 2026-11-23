@@ -14,7 +14,7 @@
 ## 1. API Overview
 
 ### Purpose
-The Calls API extracts call activity logs and telephony history from `migrated_calls` (migrated from the Zoho CRM Calls module and Zoho PhoneBridge integration). It normalizes telephony direction (`inbound`, `outbound`) and call outcomes (`answered`, `missed`, `cancelled`, `busy`), dynamically resolves customer phone numbers across 5 polymorphic parent record types (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses from `migrated_users`, formats PhoneBridge voice recording metadata (returning null fields as Zoho audio URLs cannot be accessed outside the CRM), and returns paginated results sorted chronologically.
+The Calls API extracts call activity logs and telephony history from `migrated_calls` (migrated from the Zoho CRM Calls module and Zoho PhoneBridge integration). It normalizes telephony direction (`inbound`, `outbound`) and call outcomes (`answered`, `overdue`, `scheduled`, `cancelled`), dynamically resolves customer phone numbers across 5 polymorphic parent record types (Lead, Contact, Deal, Visa Application, Spouse Skill Assessment) using single-pass parallel batching, normalizes agent and creator/modifier email addresses from `migrated_users`, formats PhoneBridge voice recording metadata (returning null fields as Zoho audio URLs cannot be accessed outside the CRM), and returns paginated results sorted chronologically.
 
 ### Supported Query Parameters
 
@@ -49,7 +49,7 @@ Direct mapping from MongoDB `migrated_calls` and related collections to [`CallIt
 | `parentType` | `string \| null` | `parent_entity_type` | String | Standardized parent entity type (`lead`, `contact`, `deal`, `visa_application`, `spouse_skill_assessment`, `task`, `event`, `signed_document`), or `null`. |
 | `parentZohoId` | `string \| null` | `_zoho_*_id` | String | Original Zoho ID of the linked parent record (`_zoho_lead_id`, `_zoho_contact_id`, etc.), or `null`. |
 | `direction` | `CallDirection` | `Call_Type` | Picklist | Mapped to `'inbound'` or `'outbound'`. Missed calls map to `'inbound'`. Defaults to `'outbound'`. |
-| `status` | `CallStatus` | `Call_Duration_in_seconds`, `Outgoing_Call_Status`, `Call_Result` | Number, Picklists | Evaluates talk time first (`> 0` &rarr; `'answered'`), then checks cancelled and busy indicators, defaulting to `'missed'`. |
+| `status` | `CallStatus` | `Call_Duration_in_seconds`, `Outgoing_Call_Status`, `Call_Start_Time` | Number, Picklist, Datetime | Evaluates talk time (`> 0` &rarr; `'answered'`), Outgoing_Call_Status (`'Completed'` &rarr; `'answered'`, `'Overdue'` &rarr; `'overdue'`, `'Cancelled'` &rarr; `'cancelled'`), and scheduled date comparison (`> now` &rarr; `'scheduled'`, `<= now` &rarr; `'overdue'`). |
 | `customerPhone` | `string \| null` | Polymorphic parent record &rarr; `Phone`, `Mobile`, `Country_Code` | String | Resolved in parallel across Lead, Contact, Deal, Visa Application, or Spouse Assessment. Normalized to international E.164. Null if missing/unparseable. |
 | `agentEmail` | `string \| null` | `_zoho_owner_id` &rarr; `migrated_users.email` | Lookup | Resolved agent email address via single-pass batch lookup, or `null`. |
 | `startedAt` | `string` (ISO 8601) | `Call_Start_Time` | Datetime | Normalized to UTC ISO 8601 string. Fallback: `1970-01-01T00:00:00.000Z`. |
@@ -76,12 +76,14 @@ Direct mapping from MongoDB `migrated_calls` and related collections to [`CallIt
 - **Fallback:** If missing, empty, or unstated &rarr; `'outbound'` (safe default as CRM telecallers predominantly log outbound activities).
 
 ### 2. Deterministic Call Status Resolution (`resolveStatus`)
-Status resolution follows a strict deterministic decision ladder:
-1. **Talk Time Check (Duration > 0):** If `Call_Duration_in_seconds != null && Call_Duration_in_seconds > 0`, the call connected and had voice activity. Status is strictly `'answered'`.
-2. **Zero or Missing Duration (Duration == 0 or null):**
-   - **Cancelled Check:** If `Outgoing_Call_Status?.toLowerCase() === 'cancelled'` or `Call_Result?.toLowerCase().includes('cancelled')` &rarr; `'cancelled'`.
-   - **Busy / Unreachable Check:** If `Call_Result` contains `'busy'`, `'reachable'` (e.g. *"Number Not Reachable"*), or `'no response/busy'` &rarr; `'busy'`.
-   - **Default Missed:** All other uncompleted outcomes (*"Ringing Not Answering"*, *"Missed"*, *"TC"*, *"RNR-3"*, null) resolve to `'missed'`.
+Status resolution evaluates talk time, `Outgoing_Call_Status`, and scheduled `Call_Start_Time`:
+1. **Talk Time Check (Duration > 0):** If `Call_Duration_in_seconds != null && Call_Duration_in_seconds > 0`, voice activity occurred. Status is strictly `'answered'`.
+2. **Zero or Missing Duration (Duration <= 0 or null):**
+   - **Completed:** If `Outgoing_Call_Status` is `'Completed'` &rarr; `'answered'` (resolves 565k completed calls where telephony recorded 0 duration).
+   - **Overdue:** If `Outgoing_Call_Status` is `'Overdue'` &rarr; `'overdue'`.
+   - **Cancelled:** If `Outgoing_Call_Status` is `'Cancelled'` or `'Canceled'` &rarr; `'cancelled'`.
+   - **Scheduled:** If `Call_Start_Time` is in the future relative to execution time (`> now`) &rarr; `'scheduled'`; if the scheduled date has passed (`<= now`) or is missing &rarr; `'overdue'`.
+   - **Null / Unstated:** If `Call_Start_Time` is in the future (`> now`) &rarr; `'scheduled'`; if past or missing &rarr; `'overdue'`.
 
 ### 3. Polymorphic Parallel Customer Phone Resolution (`batchResolveCustomerPhones`)
 To prevent N+1 queries across polymorphic parent records:
@@ -125,13 +127,16 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
 
 ### Call Status Resolution Matrix
 
-| Talk Time (`Call_Duration_in_seconds`) | `Outgoing_Call_Status` | `Call_Result` | Target `status` |
+| Talk Time (`Call_Duration_in_seconds`) | `Outgoing_Call_Status` | `Call_Start_Time` | Target `status` |
 | :--- | :--- | :--- | :--- |
 | `> 0` | Any | Any | `'answered'` |
-| `<= 0` or `null` | `'Cancelled'` | Any | `'cancelled'` |
-| `<= 0` or `null` | Any | Contains `"cancelled"` | `'cancelled'` |
-| `<= 0` or `null` | Not cancelled | Contains `"busy"`, `"reachable"`, or `"no response/busy"` | `'busy'` |
-| `<= 0` or `null` | Not cancelled | Any other value (`'Ringing Not Answering'`, `'RNR-3'`, null, etc.) | `'missed'` |
+| `<= 0` or `null` | `'Completed'` (case-insensitive) | Any | `'answered'` |
+| `<= 0` or `null` | `'Overdue'` (case-insensitive) | Any | `'overdue'` |
+| `<= 0` or `null` | `'Cancelled'` / `'Canceled'` | Any | `'cancelled'` |
+| `<= 0` or `null` | `'Scheduled'` (case-insensitive) | In future (`> now`) | `'scheduled'` |
+| `<= 0` or `null` | `'Scheduled'` (case-insensitive) | In past (`<= now`) or missing | `'overdue'` |
+| `<= 0` or `null` | `null` / empty / unstated | In future (`> now`) | `'scheduled'` |
+| `<= 0` or `null` | `null` / empty / unstated | In past (`<= now`) or missing | `'overdue'` |
 
 ### Source Outgoing Call Status Picklist Enums
 - `'Scheduled'`
@@ -165,7 +170,7 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
 | `parentType` | Missing or unrecognized `parent_entity_type` | Unresolved entity | `null` |
 | `parentZohoId` | Missing ID in matched `_zoho_*_id` | Null fallback | `null` |
 | `direction` | Missing, empty, or unmapped `Call_Type` | Standard telecalling direction assumption | `'outbound'` |
-| `status` | Missing duration, status, and result | Unanswered assumption | `'missed'` |
+| `status` | Missing duration and unstated status (past or missing date) | Overdue assumption | `'overdue'` |
 | `customerPhone` | Missing entity, empty phone, or invalid syntax | Null assignment | `null` |
 | `agentEmail` | Owner ID missing or not found in `migrated_users` | Unassigned lookup | `null` |
 | `startedAt` | Missing or invalid `Call_Start_Time` | Unix Epoch UTC | `"1970-01-01T00:00:00.000Z"` |
@@ -184,17 +189,18 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
 
 ## 6. Key Edge Cases
 
-1. **Missed Calls Are Categorized as Inbound:** In Zoho CRM PhoneBridge, a call logged with `Call_Type: "Missed"` indicates an inbound call from a customer that rang until timeout without being picked up by an agent. The engine properly maps direction to `'inbound'` and status to `'missed'`.
-2. **Talk Time Overrules Status Picklists:** In legacy Zoho records, human agents often leave the call status or result dropdown as *"Busy"* or *"Ringing Not Answering"*, but PhoneBridge telephony recorded actual talk time (`Call_Duration_in_seconds > 0`). The service treats duration > 0 as authoritative ground truth, overriding negative picklists to `'answered'`.
-3. **Polymorphic Entity Cascade for Customer Phone:** Calls can be attached to 5 different business entities. The lookup pipeline resolves phones following this hierarchy:
+1. **Completed Calls with Zero Duration:** In Zoho CRM PhoneBridge and agent call logging, completed calls frequently have `Call_Duration_in_seconds` recorded as 0 or null (over 565k records). When `Outgoing_Call_Status` is "Completed", the engine treats the call as `'answered'`.
+2. **Talk Time Overrules Picklists:** In legacy Zoho records, human agents often leave the status unselected or marked as "Scheduled", but PhoneBridge telephony recorded actual talk time (`Call_Duration_in_seconds > 0`). The service treats duration > 0 as authoritative ground truth, classifying it as `'answered'`.
+3. **Scheduled vs. Overdue Resolution for Future/Past Calls:** Calls marked "Scheduled" or having no explicit status (`null`/empty) are resolved dynamically against the current time: if `Call_Start_Time` is strictly in the future (`> now`), it resolves to `'scheduled'`; if the start time is past (`<= now`) or missing, it resolves to `'overdue'`.
+4. **Polymorphic Entity Cascade for Customer Phone:** Calls can be attached to 5 different business entities. The lookup pipeline resolves phones following this hierarchy:
    - **Lead:** `Phone` &rarr; `Mobile` (using Lead `Country_Code`)
    - **Contact:** `Phone` &rarr; `Mobile` (using Contact `Country_Code`)
    - **Deal:** Deal `Phone` &rarr; linked Contact (`_zoho_contact_id`) `Phone`
    - **Visa Application:** Linked Contact (`_zoho_contact_id`) `Phone`
    - **Spouse Assessment:** Spouse `Phone`
    - **Fallback:** Unresolvable or missing phone numbers cleanly resolve to `null`.
-4. **PhoneBridge Recording Inaccessibility:** Zoho PhoneBridge voice recordings (`Voice_Recording__s`) cannot be accessed, streamed, or downloaded outside the authenticated Zoho CRM domain. Therefore, the recording object always safely returns `{ url: null, mimeType: null, sizeBytes: null }`.
-5. **Scheduled Follow-up Timestamps:** The Zoho custom field `When_To_Make_The_Call` is normalized to ISO 8601 as `followUpAt`. This allows downstream calendar and dialer services to automatically schedule agent reminders.
+5. **PhoneBridge Recording Inaccessibility:** Zoho PhoneBridge voice recordings (`Voice_Recording__s`) cannot be accessed, streamed, or downloaded outside the authenticated Zoho CRM domain. Therefore, the recording object always safely returns `{ url: null, mimeType: null, sizeBytes: null }`.
+6. **Scheduled Follow-up Timestamps:** The Zoho custom field `When_To_Make_The_Call` is normalized to ISO 8601 as `followUpAt`. This allows downstream calendar and dialer services to automatically schedule agent reminders.
 
 ---
 
@@ -204,7 +210,7 @@ To populate `agentEmail`, `createdByEmail`, and `modifiedByEmail`:
 
 ```typescript
 export type CallDirection = 'inbound' | 'outbound';
-export type CallStatus = 'answered' | 'missed' | 'cancelled' | 'busy';
+export type CallStatus = 'answered' | 'overdue' | 'scheduled' | 'cancelled';
 
 export interface CallRecordingDto {
   url: string | null;
@@ -276,7 +282,7 @@ export interface CallsResponseDto {
       "parentType": "contact",
       "parentZohoId": "164193000000822091",
       "direction": "inbound",
-      "status": "missed",
+      "status": "overdue",
       "customerPhone": "+919123456789",
       "agentEmail": null,
       "startedAt": "2024-03-03T04:22:15.000Z",
@@ -300,7 +306,7 @@ export interface CallsResponseDto {
       "parentType": "deal",
       "parentZohoId": "164193000000899014",
       "direction": "outbound",
-      "status": "busy",
+      "status": "overdue",
       "customerPhone": "+919988776655",
       "agentEmail": "rahul.patel@worldvisa.in",
       "startedAt": "2024-03-04T11:00:00.000Z",

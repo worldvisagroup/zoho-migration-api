@@ -21,6 +21,7 @@ import { R2StorageService } from '../../attachments/r2-storage.service.js';
 import { getMimeType } from '../../attachments/utils/mime-type.helper.js';
 import { AttachmentItemDto } from '../../attachments/dto/attachment-response.dto.js';
 import { CallItemDto, CallRecordingDto } from '../../calls/dto/call-response.dto.js';
+import { resolveCallStatus } from '../../calls/utils/call-status.util.js';
 import { MeetingItemDto, MeetingParticipantDto } from '../../meetings/dto/meeting-response.dto.js';
 import { normalizeMeetingStatus } from '../../meetings/utils/meeting-status.util.js';
 import { NoteItemDto } from '../../notes/dto/note-response.dto.js';
@@ -425,18 +426,11 @@ export class EnquiriesService {
           ? Math.max(0, Math.floor(c.Call_Duration_in_seconds))
           : 0;
 
-      let callStatus: 'answered' | 'missed' | 'busy' | 'cancelled' = 'missed';
-      if (durationSeconds > 0) {
-        callStatus = 'answered';
-      } else {
-        const outStatus = c.Outgoing_Call_Status?.toLowerCase().trim();
-        const res = c.Call_Result?.toLowerCase().trim();
-        if (outStatus === 'cancelled' || (res && res.includes('cancelled'))) {
-          callStatus = 'cancelled';
-        } else if (res && (res.includes('busy') || res.includes('reachable'))) {
-          callStatus = 'busy';
-        }
-      }
+      const callStatus = resolveCallStatus(
+        c.Call_Duration_in_seconds,
+        c.Outgoing_Call_Status,
+        c.Call_Start_Time,
+      );
 
       const cId = c._zoho_created_by_id?.trim() || null;
       const mId = c._zoho_modified_by_id?.trim() || null;

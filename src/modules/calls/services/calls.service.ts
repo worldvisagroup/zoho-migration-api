@@ -13,6 +13,7 @@ import {
   QueryCallsDto,
 } from '../dto/index.js';
 import { CallsRepository } from '../repositories/calls.repository.js';
+import { resolveCallStatus } from '../utils/index.js';
 
 @Injectable()
 export class CallsService {
@@ -83,35 +84,19 @@ export class CallsService {
   /**
    * Deterministically resolves call status:
    * - Duration > 0 -> answered
-   * - Duration == 0 (or null):
-   *   - If cancelled -> cancelled
-   *   - If busy / unreachable -> busy
-   *   - Otherwise -> missed
+   * - Duration <= 0 (or null):
+   *   - Completed -> answered
+   *   - Overdue -> overdue
+   *   - Cancelled -> cancelled
+   *   - Scheduled: future Call_Start_Time -> scheduled, past or missing -> overdue
+   *   - null / empty status: future Call_Start_Time -> scheduled, past or missing -> overdue
    */
   resolveStatus(call: MigratedCallEntity): CallStatus {
-    const duration = call.Call_Duration_in_seconds;
-
-    if (duration != null && duration > 0) {
-      return 'answered';
-    }
-
-    const outgoingStatus = call.Outgoing_Call_Status?.trim().toLowerCase();
-    const result = call.Call_Result?.trim().toLowerCase();
-
-    if (outgoingStatus === 'cancelled' || (result && result.includes('cancelled'))) {
-      return 'cancelled';
-    }
-
-    if (
-      result &&
-      (result.includes('busy') ||
-        result.includes('reachable') ||
-        result.includes('no response/busy'))
-    ) {
-      return 'busy';
-    }
-
-    return 'missed';
+    return resolveCallStatus(
+      call.Call_Duration_in_seconds,
+      call.Outgoing_Call_Status,
+      call.Call_Start_Time,
+    );
   }
 
   /**

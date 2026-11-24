@@ -7,9 +7,9 @@ import {
 import type { MigratedTaskEntity } from '../../../database/schema/index.js';
 import { QueryTasksDto, TaskItemDto, TasksResponseDto } from '../dto/index.js';
 import { TasksRepository } from '../repositories/tasks.repository.js';
+import { resolveTaskCompletedAt } from '../utils/task-completed-at.util.js';
 import { normalizeTaskPriority } from '../utils/task-priority.util.js';
 import { normalizeTaskStatus } from '../utils/task-status.util.js';
-import { resolveTaskCompletedAt } from '../utils/task-completed-at.util.js';
 
 @Injectable()
 export class TasksService {
@@ -86,8 +86,12 @@ export class TasksService {
     const priority = normalizeTaskPriority(record.Priority);
 
     const title = record.Subject ? record.Subject.trim() : '';
-    const description =
+    let description =
       record.Description && record.Description.trim() ? record.Description.trim() : null;
+
+    if (description === ".") {
+      description = null
+    }
 
     const dueDate = this.resolveDueDate(record.Due_Date);
 

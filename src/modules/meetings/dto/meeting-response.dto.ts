@@ -127,6 +127,13 @@ export class MeetingItemDto {
   status: TargetMeetingStatus;
 
   @ApiProperty({
+    description: 'Indicates whether the meeting is an all-day event',
+    example: false,
+    type: Boolean,
+  })
+  allDay: boolean;
+
+  @ApiProperty({
     description: 'UTC ISO 8601 scheduled start timestamp from Start_DateTime',
     example: '2024-03-04T11:00:00.000Z',
     type: String,
@@ -195,6 +202,13 @@ export class MeetingItemDto {
   createdByEmail: string | null;
 
   @ApiProperty({
+    description: 'UTC ISO 8601 creation timestamp from Zoho Created_Time',
+    example: '2024-03-01T10:00:00.000Z',
+    type: String,
+  })
+  createdAt: string;
+
+  @ApiProperty({
     description:
       'UTC ISO 8601 last modified timestamp (falls back to Created_Time if Modified_Time is missing; never null)',
     example: '2024-03-05T10:00:00.000Z',
@@ -217,6 +231,7 @@ export class MeetingItemDto {
     title: string;
     description: string | null;
     status: TargetMeetingStatus;
+    allDay?: boolean;
     scheduledAt: string;
     startedAt: string | null;
     endedAt: string;
@@ -224,6 +239,7 @@ export class MeetingItemDto {
     hostId: string | null;
     participants: MeetingParticipantDto[];
     recording: MeetingRecordingDto | null;
+    createdAt: string;
     createdById: string | null;
     createdByEmail: string | null;
     modifiedAt: string;
@@ -235,6 +251,7 @@ export class MeetingItemDto {
     this.title = data.title;
     this.description = data.description;
     this.status = data.status;
+    this.allDay = Boolean(data.allDay);
     this.scheduledAt = data.scheduledAt;
     this.startedAt = data.startedAt;
     this.endedAt = data.endedAt;
@@ -242,6 +259,7 @@ export class MeetingItemDto {
     this.hostId = data.hostId;
     this.participants = data.participants;
     this.recording = data.recording;
+    this.createdAt = data.createdAt;
     this.createdById = data.createdById;
     this.createdByEmail = data.createdByEmail;
     this.modifiedAt = data.modifiedAt;

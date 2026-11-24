@@ -51,6 +51,7 @@ Direct mapping from MongoDB `migrated_events`, `migrated_meeting_recordings`, an
 | `title` | `string` | `Event_Title` | String | Trimmed event title. Defaults to empty string `""` if missing. |
 | `description` | `string \| null` | `Description` | Textarea | Trimmed plain text notes. Returns `null` if empty or missing. |
 | `status` | `TargetMeetingStatus` | `Meeting_Status`, `is_closed` | Picklist, Boolean | Normalized to `'scheduled'`, `'ended'`, or `'cancelled'` via status ladder. |
+| `allDay` | `boolean` | `All_day` | Boolean | True if all-day event, false otherwise. Defaults to `false`. |
 | `scheduledAt` | `string` (ISO 8601) | `Start_DateTime` | Datetime | Normalized to UTC ISO 8601 scheduled start timestamp. |
 | `startedAt` | `string \| null` | `Start_DateTime`, `status` | Datetime, Computed | **If status === 'ended':** falls back to `scheduledAt`.<br>**If status === 'scheduled' or 'cancelled':** strictly `null`. |
 | `endedAt` | `string` (ISO 8601) | `End_DateTime` | Datetime | Normalized to UTC ISO 8601 end timestamp. |
@@ -60,6 +61,7 @@ Direct mapping from MongoDB `migrated_events`, `migrated_meeting_recordings`, an
 | `recording` | `MeetingRecordingDto \| null` | `migrated_meeting_recordings` &rarr; R2 | Lookup / Presigned | Cloudflare R2 presigned download URL, MIME type, and file size in bytes, or `null`. |
 | `createdById` | `string \| null` | `_zoho_created_by_id` | String | Cleaned Zoho user ID of creator, or `null`. |
 | `createdByEmail` | `string \| null` | `_zoho_created_by_id` &rarr; `migrated_users.email` | Lookup | Resolved creator email address via batch lookup, or `null`. |
+| `createdAt` | `string` (ISO 8601) | `Created_Time` | Datetime | Normalized to UTC ISO 8601 creation timestamp from Zoho `Created_Time`. |
 | `modifiedById` | `string \| null` | `_zoho_modified_by_id` | String | Cleaned Zoho user ID of last modifier, or `null`. |
 | `modifiedAt` | `string` (ISO 8601) | `Modified_Time`, `Last_Activity_Time`, `Created_Time` | Datetime | Authentic Zoho `Modified_Time` (100% populated in `migrated_events`), falls back to `Last_Activity_Time`, then `Created_Time`. Never null. |
 
@@ -147,6 +149,7 @@ Meetings require comprehensive attendee attribution distinguishing internal cons
 | `description` | Missing or whitespace `Description` | Plain nullable string | `null` |
 | `status` | Unstated status with `is_closed === false` | Open appointment rule | `'scheduled'` |
 | `status` | Unstated status with `is_closed === true` | Historical event rule | `'ended'` |
+| `allDay` | Missing, null, or undefined `All_day` | Boolean coercion | `false` |
 | `scheduledAt` | Missing or invalid `Start_DateTime` | Unix Epoch UTC | `"1970-01-01T00:00:00.000Z"` |
 | `startedAt` | Status is `'ended'` | Cascades to `scheduledAt` | `scheduledAt` timestamp |
 | `startedAt` | Status is `'scheduled'` or `'cancelled'` | Unstarted rule | `null` |
@@ -157,6 +160,7 @@ Meetings require comprehensive attendee attribution distinguishing internal cons
 | `recording` | Missing or unrecorded event | No recording document | `null` |
 | `createdById` | Missing or null `_zoho_created_by_id` | Cleaned nullable string | `null` |
 | `createdByEmail` | Creator ID not found in `migrated_users` | Lookup miss | `null` |
+| `createdAt` | Missing or invalid `Created_Time` | Falls back to Unix Epoch | `"1970-01-01T00:00:00.000Z"` |
 | `modifiedById` | Missing or null `_zoho_modified_by_id` | Cleaned nullable string | `null` |
 | `modifiedAt` | Missing or invalid `Modified_Time` | Falls back to `Created_Time` &rarr; Epoch | `createdAt` value or Epoch |
 
@@ -199,6 +203,7 @@ export interface MeetingItemDto {
   title: string;                      // Meeting title / subject
   description: string | null;         // Plain text description or null
   status: TargetMeetingStatus;        // 'scheduled' | 'ended' | 'cancelled'
+  allDay: boolean;                    // Indicates whether the meeting is an all-day event
   scheduledAt: string;                // Scheduled start time in UTC ISO 8601
   startedAt: string | null;           // Actual start time (only if status === 'ended')
   endedAt: string;                    // Scheduled / actual end time in UTC ISO 8601
@@ -208,6 +213,7 @@ export interface MeetingItemDto {
   recording: MeetingRecordingDto | null; // Recording metadata or null
   createdById: string | null;         // Zoho creator ID
   createdByEmail: string | null;      // Creator staff email address
+  createdAt: string;                  // UTC ISO 8601 creation timestamp
   modifiedAt: string;                 // Last modified timestamp in UTC ISO 8601
   modifiedById: string | null;        // Zoho modifier ID
 }
@@ -233,6 +239,7 @@ export interface MeetingsResponseDto {
       "title": "Australia PR Initial Eligibility Consultation",
       "description": "Reviewed client qualifications, ACS points calculator, and English proficiency test plans.",
       "status": "ended",
+      "allDay": false,
       "scheduledAt": "2024-03-04T11:00:00.000Z",
       "startedAt": "2024-03-04T11:00:00.000Z",
       "endedAt": "2024-03-04T11:45:00.000Z",
@@ -257,6 +264,7 @@ export interface MeetingsResponseDto {
       },
       "createdById": "164193000000512001",
       "createdByEmail": "asha.sharma@worldvisa.in",
+      "createdAt": "2024-03-01T10:00:00.000Z",
       "modifiedAt": "2024-03-04T12:00:00.000Z",
       "modifiedById": "164193000000512001"
     },
@@ -267,6 +275,7 @@ export interface MeetingsResponseDto {
       "title": "Document Verification Follow-up",
       "description": null,
       "status": "cancelled",
+      "allDay": false,
       "scheduledAt": "2024-03-06T14:00:00.000Z",
       "startedAt": null,
       "endedAt": "2024-03-06T14:30:00.000Z",
@@ -287,6 +296,7 @@ export interface MeetingsResponseDto {
       "recording": null,
       "createdById": "164193000000512009",
       "createdByEmail": "vikram.seth@worldvisa.in",
+      "createdAt": "2024-03-02T10:00:00.000Z",
       "modifiedAt": "2024-03-06T13:45:00.000Z",
       "modifiedById": "164193000000512009"
     },
@@ -315,6 +325,7 @@ export interface MeetingsResponseDto {
       "recording": null,
       "createdById": "164193000000512001",
       "createdByEmail": "asha.sharma@worldvisa.in",
+      "createdAt": "2026-11-01T09:00:00.000Z",
       "modifiedAt": "2026-11-01T09:30:00.000Z",
       "modifiedById": "164193000000512001"
     }

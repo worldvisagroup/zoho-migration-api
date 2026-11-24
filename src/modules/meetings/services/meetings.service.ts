@@ -200,6 +200,7 @@ export class MeetingsService {
     // Timestamps
     const scheduledAt = normalizeZohoTimestamp(record.Start_DateTime);
     const endedAt = normalizeZohoTimestamp(record.End_DateTime);
+    const createdAt = normalizeZohoTimestamp(record.Created_Time);
     const rawModified = record.Modified_Time ?? record.Last_Activity_Time ?? record.Created_Time;
     const modifiedAt = normalizeZohoTimestamp(rawModified, record.Created_Time);
     // startedAt fallback: if ended, falls back to scheduled Start_DateTime; if scheduled/cancelled, null
@@ -304,6 +305,7 @@ export class MeetingsService {
       title,
       description,
       status,
+      allDay: Boolean(record.All_day),
       scheduledAt,
       startedAt,
       endedAt,
@@ -311,6 +313,7 @@ export class MeetingsService {
       hostId,
       participants,
       recording,
+      createdAt,
       createdById,
       createdByEmail,
       modifiedAt,

@@ -477,6 +477,7 @@ export interface EnquiriesResponseDto {
           "title": "Australia PR Strategy Consultation",
           "description": "Virtual meeting to finalize migration roadmap.",
           "status": "ended",
+          "allDay": false,
           "scheduledAt": "2024-03-02T11:00:00.000Z",
           "startedAt": "2024-03-02T11:00:00.000Z",
           "endedAt": "2024-03-02T11:45:00.000Z",
@@ -497,6 +498,7 @@ export interface EnquiriesResponseDto {
           "recording": null,
           "createdById": "164193000000028001",
           "createdByEmail": "asha@worldvisa.in",
+          "createdAt": "2024-03-02T10:00:00.000Z",
           "modifiedAt": "2024-03-02T11:45:00.000Z",
           "modifiedById": "164193000000028001"
         }

@@ -245,6 +245,13 @@ export default function MeetingsApiDocPage() {
                   <td className="px-4 py-2.5">Normalized to <code className="text-slate-200 font-mono">&apos;scheduled&apos;</code>, <code className="text-slate-200 font-mono">&apos;ended&apos;</code>, or <code className="text-slate-200 font-mono">&apos;cancelled&apos;</code> via status ladder.</td>
                 </tr>
                 <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">allDay</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">boolean</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">All_day</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">Boolean</td>
+                  <td className="px-4 py-2.5">Indicates whether the meeting is an all-day event. Defaults to <code className="text-slate-200 font-mono">false</code>.</td>
+                </tr>
+                <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">scheduledAt</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">string (ISO 8601)</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Start_DateTime</td>
@@ -309,6 +316,13 @@ export default function MeetingsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-sky-300">_zoho_created_by_id &rarr; migrated_users.email</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">Lookup</td>
                   <td className="px-4 py-2.5">Resolved creator email address via batch lookup, or <code className="text-slate-400 font-mono">null</code>.</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">createdAt</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string (ISO 8601)</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">Created_Time</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">Datetime</td>
+                  <td className="px-4 py-2.5">Normalized to UTC ISO 8601 creation timestamp from Zoho <code className="font-mono">Created_Time</code>.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">modifiedById</td>
@@ -545,6 +559,12 @@ export default function MeetingsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
                 </tr>
                 <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">allDay</td>
+                  <td className="px-4 py-2.5">Missing, null, or undefined <code className="font-mono">All_day</code></td>
+                  <td className="px-4 py-2.5">Boolean coercion</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-200 font-bold">false</td>
+                </tr>
+                <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">scheduledAt</td>
                   <td className="px-4 py-2.5">Missing or invalid <code className="font-mono">Start_DateTime</code></td>
                   <td className="px-4 py-2.5">Unix Epoch UTC</td>
@@ -591,6 +611,12 @@ export default function MeetingsApiDocPage() {
                   <td className="px-4 py-2.5">Creator ID not found in <code className="font-mono">migrated_users</code></td>
                   <td className="px-4 py-2.5">Lookup miss</td>
                   <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">createdAt</td>
+                  <td className="px-4 py-2.5">Missing or invalid <code className="font-mono">Created_Time</code></td>
+                  <td className="px-4 py-2.5">Falls back to Unix Epoch</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-200">&quot;1970-01-01T00:00:00.000Z&quot;</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">modifiedAt</td>
@@ -679,6 +705,7 @@ export interface MeetingItemDto {
   title: string;                      // Meeting title / subject
   description: string | null;         // Plain text description or null
   status: TargetMeetingStatus;        // 'scheduled' | 'ended' | 'cancelled'
+  allDay: boolean;                    // Indicates whether the meeting is an all-day event
   scheduledAt: string;                // Scheduled start time in UTC ISO 8601
   startedAt: string | null;           // Actual start time (only if status === 'ended')
   endedAt: string;                    // Scheduled / actual end time in UTC ISO 8601
@@ -688,6 +715,7 @@ export interface MeetingItemDto {
   recording: MeetingRecordingDto | null; // Recording metadata or null
   createdById: string | null;         // Zoho creator ID
   createdByEmail: string | null;      // Creator staff email address
+  createdAt: string;                  // UTC ISO 8601 creation timestamp
   modifiedAt: string;                 // Last modified timestamp in UTC ISO 8601
   modifiedById: string | null;        // Zoho modifier ID
 }
@@ -716,6 +744,7 @@ export interface MeetingsResponseDto {
       "title": "Australia PR Initial Eligibility Consultation",
       "description": "Reviewed client qualifications, ACS points calculator, and English proficiency test plans.",
       "status": "ended",
+      "allDay": false,
       "scheduledAt": "2024-03-04T11:00:00.000Z",
       "startedAt": "2024-03-04T11:00:00.000Z",
       "endedAt": "2024-03-04T11:45:00.000Z",
@@ -740,6 +769,7 @@ export interface MeetingsResponseDto {
       },
       "createdById": "164193000000512001",
       "createdByEmail": "asha.sharma@worldvisa.in",
+      "createdAt": "2024-03-01T10:00:00.000Z",
       "modifiedAt": "2024-03-04T12:00:00.000Z",
       "modifiedById": "164193000000512001"
     },
@@ -750,6 +780,7 @@ export interface MeetingsResponseDto {
       "title": "Document Verification Follow-up",
       "description": null,
       "status": "cancelled",
+      "allDay": false,
       "scheduledAt": "2024-03-06T14:00:00.000Z",
       "startedAt": null,
       "endedAt": "2024-03-06T14:30:00.000Z",
@@ -770,6 +801,7 @@ export interface MeetingsResponseDto {
       "recording": null,
       "createdById": "164193000000512009",
       "createdByEmail": "vikram.seth@worldvisa.in",
+      "createdAt": "2024-03-02T10:00:00.000Z",
       "modifiedAt": "2024-03-06T13:45:00.000Z",
       "modifiedById": "164193000000512009"
     },
@@ -798,6 +830,7 @@ export interface MeetingsResponseDto {
       "recording": null,
       "createdById": "164193000000512001",
       "createdByEmail": "asha.sharma@worldvisa.in",
+      "createdAt": "2026-11-01T09:00:00.000Z",
       "modifiedAt": "2026-11-01T09:30:00.000Z",
       "modifiedById": "164193000000512001"
     }

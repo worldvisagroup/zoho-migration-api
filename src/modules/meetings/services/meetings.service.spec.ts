@@ -123,6 +123,7 @@ describe('MeetingsService', () => {
       expect(meeting.title).toBe('Initial Consultation');
       expect(meeting.description).toBe('Discussion regarding Australia 189 PR visa pathway.');
       expect(meeting.status).toBe('ended');
+      expect(meeting.allDay).toBe(false);
       expect(meeting.scheduledAt).toBe('2024-03-04T11:00:00.000Z');
       expect(meeting.startedAt).toBe('2024-03-04T11:00:00.000Z');
       expect(meeting.endedAt).toBe('2024-03-04T11:45:00.000Z');
@@ -130,6 +131,7 @@ describe('MeetingsService', () => {
       expect(meeting.hostEmail).toBe('host@worldvisa.in');
       expect(meeting.createdById).toBe('user_creator_1');
       expect(meeting.createdByEmail).toBe('creator@worldvisa.in');
+      expect(meeting.createdAt).toBe('2024-03-01T09:00:00.000Z');
       expect(meeting.modifiedById).toBe('user_modifier_1');
       expect(meeting.modifiedAt).toBe('2024-03-04T12:00:00.000Z');
 
@@ -152,6 +154,29 @@ describe('MeetingsService', () => {
         mimeType: 'video/mp4',
         sizeBytes: 52428800,
       });
+    });
+
+    it('should correctly set allDay to true when All_day is true', async () => {
+      const mockAllDayEvent: MigratedEventEntity = {
+        zoho_id: 'event_allday',
+        Event_Title: 'Whole Day Workshop',
+        All_day: true,
+        Meeting_Status: 'Attended',
+        is_closed: true,
+        Start_DateTime: new Date('2024-03-04T00:00:00.000Z'),
+        End_DateTime: new Date('2024-03-04T23:59:59.000Z'),
+        Created_Time: new Date('2024-03-01T09:00:00.000Z'),
+        Modified_Time: new Date('2024-03-04T12:00:00.000Z'),
+      };
+      mockRepository.findMeetings.mockResolvedValue({ records: [mockAllDayEvent], total: 1 });
+      mockRepository.batchResolveUsers.mockResolvedValue(new Map());
+      mockRepository.batchResolveStaffEmails.mockResolvedValue(new Set());
+      mockRepository.batchFindRecordings.mockResolvedValue(new Map());
+      mockR2StorageService.generateDownloadUrlsBatch.mockResolvedValue([]);
+      mockRepository.batchResolveCustomers.mockResolvedValue(new Map());
+
+      const result = await service.getMeetings({ page: 1, limit: 1 });
+      expect(result.data[0].allDay).toBe(true);
     });
 
     it('should invoke batchResolveCustomers when meeting has only staff email (participant email count 1 and it is staff)', async () => {

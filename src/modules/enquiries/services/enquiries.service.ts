@@ -500,6 +500,7 @@ export class EnquiriesService {
       const scheduledAt = normalizeZohoTimestamp(m.Start_DateTime);
       const endedAt = normalizeZohoTimestamp(m.End_DateTime);
       const startedAt = meetingStatus === 'ended' ? scheduledAt : null;
+      const createdAt = normalizeZohoTimestamp(m.Created_Time);
       const oId = m._zoho_owner_id?.trim() || null;
       const cId = m._zoho_created_by_id?.trim() || null;
       const mId = m._zoho_modified_by_id?.trim() || null;
@@ -533,6 +534,7 @@ export class EnquiriesService {
         title: m.Event_Title?.trim() || '',
         description: m.Description?.trim() || null,
         status: meetingStatus,
+        allDay: Boolean(m.All_day),
         scheduledAt,
         startedAt,
         endedAt,
@@ -540,6 +542,7 @@ export class EnquiriesService {
         hostId: oId,
         participants,
         recording: null,
+        createdAt,
         createdById: cId,
         createdByEmail: cId ? (userMap.get(cId)?.email ?? null) : null,
         modifiedAt: normalizeZohoTimestamp(m.Modified_Time, m.Created_Time),

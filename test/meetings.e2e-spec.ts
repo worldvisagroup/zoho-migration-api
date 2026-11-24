@@ -45,6 +45,7 @@ describe('MeetingsController (e2e)', () => {
       Description: null,
       Meeting_Status: 'Postponed',
       is_closed: true,
+      All_day: true,
       Start_DateTime: new Date('2024-03-06T14:00:00.000Z'),
       End_DateTime: new Date('2024-03-06T14:30:00.000Z'),
       _zoho_owner_id: 'user_host_1',
@@ -306,6 +307,7 @@ describe('MeetingsController (e2e)', () => {
       expect(firstMeeting.title).toBe('Eligibility discussion');
       expect(firstMeeting.description).toBe('Initial discussion on PR options');
       expect(firstMeeting.status).toBe('ended');
+      expect(firstMeeting.allDay).toBe(false);
       expect(firstMeeting.scheduledAt).toBe('2024-03-04T11:00:00.000Z');
       expect(firstMeeting.startedAt).toBe('2024-03-04T11:00:00.000Z');
       expect(firstMeeting.endedAt).toBe('2024-03-04T11:40:00.000Z');
@@ -313,6 +315,7 @@ describe('MeetingsController (e2e)', () => {
       expect(firstMeeting.hostId).toBe('user_host_1');
       expect(firstMeeting.createdById).toBe('user_host_1');
       expect(firstMeeting.createdByEmail).toBe('asha@worldvisa.in');
+      expect(firstMeeting.createdAt).toBe('2024-03-01T10:00:00.000Z');
       expect(firstMeeting.modifiedById).toBe('user_host_1');
       expect(firstMeeting.modifiedAt).toBe('2024-03-05T10:00:00.000Z');
 
@@ -337,7 +340,9 @@ describe('MeetingsController (e2e)', () => {
       const secondMeeting = response.body.data[1];
       expect(secondMeeting.externalId).toBe('event_002');
       expect(secondMeeting.parentType).toBe('contact');
+      expect(secondMeeting.allDay).toBe(true);
       expect(secondMeeting.parentZohoId).toBe('contact_001');
+      expect(secondMeeting.createdAt).toBe('2024-03-02T10:00:00.000Z');
       expect(secondMeeting.status).toBe('cancelled');
       expect(secondMeeting.startedAt).toBeNull();
       // Contact fallback participant

@@ -211,6 +211,7 @@ describe('EnquiriesService', () => {
       expect(enquiry.meetings.length).toBe(1);
       expect(enquiry.meetings[0].parentType).toBe('lead');
       expect(enquiry.meetings[0].parentZohoId).toBe('lead_100');
+      expect(enquiry.meetings[0].allDay).toBe(false);
       expect(enquiry.attachments.length).toBe(1);
       expect(enquiry.attachments[0].parentType).toBe('lead');
       expect(enquiry.attachments[0].parentZohoId).toBe('lead_100');

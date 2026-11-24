@@ -142,7 +142,7 @@ export class TaskItemDto {
 
   @ApiPropertyOptional({
     description:
-      'UTC ISO 8601 completion timestamp for done tasks (Closed_Time -> Modified_Time -> Created_Time; null if task is not done)',
+      'UTC ISO 8601 completion timestamp for done tasks (Closed_Time, or Modified_Time/Created_Time if Closed_Time < Created_Time; null if task is not done or Closed_Time is missing)',
     example: '2024-09-29T05:30:00.000Z',
     type: String,
     nullable: true,

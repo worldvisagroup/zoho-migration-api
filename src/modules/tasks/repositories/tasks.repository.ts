@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model, QueryFilter } from 'mongoose';
+import type { Model, QueryFilter, SortOrder } from 'mongoose';
 import { sanitizeEmail } from '../../../common/utils/index.js';
 import type {
   MigratedTaskDocument,
@@ -50,7 +50,14 @@ export class TasksRepository implements ITasksRepository {
       filter['parent_entity_type'] = query.type;
     }
 
-    if (query.from || query.to) {
+    if (query.updatedSince) {
+      const sinceDate = new Date(query.updatedSince);
+      filter['$or'] = [
+        { Modified_Time: { $gte: sinceDate } },
+        { Last_Activity_Time: { $gte: sinceDate } },
+        { Closed_Time: { $gte: sinceDate } },
+      ];
+    } else if (query.from || query.to) {
       const dateFilter: Record<string, Date> = {};
       if (query.from) {
         dateFilter['$gte'] = new Date(query.from);
@@ -65,7 +72,8 @@ export class TasksRepository implements ITasksRepository {
   }
 
   /**
-   * Fetches paginated task records matching query filters, ordered oldest to newest by Created_Time.
+   * Fetches paginated task records matching query filters, ordered oldest to newest.
+   * Sorted by Last_Activity_Time and Created_Time when updatedSince is provided; otherwise by Created_Time.
    */
   async findTasks(query: QueryTasksDto): Promise<PaginatedTaskRecords> {
     const filter = this.buildFilter(query);
@@ -73,10 +81,14 @@ export class TasksRepository implements ITasksRepository {
     const limit = query.limit ?? 200;
     const skip = (page - 1) * limit;
 
+    const sort: Record<string, SortOrder> = query.updatedSince
+      ? { Last_Activity_Time: 1, Created_Time: 1, _id: 1 }
+      : { Created_Time: 1, _id: 1 };
+
     const [records, total] = await Promise.all([
       this.taskModel
         .find(filter)
-        .sort({ Created_Time: 1, _id: 1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean<MigratedTaskEntity[]>()

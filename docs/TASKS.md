@@ -30,8 +30,10 @@ The Tasks API extracts all CRM action items, follow-ups, and operational tasks f
 | `limit` | `number` | No | `200` | `@IsInt()`, `@Min(1)`, `@Max(1000)` | Records per page (capped at 1,000). |
 | `from` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Inclusive start filter on Zoho `Created_Time`. |
 | `to` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Inclusive end filter on Zoho `Created_Time`. |
+| `updatedSince` | `string` | No | `undefined` | `@IsISO8601({ strict: true })` | Incremental sync filter on Zoho task activity (`>=`). Checks `Modified_Time`, `Last_Activity_Time`, and `Closed_Time`. Mutually exclusive with `from`/`to`. |
 
-- **Sorting Guarantee:** Ascending order by creation timestamp: `{ Created_Time: 1, _id: 1 }` (stable chronological order).
+- **Collision Prevention Strategy:** `updatedSince` is strictly mutually exclusive with `from` and `to`. Specifying both returns `400 Bad Request`.
+- **Sorting Guarantee:** Ascending order: `{ Created_Time: 1, _id: 1 }` (oldest to newest) by default, or `{ Last_Activity_Time: 1, Created_Time: 1, _id: 1 }` when `updatedSince` is supplied.
 - **Pagination Flag:** `hasMore = page * pageSize < total`.
 - **Response Wrapper:** Uses `@BypassTransform()` to return the direct migration envelope (`data`, `total`, `page`, `pageSize`, `hasMore`).
 
@@ -58,8 +60,8 @@ Direct mapping from MongoDB `migrated_tasks` to [`TaskItemDto`](file:///e:/World
 | `modifiedByZohoId` | `string \| null` | `_zoho_modified_by_id` | String | Cleaned Zoho user ID of last modifier, or `null`. |
 | `modifiedByEmail` | `string \| null` | `_zoho_modified_by_id` &rarr; `migrated_users` | Lookup | Resolved modifier email address via batch lookup, or `null`. |
 | `createdAt` | `string` (ISO 8601) | `Created_Time` | Date / String | Normalized to UTC ISO 8601. Fallback: `1970-01-01T00:00:00.000Z`. |
-| `modifiedAt` | `string` (ISO 8601) | `Modified_Time`, `Created_Time` | Date / String | Primary `Modified_Time`, falls back to `Created_Time`. Never null. |
-| `completedAt` | `string \| null` | `Closed_Time`, `Modified_Time`, `Created_Time` | Date / String | **If status === 'done':** `Closed_Time &rarr; Modified_Time &rarr; Created_Time`.<br>**If status !== 'done':** strictly `null`. |
+| `modifiedAt` | `string` (ISO 8601) | `Modified_Time`, `Last_Activity_Time`, `Closed_Time`, `Created_Time` | Date / String | Activity cascade: `Modified_Time ?? Last_Activity_Time ?? (is_closed ? Closed_Time : null) ?? Created_Time`. Never null. |
+| `completedAt` | `string \| null` | `Closed_Time`, `Modified_Time`, `Created_Time` | Date / String | **If status === 'done':** `Closed_Time` if present and &ge; `Created_Time`. If `Closed_Time < Created_Time` (Zoho anomaly), falls back to `Modified_Time ?? Created_Time`. If `Closed_Time` missing: `null`.<br>**If status !== 'done':** strictly `null`. |
 
 ---
 
@@ -79,16 +81,23 @@ Direct mapping from MongoDB `migrated_tasks` to [`TaskItemDto`](file:///e:/World
 
 ### 3. Completion Timestamp Resolution (`resolveCompletedAt`)
 - **Active Tasks:** If status is not `done`, `completedAt` is strictly `null`.
-- **Done Tasks (3-Tier Fallback):**
-  1. `Closed_Time` if valid.
-  2. `Modified_Time` if valid.
-  3. `Created_Time` (guaranteed non-null timestamp).
+- **Done Tasks:**
+  1. If `Closed_Time` is missing, null, or invalid &rarr; returns `null`.
+  2. If `Closed_Time < Created_Time` (Zoho CRM anomaly where task closed timestamp predates creation), falls back to `Modified_Time` if valid; otherwise `Created_Time`.
+  3. Otherwise (`Closed_Time >= Created_Time`), returns normalized `Closed_Time`.
 
 ### 4. Single-Pass Staff Email Batching
 To prevent N+1 database queries during pagination:
 - The service extracts unique user IDs from `_zoho_owner_id`, `_zoho_created_by_id`, and `_zoho_modified_by_id` across the batch.
 - Executes a single indexed query: `userModel.find({ zoho_id: { $in: uniqueIds } })`.
 - Maps each ID to its sanitized email address in memory for instant DTO projection.
+
+### 5. Modification Timestamp Activity Cascade
+Because `migrated_tasks` in Zoho CRM tracks activity through multiple fields rather than solely `Modified_Time`, `modifiedAt` resolves through an authentic 4-tier activity cascade:
+1. `Modified_Time` if present and valid.
+2. `Last_Activity_Time` (captures agent interactions, edits, and status changes).
+3. `Closed_Time` if the task is closed (`is_closed === true`).
+4. `Created_Time` fallback (ensures `modifiedAt` is never null).
 
 ---
 
@@ -144,8 +153,9 @@ To prevent N+1 database queries during pagination:
 | `createdByEmail` | Creator not found in `migrated_users` | Lookup miss | `null` |
 | `modifiedByEmail` | Modifier not found in `migrated_users` | Lookup miss | `null` |
 | `createdAt` | Missing/invalid `Created_Time` | Unix Epoch UTC | `"1970-01-01T00:00:00.000Z"` |
-| `modifiedAt` | Missing/invalid `Modified_Time` | Falls back to `Created_Time` | `createdAt` value or Epoch |
-| `completedAt` | Task is done but missing `Closed_Time` | Falls back to `Modified_Time`, then `Created_Time` | `modifiedAt` / `createdAt` |
+| `modifiedAt` | Missing `Modified_Time` | Falls back to `Last_Activity_Time`, `Closed_Time` (if closed), then `Created_Time` | Most recent activity or `createdAt` value |
+| `completedAt` | Task is done but missing `Closed_Time` | Non-completion timestamp | `null` |
+| `completedAt` | Task is done with `Closed_Time < Created_Time` (anomaly) | Falls back to `Modified_Time`, then `Created_Time` | `modifiedAt` / `createdAt` |
 | `completedAt` | Task status is not `'done'` | Non-completion rule | `null` |
 
 ---
@@ -153,9 +163,9 @@ To prevent N+1 database queries during pagination:
 ## 6. Key Edge Cases
 
 1. **`is_closed` Override Overrules Status Text:** In Zoho CRM, workflow rules often toggle the boolean `is_closed: true` while leaving legacy status picklist values as *"In Progress"* or *"Deferred"*. The normalization engine treats `is_closed: true` as the authoritative signal, forcing the task to `done`.
-2. **`completedAt` Guaranteed Non-Null for Done Tasks:** If a task is marked `done`, `completedAt` will never be null. If `Closed_Time` was omitted by Zoho, the engine cascades through `Modified_Time` and `Created_Time`. Conversely, active tasks (`todo`, `in_progress`) are strictly `null`.
+2. **`Closed_Time` Anomaly & Nullability Resolution:** In legacy Zoho CRM data, some completed tasks have `Closed_Time` timestamps that predate `Created_Time`. When `Closed_Time < Created_Time`, the resolver falls back to `Modified_Time` (or `Created_Time`) to guarantee chronological consistency (`completedAt >= createdAt`). If a completed task has no `Closed_Time` recorded at all, `completedAt` returns `null` rather than synthesizing an artificial completion date. Active tasks (`todo`, `in_progress`) are strictly `null`.
 3. **Polymorphic Parent Entity Relationships:** Zoho CRM links tasks across multiple modules using polymorphic lookups. The API enables targeted parent filtering across `zohoLeadId`, `zohoContactId`, `zohoDealId`, `visaApplicationId`, and `spouseSkillAssessmentId`.
-4. **`modifiedAt` Never-Null Guarantee:** Even if Zoho records omit `Modified_Time` upon initial creation, `modifiedAt` falls back to `Created_Time`, ensuring target databases with non-null updated timestamp constraints remain valid.
+4. **`modifiedAt` Activity Cascade & Never-Null Guarantee:** In Zoho CRM, tasks track edits through `Last_Activity_Time` and `Closed_Time` rather than just `Modified_Time`. The normalization engine resolves `modifiedAt` using this authentic cascade, preventing delta updates from stalling while guaranteeing a non-null timestamp for downstream replication.
 
 ---
 
@@ -183,7 +193,7 @@ export interface TaskItemDto {
   modifiedAt: string;                 // Zoho Modified_Time in UTC ISO 8601
   modifiedByEmail: string | null;     // Resolved modifier email or null
   modifiedByZohoId: string | null;    // Zoho modifier ID or null
-  completedAt: string | null;         // Completion timestamp (only if status === 'done')
+  completedAt: string | null;         // Completion timestamp (only if status === 'done' and Closed_Time exists; resolves anomaly if Closed_Time < Created_Time)
 }
 
 export interface TasksResponseDto {

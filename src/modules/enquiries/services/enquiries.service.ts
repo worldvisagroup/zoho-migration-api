@@ -28,6 +28,7 @@ import { NoteItemDto } from '../../notes/dto/note-response.dto.js';
 import { TaskItemDto } from '../../tasks/dto/task-response.dto.js';
 import { normalizeTaskPriority } from '../../tasks/utils/task-priority.util.js';
 import { normalizeTaskStatus } from '../../tasks/utils/task-status.util.js';
+import { resolveTaskCompletedAt } from '../../tasks/utils/task-completed-at.util.js';
 import {
   EnquiriesResponseDto,
   EnquiryAttributionDto,
@@ -489,8 +490,19 @@ export class EnquiriesService {
         createdAt: normalizeZohoTimestamp(t.Created_Time),
         modifiedByZohoId: mId,
         modifiedByEmail: mId ? (userMap.get(mId)?.email ?? null) : null,
-        modifiedAt: normalizeZohoTimestamp(t.Modified_Time, t.Created_Time),
-        completedAt: t.Closed_Time ? normalizeZohoTimestamp(t.Closed_Time) : null,
+        modifiedAt: normalizeZohoTimestamp(
+          t.Modified_Time ??
+            t.Last_Activity_Time ??
+            (t.is_closed ? t.Closed_Time : null) ??
+            t.Created_Time,
+          t.Created_Time,
+        ),
+        completedAt: resolveTaskCompletedAt(
+          normalizeTaskStatus(t.Status, t.is_closed) === 'done',
+          t.Closed_Time,
+          t.Modified_Time,
+          t.Created_Time,
+        ),
       });
     });
 

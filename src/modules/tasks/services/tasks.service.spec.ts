@@ -135,7 +135,7 @@ describe('TasksService', () => {
       expect(task.completedAt).toBeNull();
     });
 
-    it('should fall back completedAt to Modified_Time or Created_Time for done task if Closed_Time is missing', async () => {
+    it('should return null completedAt for done task if Closed_Time is missing', async () => {
       const mockRecords: MigratedTaskEntity[] = [
         {
           zoho_id: 'task_004',
@@ -145,12 +145,34 @@ describe('TasksService', () => {
           Created_Time: new Date('2024-01-01T08:00:00.000Z'),
           Modified_Time: new Date('2024-01-03T10:00:00.000Z'),
         },
+      ];
+
+      mockRepository.findTasks.mockResolvedValue({ records: mockRecords, total: 1 });
+      mockRepository.batchResolveUserEmails.mockResolvedValue(new Map());
+
+      const result = await service.getTasks({ page: 1, limit: 200 });
+
+      expect(result.data[0].completedAt).toBeNull();
+    });
+
+    it('should handle Closed_Time < Created_Time anomaly by falling back to Modified_Time or Created_Time', async () => {
+      const mockRecords: MigratedTaskEntity[] = [
         {
-          zoho_id: 'task_005',
-          Subject: 'Done without Closed or Modified Time',
+          zoho_id: 'task_005a',
+          Subject: 'Anomaly with Modified_Time',
           Status: 'Completed',
           is_closed: true,
-          Created_Time: new Date('2024-01-01T08:00:00.000Z'),
+          Created_Time: new Date('2024-01-05T10:00:00.000Z'),
+          Closed_Time: new Date('2024-01-01T10:00:00.000Z'), // earlier than Created_Time!
+          Modified_Time: new Date('2024-01-06T12:00:00.000Z'),
+        },
+        {
+          zoho_id: 'task_005b',
+          Subject: 'Anomaly without Modified_Time',
+          Status: 'Completed',
+          is_closed: true,
+          Created_Time: new Date('2024-01-05T10:00:00.000Z'),
+          Closed_Time: new Date('2024-01-01T10:00:00.000Z'), // earlier than Created_Time!
         },
       ];
 
@@ -159,8 +181,8 @@ describe('TasksService', () => {
 
       const result = await service.getTasks({ page: 1, limit: 200 });
 
-      expect(result.data[0].completedAt).toBe('2024-01-03T10:00:00.000Z');
-      expect(result.data[1].completedAt).toBe('2024-01-01T08:00:00.000Z');
+      expect(result.data[0].completedAt).toBe('2024-01-06T12:00:00.000Z');
+      expect(result.data[1].completedAt).toBe('2024-01-05T10:00:00.000Z');
     });
 
     it('should fall back modifiedAt to Created_Time when Modified_Time is missing', async () => {
@@ -181,6 +203,35 @@ describe('TasksService', () => {
 
       expect(task.createdAt).toBe('2024-02-14T05:00:00.000Z');
       expect(task.modifiedAt).toBe('2024-02-14T05:00:00.000Z');
+    });
+
+    it('should resolve modifiedAt using Last_Activity_Time or Closed_Time cascade when Modified_Time is missing', async () => {
+      const mockRecords: MigratedTaskEntity[] = [
+        {
+          zoho_id: 'task_006a',
+          Subject: 'Task with Last_Activity_Time',
+          Status: 'In Progress',
+          is_closed: false,
+          Created_Time: new Date('2024-02-14T05:00:00.000Z'),
+          Last_Activity_Time: new Date('2024-02-16T08:30:00.000Z'),
+        },
+        {
+          zoho_id: 'task_006b',
+          Subject: 'Closed task with Closed_Time but no Last_Activity_Time',
+          Status: 'Completed',
+          is_closed: true,
+          Created_Time: new Date('2024-02-14T05:00:00.000Z'),
+          Closed_Time: new Date('2024-02-17T11:00:00.000Z'),
+        },
+      ];
+
+      mockRepository.findTasks.mockResolvedValue({ records: mockRecords, total: 2 });
+      mockRepository.batchResolveUserEmails.mockResolvedValue(new Map());
+
+      const result = await service.getTasks({ page: 1, limit: 200 });
+
+      expect(result.data[0].modifiedAt).toBe('2024-02-16T08:30:00.000Z');
+      expect(result.data[1].modifiedAt).toBe('2024-02-17T11:00:00.000Z');
     });
 
     it('should set emails to null when user ID exists but is not in user map, and null for missing IDs', async () => {

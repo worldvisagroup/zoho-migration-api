@@ -48,6 +48,18 @@ describe('TasksController (e2e)', () => {
       _zoho_deal_id: 'deal_001',
       Created_Time: new Date('2024-03-04T10:00:00.000Z'),
     },
+    {
+      zoho_id: 'task_004',
+      Subject: 'Anomaly task with Closed_Time before Created_Time',
+      Status: 'Completed',
+      is_closed: true,
+      Priority: 'Low',
+      parent_entity_type: 'lead',
+      _zoho_lead_id: 'lead_002',
+      Created_Time: new Date('2024-03-05T10:00:00.000Z'),
+      Closed_Time: new Date('2024-03-01T10:00:00.000Z'), // Anomaly: earlier than created
+      Modified_Time: new Date('2024-03-06T15:00:00.000Z'),
+    },
   ];
 
   const mockUserData = [
@@ -183,13 +195,13 @@ describe('TasksController (e2e)', () => {
         .expect(200);
 
       expect(res.body).toHaveProperty('data');
-      expect(res.body).toHaveProperty('total', 3);
+      expect(res.body).toHaveProperty('total', 4);
       expect(res.body).toHaveProperty('page', 1);
       expect(res.body).toHaveProperty('pageSize', 200);
       expect(res.body).toHaveProperty('hasMore', false);
 
       const items = res.body.data;
-      expect(items).toHaveLength(3);
+      expect(items).toHaveLength(4);
 
       // Record 1: completed task
       const first = items[0];
@@ -230,6 +242,12 @@ describe('TasksController (e2e)', () => {
       expect(third.priority).toBe('medium');
       expect(third.completedAt).toBeNull();
       expect(third.modifiedAt).toBe('2024-03-04T10:00:00.000Z'); // Fallback to Created_Time
+
+      // Record 4: Anomaly Closed_Time < Created_Time -> falls back to Modified_Time
+      const fourth = items[3];
+      expect(fourth.externalId).toBe('task_004');
+      expect(fourth.status).toBe('done');
+      expect(fourth.completedAt).toBe('2024-03-06T15:00:00.000Z');
     });
 
     it('should accept valid query filters and pagination params', async () => {
@@ -325,6 +343,51 @@ describe('TasksController (e2e)', () => {
       expect(res.body.message).toEqual(
         expect.arrayContaining([
           expect.stringContaining('to must be a valid ISO 8601 date string'),
+        ]),
+      );
+    });
+
+    it('should filter by updatedSince and return 200 OK', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/tasks?updatedSince=2024-01-01T00:00:00Z')
+        .set('x-api-key', apiKey)
+        .expect(200);
+
+      expect(res.body.data).toBeInstanceOf(Array);
+      expect(res.body.page).toBe(1);
+    });
+
+    it('should return 400 Bad Request when updatedSince and from are both supplied (collision)', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/tasks?updatedSince=2024-01-01T00:00:00Z&from=2023-01-01T00:00:00Z')
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(res.body.message).toContain(
+        "Cannot specify both 'updatedSince' (modification filter) and 'from'/'to' (creation filters) simultaneously",
+      );
+    });
+
+    it('should return 400 Bad Request when updatedSince and to are both supplied (collision)', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/tasks?updatedSince=2024-01-01T00:00:00Z&to=2024-12-31T23:59:59Z')
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(res.body.message).toContain(
+        "Cannot specify both 'updatedSince' (modification filter) and 'from'/'to' (creation filters) simultaneously",
+      );
+    });
+
+    it('should return 400 Bad Request when updatedSince is not a valid ISO 8601 string', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/tasks?updatedSince=invalid-iso')
+        .set('x-api-key', apiKey)
+        .expect(400);
+
+      expect(res.body.message).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('updatedSince must be a valid ISO 8601 date string'),
         ]),
       );
     });

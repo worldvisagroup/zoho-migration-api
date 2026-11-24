@@ -54,7 +54,7 @@ describe('ClientsController (e2e)', () => {
       Last_Name: 'Dravid',
       Email: 'rahul@example.com',
       Phone: '9876543210',
-      Mobile: '9123456780',
+      Mobile: '9876543211',
       Country_Code: '+91 - India',
       DOB: '1973-01-11',
       Created_Time: new Date('2023-01-01T10:00:00Z'),
@@ -254,7 +254,7 @@ describe('ClientsController (e2e)', () => {
       const contact = res.body.data[0];
       expect(contact.externalId).toBe('contact_001');
       expect(contact.phone).toBe('+919876543210');
-      expect(contact.secondaryPhone).toBe('+919123456780');
+      expect(contact.secondaryPhone).toBe('+919876543211');
     });
 
     it('should return 400 Bad Request when type parameter is missing', async () => {

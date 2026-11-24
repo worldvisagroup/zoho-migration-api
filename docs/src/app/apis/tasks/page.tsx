@@ -149,6 +149,13 @@ export default function TasksApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-amber-300">@IsISO8601({'{ strict: true }'})</td>
                   <td className="px-4 py-2.5">Inclusive end date filter on Zoho <code className="text-slate-200">Created_Time</code>.</td>
                 </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-sky-300">updatedSince</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">ISO 8601</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500">—</td>
+                  <td className="px-4 py-2.5 font-mono text-amber-300">@IsISO8601({'{ strict: true }'})</td>
+                  <td className="px-4 py-2.5">Incremental sync filter on Zoho task activity (&ge;). Checks <code className="text-slate-200">Modified_Time</code>, <code className="text-slate-200">Last_Activity_Time</code>, and <code className="text-slate-200">Closed_Time</code>. Mutually exclusive with <code className="text-slate-200">from</code>/<code className="text-slate-200">to</code> (returns 400 if combined).</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -156,7 +163,7 @@ export default function TasksApiDocPage() {
           <div className="text-xs text-slate-400 flex flex-wrap gap-4 pt-1">
             <div>
               <span className="text-slate-500">Sort Order:</span>{' '}
-              <span className="font-mono text-amber-300 font-semibold">Created_Time ASC (1), _id ASC (1)</span> — Stable chronological order
+              <span className="font-mono text-amber-300 font-semibold">Created_Time ASC (1), _id ASC (1)</span> default, or <span className="font-mono text-amber-300 font-semibold">Last_Activity_Time ASC (1), Created_Time ASC (1)</span> with <code className="text-slate-300 font-mono">updatedSince</code>
             </div>
             <div>
               <span className="text-slate-500">Pagination Flag:</span>{' '}
@@ -302,9 +309,9 @@ export default function TasksApiDocPage() {
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">modifiedAt</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">string (ISO 8601)</td>
-                  <td className="px-4 py-2.5 font-mono text-sky-300">Modified_Time, Created_Time</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">Modified_Time, Last_Activity_Time, Closed_Time, Created_Time</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">Date / String</td>
-                  <td className="px-4 py-2.5">Primary <code className="font-mono">Modified_Time</code>, falls back to <code className="font-mono">Created_Time</code>. Never null.</td>
+                  <td className="px-4 py-2.5">Activity cascade: <code className="font-mono">Modified_Time ?? Last_Activity_Time ?? (is_closed ? Closed_Time : null) ?? Created_Time</code>. Never null.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">completedAt</td>
@@ -312,7 +319,7 @@ export default function TasksApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-sky-300">Closed_Time, Modified_Time, Created_Time</td>
                   <td className="px-4 py-2.5 font-mono text-slate-400">Date / String</td>
                   <td className="px-4 py-2.5">
-                    <strong>If status === &apos;done&apos;:</strong> <code className="font-mono">Closed_Time &rarr; Modified_Time &rarr; Created_Time</code>.<br />
+                    <strong>If status === &apos;done&apos;:</strong> <code className="font-mono">Closed_Time</code> if &ge; <code className="font-mono">Created_Time</code>. If anomalous (<code className="font-mono">Closed_Time &lt; Created_Time</code>), falls back to <code className="font-mono">Modified_Time ?? Created_Time</code>. If missing: <code className="font-mono text-slate-400">null</code>.<br />
                     <strong>If status !== &apos;done&apos;:</strong> strictly <code className="font-mono text-slate-400">null</code>.
                   </td>
                 </tr>
@@ -364,15 +371,15 @@ export default function TasksApiDocPage() {
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-2">
               <span className="font-semibold text-white text-sm block">3. Completion Timestamp Resolution</span>
               <p className="text-slate-300 leading-relaxed">
-                Uses <code className="font-mono text-emerald-300">resolveCompletedAt()</code>:
+                Uses <code className="font-mono text-emerald-300">resolveTaskCompletedAt()</code>:
               </p>
               <ul className="list-disc list-inside space-y-1 text-slate-400">
                 <li><strong>Active Tasks:</strong> If normalized status is not <code className="font-mono text-emerald-400">done</code>, returns strictly <code className="font-mono text-slate-400">null</code>.</li>
-                <li><strong>Done Tasks (3-Tier Fallback):</strong>
+                <li><strong>Done Tasks:</strong>
                   <ol className="list-decimal list-inside pl-2 pt-0.5 space-y-0.5 text-slate-300">
-                    <li><code className="font-mono text-slate-200">Closed_Time</code> if valid.</li>
-                    <li><code className="font-mono text-slate-200">Modified_Time</code> if valid.</li>
-                    <li><code className="font-mono text-slate-200">Created_Time</code> (guaranteed non-null timestamp).</li>
+                    <li>If <code className="font-mono text-slate-200">Closed_Time</code> is missing/null &rarr; returns <code className="font-mono text-slate-400">null</code>.</li>
+                    <li>If <code className="font-mono text-slate-200">Closed_Time &lt; Created_Time</code> (anomaly) &rarr; falls back to <code className="font-mono text-slate-200">Modified_Time</code> (or <code className="font-mono text-slate-200">Created_Time</code>).</li>
+                    <li>Otherwise &rarr; returns normalized <code className="font-mono text-slate-200">Closed_Time</code>.</li>
                   </ol>
                 </li>
               </ul>
@@ -389,6 +396,20 @@ export default function TasksApiDocPage() {
                 <li>Executes a single indexed query: <code className="font-mono text-sky-300">{`userModel.find({ zoho_id: { $in: uniqueIds } })`}</code>.</li>
                 <li>Maps each ID to its sanitized email address in memory for instant DTO projection.</li>
               </ul>
+            </div>
+
+            {/* ModifiedAt Activity Cascade */}
+            <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-2">
+              <span className="font-semibold text-white text-sm block">5. Modification Timestamp Activity Cascade</span>
+              <p className="text-slate-300 leading-relaxed">
+                Resolves <code className="font-mono text-emerald-300">modifiedAt</code> through authentic Zoho activity fields:
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-slate-400">
+                <li><code className="font-mono text-slate-200">Modified_Time</code> if present and valid.</li>
+                <li><code className="font-mono text-slate-200">Last_Activity_Time</code> (captures agent interactions &amp; edits).</li>
+                <li><code className="font-mono text-slate-200">Closed_Time</code> if task is closed (<code className="font-mono text-emerald-400">is_closed === true</code>).</li>
+                <li><code className="font-mono text-slate-200">Created_Time</code> guaranteed fallback.</li>
+              </ol>
             </div>
           </div>
         </section>
@@ -604,13 +625,19 @@ export default function TasksApiDocPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">modifiedAt</td>
-                  <td className="px-4 py-2.5">Missing/invalid <code className="font-mono">Modified_Time</code></td>
-                  <td className="px-4 py-2.5">Falls back to <code className="font-mono">Created_Time</code></td>
-                  <td className="px-4 py-2.5 font-mono text-slate-200">createdAt value or Epoch</td>
+                  <td className="px-4 py-2.5">Missing <code className="font-mono">Modified_Time</code></td>
+                  <td className="px-4 py-2.5">Falls back to <code className="font-mono">Last_Activity_Time</code>, <code className="font-mono">Closed_Time</code> (if closed), then <code className="font-mono">Created_Time</code></td>
+                  <td className="px-4 py-2.5 font-mono text-slate-200">Most recent activity or createdAt value</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">completedAt</td>
                   <td className="px-4 py-2.5">Task is done but missing <code className="font-mono">Closed_Time</code></td>
+                  <td className="px-4 py-2.5">Omitted completion timestamp</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-500 font-bold">null</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">completedAt</td>
+                  <td className="px-4 py-2.5">Task is done with <code className="font-mono">Closed_Time &lt; Created_Time</code> (anomaly)</td>
                   <td className="px-4 py-2.5">Falls back to <code className="font-mono">Modified_Time</code>, then <code className="font-mono">Created_Time</code></td>
                   <td className="px-4 py-2.5 font-mono text-slate-200">modifiedAt / createdAt</td>
                 </tr>
@@ -643,9 +670,9 @@ export default function TasksApiDocPage() {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
-              <span className="font-semibold text-white">completedAt Guaranteed Non-Null for Done Tasks</span>
+              <span className="font-semibold text-white">Closed_Time Anomaly &amp; Nullability Resolution</span>
               <p className="text-slate-300 leading-relaxed">
-                If a task is marked <code className="font-mono text-emerald-400">done</code>, <code className="font-mono text-slate-200">completedAt</code> will never be null. If <code className="font-mono">Closed_Time</code> was omitted by Zoho, the engine cascades through <code className="font-mono">Modified_Time</code> and <code className="font-mono">Created_Time</code>. Conversely, active tasks (<code className="font-mono">todo</code>, <code className="font-mono">in_progress</code>) are strictly <code className="font-mono">null</code>.
+                In legacy Zoho CRM data, some completed tasks have <code className="font-mono text-slate-200">Closed_Time</code> timestamps that predate <code className="font-mono text-slate-200">Created_Time</code>. When <code className="font-mono text-slate-200">Closed_Time &lt; Created_Time</code>, the resolver falls back to <code className="font-mono text-slate-200">Modified_Time</code> (or <code className="font-mono text-slate-200">Created_Time</code>) to guarantee chronological consistency (<code className="font-mono text-slate-200">completedAt &ge; createdAt</code>). If a completed task has no <code className="font-mono">Closed_Time</code> recorded at all, <code className="font-mono text-slate-200">completedAt</code> returns <code className="font-mono text-slate-400">null</code> rather than synthesizing an artificial completion date. Active tasks (<code className="font-mono">todo</code>, <code className="font-mono">in_progress</code>) are strictly <code className="font-mono">null</code>.
               </p>
             </div>
 
@@ -657,9 +684,9 @@ export default function TasksApiDocPage() {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-1.5">
-              <span className="font-semibold text-white">modifiedAt Never-Null Guarantee</span>
+              <span className="font-semibold text-white">modifiedAt Activity Cascade &amp; Never-Null Guarantee</span>
               <p className="text-slate-300 leading-relaxed">
-                Even if Zoho records omit <code className="font-mono">Modified_Time</code> upon initial creation, <code className="font-mono text-slate-200">modifiedAt</code> falls back to <code className="font-mono">Created_Time</code>, ensuring target databases with non-null updated timestamp constraints remain valid.
+                In Zoho CRM, tasks track edits through <code className="font-mono text-slate-200">Last_Activity_Time</code> and <code className="font-mono text-slate-200">Closed_Time</code> rather than just <code className="font-mono text-slate-200">Modified_Time</code>. The normalization engine resolves <code className="font-mono text-slate-200">modifiedAt</code> using this authentic cascade, preventing delta updates from stalling while guaranteeing a non-null timestamp for downstream replication.
               </p>
             </div>
           </div>
@@ -699,7 +726,7 @@ export interface TaskItemDto {
   modifiedAt: string;                 // Zoho Modified_Time in UTC ISO 8601
   modifiedByEmail: string | null;     // Resolved modifier email or null
   modifiedByZohoId: string | null;    // Zoho modifier ID or null
-  completedAt: string | null;         // Completion timestamp (only if status === 'done')
+  completedAt: string | null;         // Completion timestamp (only if status === 'done' and Closed_Time exists; resolves anomaly if Closed_Time < Created_Time)
 }
 
 export interface TasksResponseDto {

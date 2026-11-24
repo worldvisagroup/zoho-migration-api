@@ -9,6 +9,7 @@ import { QueryTasksDto, TaskItemDto, TasksResponseDto } from '../dto/index.js';
 import { TasksRepository } from '../repositories/tasks.repository.js';
 import { normalizeTaskPriority } from '../utils/task-priority.util.js';
 import { normalizeTaskStatus } from '../utils/task-status.util.js';
+import { resolveTaskCompletedAt } from '../utils/task-completed-at.util.js';
 
 @Injectable()
 export class TasksService {
@@ -60,8 +61,10 @@ export class TasksService {
 
   /**
    * Resolves completion timestamp for tasks:
-   * - If status === 'done': Closed_Time -> Modified_Time -> Created_Time (never null)
    * - If status !== 'done': null
+   * - If status === 'done': Closed_Time (ISO 8601)
+   *   Anomaly protection: If Closed_Time is earlier than Created_Time, returns Modified_Time or Created_Time.
+   * - If Closed_Time is missing or invalid: null
    */
   private resolveCompletedAt(
     isDone: boolean,
@@ -69,28 +72,7 @@ export class TasksService {
     modifiedTime?: Date | string | null,
     createdTime?: Date | string | null,
   ): string | null {
-    if (!isDone) {
-      return null;
-    }
-
-    // Priority 1: Closed_Time
-    if (closedTime) {
-      const closedDate = new Date(closedTime);
-      if (!isNaN(closedDate.getTime())) {
-        return closedDate.toISOString();
-      }
-    }
-
-    // Priority 2: Modified_Time
-    if (modifiedTime) {
-      const modifiedDate = new Date(modifiedTime);
-      if (!isNaN(modifiedDate.getTime())) {
-        return modifiedDate.toISOString();
-      }
-    }
-
-    // Priority 3: Created_Time
-    return normalizeZohoTimestamp(createdTime);
+    return resolveTaskCompletedAt(isDone, closedTime, modifiedTime, createdTime);
   }
 
   /**
@@ -123,8 +105,13 @@ export class TasksService {
 
     // Timestamps
     const createdAt = normalizeZohoTimestamp(record.Created_Time);
-    // modifiedAt must never be null when Created_Time is available
-    const modifiedAt = normalizeZohoTimestamp(record.Modified_Time, record.Created_Time);
+    // Priority: Modified_Time -> Last_Activity_Time -> Closed_Time (if closed) -> Created_Time
+    const rawModifiedTime =
+      record.Modified_Time ??
+      record.Last_Activity_Time ??
+      (record.is_closed ? record.Closed_Time : null) ??
+      record.Created_Time;
+    const modifiedAt = normalizeZohoTimestamp(rawModifiedTime, record.Created_Time);
 
     // Parent Entity Resolution
     const { parentType, parentZohoId } = resolveParentEntity(record);

@@ -1,9 +1,7 @@
-import React from 'react';
-import { MethodBadge } from '../../../components/MethodBadge';
-import { Callout } from '../../../components/Callout';
+import { CheckCircle2, Database, UserCheck } from 'lucide-react';
 import { CodeBlock } from '../../../components/CodeBlock';
+import { MethodBadge } from '../../../components/MethodBadge';
 import { TableOfContents } from '../../../components/TableOfContents';
-import { UserCheck, Database, CheckCircle2 } from 'lucide-react';
 
 const tocItems = [
   { id: 'overview', title: '1. API Overview' },
@@ -222,7 +220,14 @@ export default function ClientsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Phone, Mobile, Country_Code</td>
                   <td className="px-4 py-2.5 font-mono text-sky-300">Phone, Mobile, Country_Code</td>
-                  <td className="px-4 py-2.5">Parsed to international E.164 with country detection. Null if missing or unparseable.</td>
+                  <td className="px-4 py-2.5">Primary phone formatted to international E.164. Evaluates <code className="font-mono">Phone</code>, falling back to <code className="font-mono">Mobile</code>. Null if unparseable.</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">secondaryPhone</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">string | null</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">Phone, Mobile, Country_Code</td>
+                  <td className="px-4 py-2.5 font-mono text-sky-300">Phone, Mobile, Country_Code</td>
+                  <td className="px-4 py-2.5">Secondary phone formatted to international E.164. Emitted when both <code className="font-mono">Phone</code> and <code className="font-mono">Mobile</code> are valid and distinct. Null if missing, invalid, or duplicate.</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-2.5 font-mono font-semibold text-emerald-400">dob</td>
@@ -309,15 +314,15 @@ export default function ClientsApiDocPage() {
 
             {/* Phone Normalization */}
             <div className="rounded-xl border border-slate-800 bg-[#0c1322] p-4 space-y-2">
-              <span className="font-semibold text-white text-sm block">3. International Phone Formatting</span>
+              <span className="font-semibold text-white text-sm block">3. Dual Phone Resolution &amp; Deduplication</span>
               <p className="text-slate-300 leading-relaxed">
                 Uses <code className="font-mono text-amber-300">normalizePhoneNumber()</code> with <code className="font-mono text-slate-300">libphonenumber-js</code>:
               </p>
               <ul className="list-disc list-inside space-y-1 text-slate-400">
-                <li>Evaluates primary <code className="font-mono">Phone</code>, falling back to <code className="font-mono">Mobile</code>.</li>
-                <li>Extracts ISO country and calling code from <code className="font-mono">Country_Code</code> text (e.g. <em>&quot;+91 - India&quot;</em> &rarr; <code className="font-mono">IN</code>, <em>&quot;+1 - USA&quot;</em> &rarr; <code className="font-mono">US</code>).</li>
-                <li>Formats valid numbers into strict international E.164 (e.g. <code className="font-mono text-slate-200">+919876543210</code>, <code className="font-mono text-slate-200">+12025550143</code>).</li>
-                <li><strong>Fallback:</strong> Unparseable or empty numbers return <code className="text-slate-200 font-mono">null</code>.</li>
+                <li>Evaluates both <code className="font-mono">Phone</code> and <code className="font-mono">Mobile</code> independently with <code className="font-mono">Country_Code</code>.</li>
+                <li><strong>Both Distinct:</strong> <code className="font-mono">phone</code> receives <code className="font-mono">Phone</code>, <code className="font-mono">secondaryPhone</code> receives <code className="font-mono">Mobile</code>.</li>
+                <li><strong>Both Identical:</strong> <code className="font-mono">phone</code> receives the number, <code className="font-mono">secondaryPhone</code> is <code className="text-slate-400 font-mono">null</code>.</li>
+                <li><strong>Single / Neither:</strong> Whichever exists maps to <code className="font-mono">phone</code>, or both resolve to <code className="text-slate-400 font-mono">null</code>.</li>
               </ul>
             </div>
 
@@ -520,6 +525,18 @@ export default function ClientsApiDocPage() {
                   <td className="px-4 py-2.5 font-mono text-slate-400 font-bold">null</td>
                 </tr>
                 <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">secondaryPhone</td>
+                  <td className="px-4 py-2.5">Missing <code className="font-mono">Mobile</code>, unparseable, or identical to <code className="font-mono">phone</code></td>
+                  <td className="px-4 py-2.5">Deduplication / null assignment</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400 font-bold">null</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">secondaryPhone</td>
+                  <td className="px-4 py-2.5">Both <code className="font-mono">Phone</code> and <code className="font-mono">Mobile</code> valid and distinct</td>
+                  <td className="px-4 py-2.5">Emits normalized mobile</td>
+                  <td className="px-4 py-2.5 font-mono text-slate-200">Normalized E.164 secondary mobile</td>
+                </tr>
+                <tr>
                   <td className="px-4 py-2.5 font-mono text-emerald-400 font-semibold">dob</td>
                   <td className="px-4 py-2.5">Missing or invalid date string</td>
                   <td className="px-4 py-2.5">Validation fails</td>
@@ -624,6 +641,7 @@ export interface ClientItemDto {
   lastName: string;          // Title-Cased last name
   email: string | null;      // Lowercased email or null
   phone: string | null;      // International E.164 phone or null
+  secondaryPhone: string | null; // Secondary international E.164 phone or null
   dob: string | null;        // UTC ISO 8601 string or null
   maritalStatus: StandardMaritalStatus | null; // Standardized marital status
   address: ClientAddressDto; // Resolved invoice or CRM address
@@ -654,6 +672,7 @@ export interface ClientsResponseDto {
       "lastName": "Connor",
       "email": "sarah.connor@example.com",
       "phone": "+12025550143",
+      "secondaryPhone": "+12025550199",
       "dob": "1985-11-20T00:00:00.000Z",
       "maritalStatus": "single",
       "address": {
@@ -672,6 +691,7 @@ export interface ClientsResponseDto {
       "lastName": "Sharma",
       "email": "rahul.sharma@example.com",
       "phone": "+919876543210",
+      "secondaryPhone": null,
       "dob": "1992-04-10T00:00:00.000Z",
       "maritalStatus": "married",
       "address": {

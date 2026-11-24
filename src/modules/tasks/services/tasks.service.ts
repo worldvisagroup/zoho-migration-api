@@ -14,7 +14,7 @@ import { normalizeTaskStatus } from '../utils/task-status.util.js';
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
 
-  constructor(private readonly tasksRepository: TasksRepository) {}
+  constructor(private readonly tasksRepository: TasksRepository) { }
 
   /**
    * Fetches, normalizes, and transforms tasks into standardized migration records.

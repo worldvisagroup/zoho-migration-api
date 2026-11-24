@@ -44,7 +44,8 @@ Direct mapping from MongoDB `migrated_leads` and `migrated_contacts` to `ClientI
 | `firstName` | `string` | `First_Name`, `Full_Name` | `First_Name`, `Full_Name` | Title-Cased via `extractNames()`. Falls back to tokenizing `Full_Name`. |
 | `lastName` | `string` | `Last_Name`, `Full_Name` | `Last_Name`, `Full_Name` | Title-Cased via `extractNames()`. Captures final token. Mononyms map to `lastName`. |
 | `email` | `string \| null` | `Email`, `Secondary_Email` | `Email`, `Secondary_Email` | Lowercased, whitespace stripped. Null if missing or invalid. |
-| `phone` | `string \| null` | `Phone`, `Mobile`, `Country_Code` | `Phone`, `Mobile`, `Country_Code` | Parsed to international E.164 with country detection. Null if missing or unparseable. |
+| `phone` | `string \| null` | `Phone`, `Mobile`, `Country_Code` | `Phone`, `Mobile`, `Country_Code` | Primary phone formatted to E.164. Evaluates `Phone`, falling back to `Mobile`. Null if unparseable. |
+| `secondaryPhone` | `string \| null` | `Phone`, `Mobile`, `Country_Code` | `Phone`, `Mobile`, `Country_Code` | Secondary phone formatted to E.164. Emitted when both `Phone` and `Mobile` are valid and distinct. Null if missing, invalid, or duplicate. |
 | `dob` | `string \| null` | `Dob` | `DOB` | Parsed to UTC midnight ISO string (`YYYY-MM-DDTHH:mm:ss.000Z`) to prevent timezone shifts. |
 | `maritalStatus` | `StandardMaritalStatus \| null` | `marital_status` | `marital_status` | Normalized to `single`, `married`, `divorced`, `widowed`, or `null`. |
 | `address` | `ClientAddressDto` | `Street`, `City`, `State`, etc. | `Mailing_Street`, `Mailing_City`, etc. | **Priority 1:** Zoho Books invoice billing address.<br>**Priority 2:** CRM record address fields. |
@@ -67,11 +68,14 @@ Direct mapping from MongoDB `migrated_leads` and `migrated_contacts` to `ClientI
 - Rejects strings without `@` or literals like `"null"`.
 - **Fallback:** If missing or invalid, returns `null`.
 
-### 3. International Phone Formatting (`normalizePhoneNumber`)
-- Evaluates primary `Phone`, falling back to `Mobile`.
-- Extracts ISO country code and calling code from `Country_Code` text (e.g. *"+91 - India"* &rarr; `IN`, *"+1 - USA"* &rarr; `US`).
-- Formats valid numbers into strict international E.164 (e.g. `+919876543210`, `+12025550143`).
-- **Fallback:** Unparseable or empty numbers return `null`.
+### 3. Dual Phone Resolution & Deduplication (`normalizePhoneNumber`)
+- **Primary & Secondary Normalization:**
+  - Evaluates both `Phone` and `Mobile` independently with `Country_Code` text (e.g. *"+91 - India"* &rarr; `IN`, *"+1 - USA"* &rarr; `US`), formatting valid numbers into strict international E.164.
+- **Deduplication Ladder:**
+  - **Both Valid & Distinct:** `phone` receives normalized `Phone`, and `secondaryPhone` receives normalized `Mobile`.
+  - **Both Valid & Identical:** `phone` receives the normalized number, and `secondaryPhone` resolves to `null` to eliminate duplicate entries.
+  - **Single Number Present:** Whichever number is valid is assigned to `phone`, and `secondaryPhone` resolves to `null`.
+  - **Neither Valid:** Both `phone` and `secondaryPhone` resolve to `null`.
 
 ### 4. Timezone-Neutral Date of Birth & Marital Status
 - **DOB Normalization:** Reads `Dob` (Leads) or `DOB` (Contacts). Parses `YYYY-MM-DD` explicitly as UTC midnight (`00:00:00.000Z`) to prevent timezone shifts across continents.
@@ -118,6 +122,8 @@ Direct mapping from MongoDB `migrated_leads` and `migrated_contacts` to `ClientI
 | `email` | Both emails missing or invalid | Null assignment | `null` |
 | `phone` | Missing `Phone` | Falls back to `Mobile` | Normalized E.164 mobile |
 | `phone` | Both `Phone` and `Mobile` missing/invalid | Null assignment | `null` |
+| `secondaryPhone` | Missing `Mobile`, unparseable, or identical to `phone` | Deduplication / null assignment | `null` |
+| `secondaryPhone` | Both `Phone` and `Mobile` valid and distinct | Emits normalized mobile | Normalized E.164 secondary mobile |
 | `dob` | Missing or invalid date string | Validation fails | `null` |
 | `maritalStatus` | Missing or unrecognized string | Validation fails | `null` |
 | `address` | No Books invoices found for client | Falls back to CRM record address fields | Sanitized CRM address |
@@ -155,6 +161,7 @@ export interface ClientItemDto {
   lastName: string;          // Title-Cased last name
   email: string | null;      // Lowercased email or null
   phone: string | null;      // International E.164 phone or null
+  secondaryPhone: string | null; // Secondary international E.164 phone or null
   dob: string | null;        // UTC ISO 8601 string or null
   maritalStatus: StandardMaritalStatus | null; // Standardized marital status
   address: ClientAddressDto; // Resolved invoice or CRM address
@@ -181,6 +188,7 @@ export interface ClientsResponseDto {
       "lastName": "Connor",
       "email": "sarah.connor@example.com",
       "phone": "+12025550143",
+      "secondaryPhone": "+12025550199",
       "dob": "1985-11-20T00:00:00.000Z",
       "maritalStatus": "single",
       "address": {
@@ -199,6 +207,7 @@ export interface ClientsResponseDto {
       "lastName": "Sharma",
       "email": "rahul.sharma@example.com",
       "phone": "+919876543210",
+      "secondaryPhone": null,
       "dob": "1992-04-10T00:00:00.000Z",
       "maritalStatus": "married",
       "address": {

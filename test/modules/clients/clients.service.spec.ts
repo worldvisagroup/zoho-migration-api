@@ -72,6 +72,7 @@ describe('ClientsService', () => {
           expect(client.lastName).toBe('Smith');
           expect(client.email).toBe('john.smith@example.com');
           expect(client.phone).toBe('+919060443444');
+          expect(client.secondaryPhone).toBeNull();
           expect(client.dob).toBe('1992-08-15T00:00:00.000Z');
           expect(client.maritalStatus).toBe('married');
           expect(client.address).toEqual({
@@ -192,6 +193,7 @@ describe('ClientsService', () => {
           expect(client.firstName).toBe('Sarah Jane');
           expect(client.lastName).toBe('Connor');
           expect(client.phone).toBe('+12025550143');
+          expect(client.secondaryPhone).toBeNull();
           expect(client.maritalStatus).toBe('single');
 
           // Must use the invoice billing address, not the fallback mailing street
@@ -238,6 +240,92 @@ describe('ClientsService', () => {
         200,
         '2024-01-01T00:00:00.000Z',
       );
+    });
+
+    describe('phone and secondaryPhone resolution', () => {
+      it('should return both phone and secondaryPhone when Phone and Mobile are distinct numbers', async () => {
+        const mockLead: MigratedLeadEntity = {
+          zoho_id: 'lead_dual_phone',
+          First_Name: 'Anil',
+          Last_Name: 'Kumar',
+          Phone: '9060443444',
+          Mobile: '9876543210',
+          Country_Code: '+91 - India',
+          Created_Time: new Date('2023-01-10T08:00:00Z'),
+          Modified_Time: new Date('2023-05-12T14:30:00Z'),
+        };
+
+        mockRepo.findLeads.mockResolvedValue({ records: [mockLead], total: 1 });
+        mockRepo.findInvoicesForClients.mockResolvedValue(new Map());
+
+        const result = await service.getClients({ type: 'leads', page: 1, limit: 10 });
+        const client = result.data[0]!;
+
+        expect(client.phone).toBe('+919060443444');
+        expect(client.secondaryPhone).toBe('+919876543210');
+      });
+
+      it('should return only one phone and null secondaryPhone when Phone and Mobile are identical after normalization', async () => {
+        const mockLead: MigratedLeadEntity = {
+          zoho_id: 'lead_same_phone',
+          First_Name: 'Anil',
+          Last_Name: 'Kumar',
+          Phone: '9060443444',
+          Mobile: '+919060443444',
+          Country_Code: '+91 - India',
+          Created_Time: new Date('2023-01-10T08:00:00Z'),
+          Modified_Time: new Date('2023-05-12T14:30:00Z'),
+        };
+
+        mockRepo.findLeads.mockResolvedValue({ records: [mockLead], total: 1 });
+        mockRepo.findInvoicesForClients.mockResolvedValue(new Map());
+
+        const result = await service.getClients({ type: 'leads', page: 1, limit: 10 });
+        const client = result.data[0]!;
+
+        expect(client.phone).toBe('+919060443444');
+        expect(client.secondaryPhone).toBeNull();
+      });
+
+      it('should set phone from Mobile and secondaryPhone to null when only Mobile is present', async () => {
+        const mockLead: MigratedLeadEntity = {
+          zoho_id: 'lead_mobile_only',
+          First_Name: 'Anil',
+          Last_Name: 'Kumar',
+          Mobile: '9876543210',
+          Country_Code: '+91 - India',
+          Created_Time: new Date('2023-01-10T08:00:00Z'),
+          Modified_Time: new Date('2023-05-12T14:30:00Z'),
+        };
+
+        mockRepo.findLeads.mockResolvedValue({ records: [mockLead], total: 1 });
+        mockRepo.findInvoicesForClients.mockResolvedValue(new Map());
+
+        const result = await service.getClients({ type: 'leads', page: 1, limit: 10 });
+        const client = result.data[0]!;
+
+        expect(client.phone).toBe('+919876543210');
+        expect(client.secondaryPhone).toBeNull();
+      });
+
+      it('should set both phone and secondaryPhone to null when neither is provided', async () => {
+        const mockLead: MigratedLeadEntity = {
+          zoho_id: 'lead_no_phone',
+          First_Name: 'Anil',
+          Last_Name: 'Kumar',
+          Created_Time: new Date('2023-01-10T08:00:00Z'),
+          Modified_Time: new Date('2023-05-12T14:30:00Z'),
+        };
+
+        mockRepo.findLeads.mockResolvedValue({ records: [mockLead], total: 1 });
+        mockRepo.findInvoicesForClients.mockResolvedValue(new Map());
+
+        const result = await service.getClients({ type: 'leads', page: 1, limit: 10 });
+        const client = result.data[0]!;
+
+        expect(client.phone).toBeNull();
+        expect(client.secondaryPhone).toBeNull();
+      });
     });
   });
 });

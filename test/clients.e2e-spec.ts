@@ -47,20 +47,35 @@ describe('ClientsController (e2e)', () => {
     }),
   };
 
+  const mockContactData = [
+    {
+      zoho_id: 'contact_001',
+      First_Name: 'Rahul',
+      Last_Name: 'Dravid',
+      Email: 'rahul@example.com',
+      Phone: '9876543210',
+      Mobile: '9123456780',
+      Country_Code: '+91 - India',
+      DOB: '1973-01-11',
+      Created_Time: new Date('2023-01-01T10:00:00Z'),
+      Modified_Time: new Date('2023-01-05T12:00:00Z'),
+    },
+  ];
+
   const mockContactModel = {
     find: vi.fn().mockReturnValue({
       sort: vi.fn().mockReturnValue({
         skip: vi.fn().mockReturnValue({
           limit: vi.fn().mockReturnValue({
             lean: vi.fn().mockReturnValue({
-              exec: vi.fn().mockResolvedValue([]),
+              exec: vi.fn().mockResolvedValue(mockContactData),
             }),
           }),
         }),
       }),
     }),
     countDocuments: vi.fn().mockReturnValue({
-      exec: vi.fn().mockResolvedValue(0),
+      exec: vi.fn().mockResolvedValue(1),
     }),
   };
 
@@ -215,6 +230,7 @@ describe('ClientsController (e2e)', () => {
       expect(record.lastName).toBe('Sharma');
       expect(record.email).toBe('priya.sharma@example.com');
       expect(record.phone).toBe('+919876543210');
+      expect(record.secondaryPhone).toBeNull();
       expect(record.dob).toBe('1995-06-15T00:00:00.000Z');
       expect(record.maritalStatus).toBe('married');
       expect(record.address).toEqual({
@@ -226,6 +242,19 @@ describe('ClientsController (e2e)', () => {
       });
       expect(record.createdAt).toBe('2023-01-01T10:00:00.000Z');
       expect(record.updatedAt).toBe('2023-01-05T12:00:00.000Z');
+    });
+
+    it('should return 200 with secondaryPhone when type=contacts and both phones are present', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/v1/clients?page=1&limit=200&type=contacts')
+        .set('x-api-key', apiKey)
+        .expect(200);
+
+      expect(res.body.data).toHaveLength(1);
+      const contact = res.body.data[0];
+      expect(contact.externalId).toBe('contact_001');
+      expect(contact.phone).toBe('+919876543210');
+      expect(contact.secondaryPhone).toBe('+919123456780');
     });
 
     it('should return 400 Bad Request when type parameter is missing', async () => {

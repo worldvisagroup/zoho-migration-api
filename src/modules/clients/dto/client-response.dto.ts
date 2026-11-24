@@ -97,6 +97,15 @@ export class ClientItemDto {
   phone: string | null;
 
   @ApiProperty({
+    description:
+      'Secondary international E.164 formatted phone number, or null if missing, unparseable, or identical to primary phone',
+    example: '+919876543211',
+    type: String,
+    nullable: true,
+  })
+  secondaryPhone: string | null;
+
+  @ApiProperty({
     description: 'Date of birth in UTC ISO 8601 format',
     type: String,
     nullable: true,
@@ -138,6 +147,7 @@ export class ClientItemDto {
     lastName: string;
     email: string | null;
     phone: string | null;
+    secondaryPhone?: string | null;
     dob: string | null;
     maritalStatus: StandardMaritalStatus | null;
     address: ClientAddress;
@@ -149,6 +159,7 @@ export class ClientItemDto {
     this.lastName = data.lastName;
     this.email = data.email;
     this.phone = data.phone;
+    this.secondaryPhone = data.secondaryPhone ?? null;
     this.dob = data.dob;
     this.maritalStatus = data.maritalStatus;
     this.address = new ClientAddressDto(data.address);

@@ -112,7 +112,22 @@ export class ClientsService {
   ): ClientItemDto {
     const names = extractNames(record.First_Name, record.Last_Name, record.Full_Name);
     const email = normalizeEmail(record.Email, record.Secondary_Email);
-    const phone = normalizePhoneNumber(record.Phone, record.Mobile, record.Country_Code);
+    const normalizedPhone = record.Phone
+      ? normalizePhoneNumber(record.Phone, null, record.Country_Code)
+      : null;
+    const normalizedMobile = record.Mobile
+      ? normalizePhoneNumber(record.Mobile, null, record.Country_Code)
+      : null;
+
+    const phone = normalizedPhone || normalizedMobile;
+    const secondaryPhone =
+      normalizedPhone && normalizedMobile && normalizedPhone !== normalizedMobile
+        ? normalizedMobile
+        : null;
+
+
+
+
     const dobRaw =
       type === 'leads' ? (record as MigratedLeadEntity).Dob : (record as MigratedContactEntity).DOB;
     const dob = normalizeDob(dobRaw);
@@ -168,6 +183,7 @@ export class ClientsService {
       lastName: names.lastName,
       email,
       phone,
+      secondaryPhone,
       dob,
       maritalStatus,
       address,
